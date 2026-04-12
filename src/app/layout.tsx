@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans, Geist } from "next/font/google";
+import { Inter, Noto_Sans, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geistMono = Geist_Mono({subsets:['latin'],variable:'--font-mono'});
 
 const inter = Inter({ subsets: ["latin"] });
 const noto = Noto_Sans({ subsets: ["latin"], weight: ["400", "700"] });
@@ -21,10 +22,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
+    <html lang="en" className={cn("font-sans", geist.variable, geistMono.variable)} suppressHydrationWarning>
       <body className={`${inter.className} ${noto.className} antialiased min-h-screen bg-white text-zinc-900 overflow-x-hidden`}>
         <Providers>
-          <div className="pb-20">
+          <div className="pb-32">
             {children}
           </div>
           <BottomNavigation />

@@ -21,7 +21,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.145 0 0);
+  --primary: oklch(0.585 0.233 277.117); /* Vibrant Trust Blue */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -32,24 +32,40 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.2 0 0);
-  --chart-2: oklch(0.4 0 0);
+  --ring: oklch(0.585 0.233 277.117);
+  --chart-1: oklch(0.585 0.233 277.117);
+  --chart-2: oklch(0.488 0.243 264.376);
   --chart-3: oklch(0.6 0 0);
   --chart-4: oklch(0.8 0 0);
   --chart-5: oklch(0.9 0 0);
-  --radius: 0.75rem;
+  --radius: 1rem;
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #fdfdfd;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-sans);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+/* Premium Pro-Shadows */
+.shadow-pro {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 10px 20px rgba(0,0,0,0.04);
+}
+
+.shadow-pro-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shadow-pro-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.03), 0 15px 35px rgba(0,0,0,0.08);
 }
 
 /* Professional Minimal Scrollbar */

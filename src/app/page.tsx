@@ -2,55 +2,45 @@
 
 import { Header } from "@/components/Header";
 import { SpaceCard } from "@/components/SpaceCard";
-import { Space } from "@/lib/supabase";
-import { useEffect, useState, useMemo } from "react";
-import { Search, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { useState, useMemo } from "react";
+import { Search, Sparkles, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Mock data for initial view
-const MOCK_SPACES: Space[] = [
+const MOCK_SPACES = [
   {
     id: '1',
-    creator_telegram_id: 123,
-    name: 'Growth Alpha Group',
-    description: 'Exclusive signals and growth strategies for upcoming projects. Learn from the best in the space.',
+    name: 'Alpha Trading Signals',
+    description: 'Real-time market analysis and trade setups for high-performing traders.',
     cover_image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
-    channel_link: '@growthalpha',
     tiers: {
-      tier1: { name: 'Weekly Access', price: 99, duration: 'week' },
-      tier2: { name: 'Monthly Access', price: 299, duration: 'month' },
-    },
-    created_at: new Date().toISOString(),
+      tier1: { price: 99, duration: 'week' },
+      tier2: { price: 299, duration: 'month' }
+    }
   },
   {
     id: '2',
-    creator_telegram_id: 456,
-    name: 'TON Builders Hub',
-    description: 'A collaborative space for developers building on the TON network. Share code, get feedback.',
-    cover_image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80',
-    channel_link: '@tonbuilders',
+    name: 'TON Builders Labs',
+    description: 'Technical deep-dives and early access to the next generation of TON apps.',
+    cover_image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&q=80',
     tiers: {
-      tier1: { name: 'Monthly Support', price: 150, duration: 'month' },
-    },
-    created_at: new Date().toISOString(),
+      tier1: { price: 49, duration: 'month' },
+      tier2: { price: 499, duration: 'year' }
+    }
   },
   {
     id: '3',
-    creator_telegram_id: 789,
-    name: 'Creator Circle',
-    description: 'The ultimate mastermind for content creators looking to scale their audience and monetization.',
-    cover_image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80',
-    channel_link: '@creatorcircle',
+    name: 'Macro Insights',
+    description: 'Global economic trends and strategic asset allocation for long-term growth.',
+    cover_image: 'https://images.unsplash.com/photo-1611974714405-08e13768b726?w=800&q=80',
     tiers: {
-      tier1: { name: 'Access', price: 49, duration: 'week' },
-    },
-    created_at: new Date().toISOString(),
+      tier1: { price: 150, duration: 'month' }
+    }
   }
 ];
 
-export default function Home() {
+export default function Discover() {
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const filteredSpaces = useMemo(() => {
     return MOCK_SPACES.filter(space => 
       space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -59,53 +49,87 @@ export default function Home() {
   }, [searchQuery]);
 
   return (
-    <main className="min-h-screen bg-white pb-32">
+    <main className="min-h-screen bg-[#fdfdfd]">
       <Header />
       
-      <div className="container mx-auto px-4 py-16 max-w-5xl">
-        <section className="mb-20 text-center max-w-3xl mx-auto space-y-6">
-          <h1 className="text-5xl md:text-6xl font-heading font-semibold text-zinc-950 tracking-tight">
-            Discovery
+      <div className="container mx-auto px-6 py-12 space-y-16">
+        {/* Intentional Hero Section */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center space-y-6 max-w-2xl mx-auto"
+        >
+          <div className="inline-flex items-center gap-2 bg-white shadow-sm border border-zinc-100 px-4 py-2 rounded-full text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            Verified Creator Hub
+          </div>
+          <h1 className="text-4xl md:text-6xl font-heading font-semibold text-zinc-950 tracking-tighter leading-[0.95]">
+            Handcrafted <br />
+            Telegram Spaces.
           </h1>
-          <p className="text-zinc-500 text-lg font-medium leading-relaxed">
-            Access curated Telegram ecosystems. Secure, tiered, and focused on value.
+          <p className="text-sm text-zinc-500 font-medium leading-relaxed">
+            Direct access to high-signal communities. <br />
+            Managed securely via Telegram Stars.
           </p>
-          
-          <div className="pt-4 flex items-center gap-3 max-w-md mx-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-              <Input 
-                type="text" 
-                placeholder="Search spaces..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 rounded-2xl border-zinc-100 bg-zinc-50/50 focus-visible:ring-zinc-200 transition-all"
-              />
-            </div>
-            <button className="h-12 w-12 flex items-center justify-center rounded-2xl border border-zinc-100 bg-white text-zinc-900 hover:bg-zinc-50 transition-colors">
-              <Filter className="w-4 h-4" />
-            </button>
+        </motion.section>
+
+        {/* Professional Search Terminal */}
+        <section className="max-w-xl mx-auto">
+          <div className="relative group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
+            <input 
+              type="text"
+              placeholder="Search by community, niche or keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-zinc-100 rounded-3xl py-4.5 pl-14 pr-6 text-sm font-medium shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all placeholder:text-zinc-400"
+            />
           </div>
         </section>
 
+        {/* Dynamic Grid with Emotional Pull */}
         <section className="space-y-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest leading-none">Featured</h2>
-            {searchQuery && (
-              <p className="text-xs text-zinc-400 font-medium italic">Found {filteredSpaces.length} result{filteredSpaces.length !== 1 ? 's' : ''}</p>
-            )}
+          <div className="flex items-center justify-between border-b border-zinc-50 pb-4">
+            <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Featured Ecosystems</h2>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Verified Escrow
+            </div>
           </div>
           
-          {filteredSpaces.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredSpaces.map((space) => (
-                <SpaceCard key={space.id} space={space} />
+          <motion.div 
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredSpaces.map((space, index) => (
+                <motion.div
+                  key={space.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: index * 0.1,
+                    ease: [0.16, 1, 0.3, 1] 
+                  }}
+                >
+                  <SpaceCard space={space as any} />
+                </motion.div>
               ))}
-            </div>
-          ) : (
-            <div className="py-24 text-center border-2 border-dashed border-zinc-100 rounded-[32px]">
-              <p className="text-sm text-zinc-400 font-medium font-heading">No spaces match your criteria</p>
-            </div>
+            </AnimatePresence>
+          </motion.div>
+
+          {filteredSpaces.length === 0 && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <p className="text-zinc-400 font-medium">No communities found matching your configuration.</p>
+            </motion.div>
           )}
         </section>
       </div>

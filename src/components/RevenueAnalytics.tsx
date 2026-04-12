@@ -34,11 +34,11 @@ const chartData = [
 const chartConfig = {
   revenue: {
     label: "Revenue",
-    color: "hsl(var(--primary))",
+    color: "var(--primary)",
   },
   members: {
     label: "Members",
-    color: "hsl(var(--chart-2))",
+    color: "oklch(0.627 0.194 149.214)", // Emerald
   },
 } satisfies ChartConfig
 
@@ -140,13 +140,12 @@ export function RevenueAnalytics() {
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  className="w-[150px] rounded-xl border-zinc-100 bg-white/90 backdrop-blur-md shadow-lg"
+                  className="w-[180px] rounded-[24px] border-zinc-100 bg-white/95 backdrop-blur-xl shadow-2xl shadow-primary/5 font-mono text-zinc-900"
                   nameKey="views"
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
+                      month: "long",
                       day: "numeric",
-                      year: "numeric",
                     })
                   }}
                 />
@@ -157,7 +156,7 @@ export function RevenueAnalytics() {
               type="natural"
               fill={`url(#fill${activeChart.charAt(0).toUpperCase() + activeChart.slice(1)})`}
               stroke={`var(--color-${activeChart})`}
-              strokeWidth={2}
+              strokeWidth={3}
               stackId="a"
             />
           </AreaChart>
