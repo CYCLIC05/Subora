@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
+@theme {
+  --color-miro-black: #1c1c1e;
+  --color-miro-blue: #5b76fe;
+  --color-miro-blue-pressed: #2a41b6;
+  --color-miro-success: #00b473;
+  --color-miro-slate: #555a6a;
+  --color-miro-border: #c7cad5;
+  --color-miro-ring: rgb(224,226,232);
+  
+  /* Pastel Accents */
+  --color-miro-coral-light: #ffc6c6;
+  --color-miro-coral-dark: #600000;
+  --color-miro-rose: #ffd8f4;
+  --color-miro-teal-light: #c3faf5;
+  --color-miro-teal-dark: #187574;
+  --color-miro-orange: #ffe6cd;
+  --color-miro-yellow: #f8db02; /* Bright yellow for accents */
+  --color-miro-yellow-dark: #746019;
+  --color-miro-pink: #fde0f0;
+  
+  --radius-miro-sm: 8px;
+  --radius-miro-md: 12px;
+  --radius-miro-lg: 24px;
+  --radius-miro-xl: 50px;
+
+  --shadow-miro-ring: 0 0 0 1px var(--color-miro-ring);
+  
+  --font-display: "Roobert", "Inter", sans-serif;
+  --font-body: "Noto Sans", "Inter", sans-serif;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #1c1c1e;
+  --miro-blue: #5b76fe;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Custom Scrollbar for Telegram-like feel but Miro styled */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c7cad5;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a5a8b5;
+}
+
+.miro-card {
+  @apply bg-white rounded-[12px] p-4;
+  box-shadow: 0 0 0 1px rgb(224, 226, 232);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.miro-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 0 0 1px rgb(224, 226, 232);
+}
+
+.miro-button-primary {
+  @apply bg-miro-blue text-white font-bold py-3 px-6 rounded-miro-sm transition-all;
+}
+
+.miro-button-primary:active {
+  @apply bg-miro-blue-pressed;
+  transform: scale(0.98);
+}
+
+.miro-button-outline {
+  @apply border border-miro-border text-miro-black font-semibold py-2 px-4 rounded-miro-sm transition-all;
+}
+
+.miro-badge-yellow {
+  @apply bg-miro-yellow text-miro-black text-[10.5px] font-bold uppercase py-1 px-2 rounded-miro-xl;
 }
