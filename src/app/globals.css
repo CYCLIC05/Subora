@@ -5,45 +5,23 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-miro-black: #1c1c1e;
-  --color-miro-blue: #5b76fe;
-  --color-miro-blue-pressed: #2a41b6;
-  --color-miro-success: #00b473;
-  --color-miro-slate: #555a6a;
-  --color-miro-border: #c7cad5;
-  --color-miro-ring: rgb(224,226,232);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-xl: 50px;
 
-  /* Pastel Accents */
-  --color-miro-coral-light: #ffc6c6;
-  --color-miro-coral-dark: #600000;
-  --color-miro-rose: #ffd8f4;
-  --color-miro-teal-light: #c3faf5;
-  --color-miro-teal-dark: #187574;
-  --color-miro-orange: #ffe6cd;
-  --color-miro-yellow: #f8db02; /* Bright yellow for accents */
-  --color-miro-yellow-dark: #746019;
-  --color-miro-pink: #fde0f0;
-
-  --radius-miro-sm: 8px;
-  --radius-miro-md: 12px;
-  --radius-miro-lg: 24px;
-  --radius-miro-xl: 50px;
-
-  --shadow-miro-ring: 0 0 0 1px var(--color-miro-ring);
-
-  --font-display: "Roobert", "Inter", sans-serif;
-  --font-body: "Noto Sans", "Inter", sans-serif;
+  --font-heading: var(--font-sans);
+  --font-body: var(--font-sans);
 }
 
 :root {
-  --miro-blue: #5b76fe;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.145 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -55,72 +33,38 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.2 0 0);
+  --chart-2: oklch(0.4 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.8 0 0);
+  --chart-5: oklch(0.9 0 0);
+  --radius: 0.75rem;
 }
 
 body {
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
 }
 
-/* Custom Scrollbar for Telegram-like feel but Miro styled */
+/* Professional Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c7cad5;
+  background: oklch(0.9 0 0);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a5a8b5;
-}
-
-.miro-card {
-  @apply bg-white rounded-[12px] p-4;
-  box-shadow: 0 0 0 1px rgb(224, 226, 232);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.miro-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 0 0 1px rgb(224, 226, 232);
-}
-
-.miro-button-primary {
-  @apply bg-miro-blue text-white font-bold py-3 px-6 rounded-miro-sm transition-all;
-}
-
-.miro-button-primary:active {
-  @apply bg-miro-blue-pressed;
-  transform: scale(0.98);
-}
-
-.miro-button-outline {
-  @apply border border-miro-border text-miro-black font-semibold py-2 px-4 rounded-miro-sm transition-all;
-}
-
-.miro-badge-yellow {
-  @apply bg-miro-yellow text-miro-black text-[10.5px] font-bold uppercase py-1 px-2 rounded-miro-xl;
+  background: oklch(0.8 0 0);
 }
 
 @theme inline {

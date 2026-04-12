@@ -5,12 +5,11 @@ import { Space } from "@/lib/supabase";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Check, ChevronLeft, Star, Users, ShieldCheck, Zap } from "lucide-react";
+import { Check, ChevronLeft, Users, ShieldCheck, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import WebApp from "@twa-dev/sdk";
 
 // Mock data fetching for now
-// ... (rest of the mock data code)
 const getSpace = (id: string): Space | null => {
   const MOCK_SPACES = [
     {
@@ -41,10 +40,9 @@ export default function SpaceDetail() {
       const fetchedSpace = getSpace(params.id as string);
       setSpace(fetchedSpace);
       
-      // Configure Main Button
       if (fetchedSpace) {
         try {
-          WebApp.MainButton.setText(`Subscribe for ${fetchedSpace.tiers.tier1.price} Stars`);
+          WebApp.MainButton.setText(`Complete Subscription`);
           WebApp.MainButton.show();
           const handleMainButtonClick = () => {
             WebApp.HapticFeedback.notificationOccurred('success');
@@ -59,7 +57,6 @@ export default function SpaceDetail() {
       }
     }
     
-    // Set Telegram back button
     try {
       WebApp.BackButton.show();
       WebApp.BackButton.onClick(() => {
@@ -69,115 +66,123 @@ export default function SpaceDetail() {
     } catch (e) {}
   }, [params.id, router]);
 
-  if (!space) return <div className="p-8 text-center text-miro-slate">Loading...</div>;
+  if (!space) return <div className="p-8 text-center text-zinc-400">Loading ecosystem details...</div>;
 
   const benefits = [
-    "Full access to private channel",
-    "Real-time exclusive updates",
-    "Member-only discussions",
-    "Priority support from creator",
-    "Direct networking opportunities"
+    "Direct secure channel access",
+    "High-fidelity updates",
+    "Member indexing & networking",
+    "Verified creator communication",
+    "Priority infrastructure support"
   ];
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white pb-32">
       <Header />
       
       {/* Hero Section */}
-      <div className="relative w-full h-[240px] md:h-[320px]">
+      <div className="relative w-full h-[280px] md:h-[360px] bg-zinc-900">
         <Image
           src={space.cover_image}
           alt={space.name}
           fill
-          className="object-cover"
+          className="object-cover opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
+        
         <button 
           onClick={() => router.back()}
-          className="absolute top-4 left-4 bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-white/40 transition-colors"
+          className="absolute top-4 left-4 bg-white/10 backdrop-blur-md p-2 rounded-xl text-white hover:bg-white/20 transition-all active:scale-95"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
-        <div className="absolute bottom-6 left-0 right-0 px-4">
-          <div className="container mx-auto">
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
+
+        <div className="absolute bottom-8 left-0 right-0 px-4">
+          <div className="container mx-auto max-w-5xl">
+            <h1 className="text-4xl md:text-5xl font-heading font-semibold text-white mb-3 tracking-tight">
               {space.name}
             </h1>
-            <div className="flex items-center gap-4 text-white/90 text-sm">
-              <span className="flex items-center gap-1">
-                <Users className="w-4 h-4" /> 1.2k members
+            <div className="flex flex-wrap items-center gap-4 text-white/70 text-[13px] font-medium">
+              <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                <Users className="w-3.5 h-3.5" /> 1,248 members
               </span>
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="w-4 h-4" /> Verified Space
+              <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                <ShieldCheck className="w-3.5 h-3.5" /> Verified Tier
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="container mx-auto px-4 py-12 max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
           {/* Main Content */}
-          <div className="lg:col-span-2">
-            <h2 className="font-display text-2xl font-bold text-miro-black mb-4">About this Space</h2>
-            <p className="text-miro-slate text-lg mb-8 leading-relaxed">
-              {space.description}
-            </p>
+          <div className="lg:col-span-2 space-y-12">
+            <section>
+              <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4">Description</h2>
+              <p className="text-zinc-600 text-lg leading-relaxed font-medium">
+                {space.description}
+              </p>
+            </section>
 
-            <h2 className="font-display text-2xl font-bold text-miro-black mb-6">What you'll get</h2>
-            <ul className="space-y-4 mb-12">
-              {benefits.map((benefit, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <div className="mt-1 flex-shrink-0 w-5 h-5 bg-miro-success/10 rounded-full flex items-center justify-center">
-                    <Check className="w-3 h-3 text-miro-success" />
-                  </div>
-                  <span className="text-miro-black font-body">{benefit}</span>
-                </li>
-              ))}
-            </ul>
+            <section>
+              <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-6">Deliverables</h2>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {benefits.map((benefit, i) => (
+                  <li key={i} className="flex items-center gap-3 p-4 rounded-2xl bg-zinc-50 border border-zinc-100">
+                    <div className="flex-shrink-0 w-5 h-5 bg-zinc-900 rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="text-zinc-900 text-sm font-semibold">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </div>
 
           {/* Sidebar / Tiers */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
-              <h2 className="font-display text-xl font-bold text-miro-black mb-4 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-miro-yellow fill-miro-yellow" />
-                Select a Tier
-              </h2>
+            <div className="sticky top-24 space-y-4">
+              <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-6">Service Plans</h2>
               
               {/* Tier 1 */}
-              <div className="miro-card border-2 border-miro-blue bg-miro-blue/5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-miro-blue text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
-                  Most Popular
+              <div className="p-6 rounded-3xl border-2 border-zinc-900 bg-zinc-900 text-white relative overflow-hidden shadow-2xl shadow-zinc-950/20 transition-all hover:translate-y-[-2px]">
+                <div className="flex justify-between items-start mb-6">
+                  <h3 className="font-heading text-lg font-semibold">{space.tiers.tier1.name}</h3>
+                  <span className="bg-white/10 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">Active</span>
                 </div>
-                <h3 className="font-display text-lg font-bold text-miro-black mb-1">{space.tiers.tier1.name}</h3>
-                <div className="flex items-baseline gap-1 mb-4">
-                  <span className="text-3xl font-display font-bold text-miro-black">{space.tiers.tier1.price}</span>
-                  <span className="text-miro-slate text-sm">Stars / {space.tiers.tier1.duration}</span>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-heading font-bold">{space.tiers.tier1.price}</span>
+                  <span className="opacity-60 text-sm font-medium">Stars / {space.tiers.tier1.duration}</span>
                 </div>
-                <div className="text-miro-blue text-xs font-bold uppercase tracking-wider mb-2">
-                  Use the Button below to subscribe
+                <div className="flex items-center gap-2 text-xs font-medium opacity-80 bg-white/5 p-3 rounded-xl border border-white/10">
+                  <ArrowRight className="w-4 h-4" />
+                  Subscription managed via Telegram
                 </div>
               </div>
 
               {/* Tier 2 (if exists) */}
               {space.tiers.tier2 && (
-                <div className="miro-card group hover:border-miro-blue transition-all">
-                  <h3 className="font-display text-lg font-bold text-miro-black mb-1">{space.tiers.tier2.name}</h3>
-                  <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-2xl font-display font-bold text-miro-black">{space.tiers.tier2.price}</span>
-                    <span className="text-miro-slate text-sm">Stars / {space.tiers.tier2.duration}</span>
+                <div className="p-6 rounded-3xl border border-zinc-100 bg-white hover:border-zinc-300 transition-all cursor-pointer group">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="font-heading text-lg font-semibold text-zinc-900">{space.tiers.tier2.name}</h3>
                   </div>
-                  <button className="miro-button-outline w-full hover:bg-miro-blue hover:text-white hover:border-miro-blue">
-                    Select Plan
-                  </button>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-3xl font-heading font-bold text-zinc-950">{space.tiers.tier2.price}</span>
+                    <span className="text-zinc-400 text-sm font-medium">Stars / {space.tiers.tier2.duration}</span>
+                  </div>
+                  <div className="pt-4 border-t border-zinc-50 flex items-center justify-between text-xs font-bold text-zinc-400 group-hover:text-zinc-900 transition-colors">
+                    Switch to this plan <ArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
               )}
 
-              <p className="text-center text-xs text-miro-slate mt-4">
-                Payments secured via Telegram Stars. <br />
-                Cancel anytime within the app.
-              </p>
+              <footer className="text-center px-4">
+                <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">
+                  Service levels are defined by the creator. <br />
+                  Stars are refundable via Telegram support within 24h.
+                </p>
+              </footer>
             </div>
           </div>
         </div>
