@@ -99,20 +99,24 @@ export default function CreateSpace() {
     // 1. WebApp.openInvoice(url) -> callback
     
     setTimeout(async () => {
-      // On success: Save to Supabase
-      const { data, error } = await supabase
-        .from('spaces')
-        .insert([{
-          name: formData.name,
-          description: formData.description,
-          cover_image: formData.cover_image,
-          channel_link: formData.channel_link,
-          tiers: {
-            tier1: { name: formData.tier1_name, price: Number(formData.tier1_price), duration: formData.tier1_duration },
-            tier2: { name: formData.tier2_name, price: Number(formData.tier2_price), duration: formData.tier2_duration }
-          },
-          creator_telegram_id: (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 0,
-        }]);
+      // On success: Save to Supabase (if configured)
+      let error = null;
+      if (supabase) {
+        const { error: supabaseError } = await supabase
+          .from('spaces')
+          .insert([{
+            name: formData.name,
+            description: formData.description,
+            cover_image: formData.cover_image,
+            channel_link: formData.channel_link,
+            tiers: {
+              tier1: { name: formData.tier1_name, price: Number(formData.tier1_price), duration: formData.tier1_duration },
+              tier2: { name: formData.tier2_name, price: Number(formData.tier2_price), duration: formData.tier2_duration }
+            },
+            creator_telegram_id: (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 0,
+          }]);
+        error = supabaseError;
+      }
 
       if (error) {
         console.error("Error saving space:", error);
