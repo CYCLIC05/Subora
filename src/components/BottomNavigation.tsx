@@ -23,8 +23,8 @@ export function BottomNavigation() {
   };
 
   return (
-    <div className="fixed bottom-8 inset-x-0 z-50 flex justify-center pointer-events-none">
-      <nav className="bg-zinc-950/90 backdrop-blur-2xl border border-white/10 rounded-full p-2 flex items-center gap-1 shadow-2xl shadow-zinc-950/40 pointer-events-auto overflow-hidden">
+    <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none">
+      <nav className="w-full max-w-[min(100%,460px)] bg-white/95 backdrop-blur-xl border border-slate-200/70 rounded-full p-2 sm:p-3 flex items-center justify-between gap-1 shadow-lg shadow-slate-200/70 pointer-events-auto overflow-hidden">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -34,21 +34,22 @@ export function BottomNavigation() {
               key={item.name}
               href={item.href}
               onClick={handleClick}
+              aria-label={item.name}
               className={cn(
-                "relative flex items-center justify-center p-3 sm:px-6 transition-all duration-300 rounded-full group outline-none",
-                isActive ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                "relative flex-1 flex items-center justify-center rounded-full transition-all duration-300 group outline-none",
+                isActive ? "text-primary" : "text-slate-500 hover:text-slate-700"
               )}
             >
-              <div className="relative z-10 flex items-center gap-3">
+              <div className="relative z-10 flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2">
                 <Icon className={cn(
-                  "w-[22px] h-[22px] transition-transform duration-300",
+                  "w-[20px] h-[20px] transition-transform duration-300",
                   isActive ? "scale-100" : "scale-90 group-hover:scale-100"
                 )} />
                 {isActive && (
                   <motion.span 
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="text-[11px] font-bold uppercase tracking-[0.1em] hidden sm:inline-block"
+                    className="text-[11px] font-bold uppercase tracking-[0.2em] hidden sm:inline-block"
                   >
                     {item.name}
                   </motion.span>
@@ -58,7 +59,7 @@ export function BottomNavigation() {
               {isActive && (
                 <motion.div
                   layoutId="active-nav-bubble"
-                  className="absolute inset-0 bg-primary/20 rounded-full border border-primary/20"
+                  className="absolute inset-1 bg-primary/10 rounded-full border border-primary/15"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}

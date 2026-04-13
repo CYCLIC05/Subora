@@ -15,29 +15,29 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.585 0.233 277.117); /* Vibrant Trust Blue */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.585 0.233 277.117);
-  --chart-1: oklch(0.585 0.233 277.117);
-  --chart-2: oklch(0.488 0.243 264.376);
-  --chart-3: oklch(0.6 0 0);
-  --chart-4: oklch(0.8 0 0);
-  --chart-5: oklch(0.9 0 0);
+  --background: #f7f8fb;
+  --foreground: #1c1c1e;
+  --card: #ffffff;
+  --card-foreground: #1c1c1e;
+  --popover: #ffffff;
+  --popover-foreground: #1c1c1e;
+  --primary: #5b76fe;
+  --primary-foreground: #ffffff;
+  --secondary: #eef3ff;
+  --secondary-foreground: #3753c8;
+  --muted: #f5f7fb;
+  --muted-foreground: #6b7280;
+  --accent: #f8db02;
+  --accent-foreground: #1f2937;
+  --destructive: #ff6b6b;
+  --border: #dde2ef;
+  --input: #ffffff;
+  --ring: #5b76fe;
+  --chart-1: #5b76fe;
+  --chart-2: #7d8cff;
+  --chart-3: #6b8aff;
+  --chart-4: #94a3b8;
+  --chart-5: #dbe3fb;
   --radius: 1rem;
 }
 
@@ -45,7 +45,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #fdfdfd;
+  background-color: var(--background);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -56,7 +56,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Premium Pro-Shadows */
 .shadow-pro {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 10px 20px rgba(0,0,0,0.04);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
 }
 
 .shadow-pro-hover {
@@ -65,22 +65,22 @@ h1, h2, h3, h4, h5, h6 {
 
 .shadow-pro-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.03), 0 15px 35px rgba(0,0,0,0.08);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1);
 }
 
 /* Professional Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.9 0 0);
-  border-radius: 10px;
+  background: rgba(92, 104, 255, 0.35);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.8 0 0);
+  background: rgba(92, 104, 255, 0.55);
 }
 
 @theme inline {

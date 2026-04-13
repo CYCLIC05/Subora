@@ -40,11 +40,11 @@ const DEFAULT_CHART_DATA: RevenuePoint[] = [
 const chartConfig = {
   revenue: {
     label: "Revenue",
-    color: "var(--primary)",
+    color: "var(--chart-1)",
   },
   members: {
     label: "Members",
-    color: "oklch(0.627 0.194 149.214)", // Emerald
+    color: "#22c55e",
   },
 } satisfies ChartConfig
 
@@ -82,7 +82,7 @@ export function RevenueAnalytics({ chartData = DEFAULT_CHART_DATA }: { chartData
                   {chartConfig[chart].label}
                 </span>
                 <span className="text-xl font-heading font-bold leading-none text-zinc-950 sm:text-2xl">
-                  {key === "revenue" ? `Stars ${total[chart].toLocaleString()}` : total[chart].toLocaleString()}
+                  {key === "revenue" ? `$${total[chart].toLocaleString()}` : total[chart].toLocaleString()}
                 </span>
               </button>
             )
@@ -92,7 +92,7 @@ export function RevenueAnalytics({ chartData = DEFAULT_CHART_DATA }: { chartData
       <CardContent className="px-2 sm:p-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="aspect-auto h-[280px] w-full"
         >
           <AreaChart
             data={chartData}
@@ -105,29 +105,29 @@ export function RevenueAnalytics({ chartData = DEFAULT_CHART_DATA }: { chartData
               <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-revenue)"
-                  stopOpacity={0.1}
+                  stopColor="var(--chart-1)"
+                  stopOpacity={0.25}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-revenue)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={0}
                 />
               </linearGradient>
               <linearGradient id="fillMembers" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-members)"
-                  stopOpacity={0.1}
+                  stopColor="#22c55e"
+                  stopOpacity={0.18}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-members)"
+                  stopColor="#22c55e"
                   stopOpacity={0}
                 />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f1f1" />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
               dataKey="date"
               tickLine={false}
@@ -141,12 +141,18 @@ export function RevenueAnalytics({ chartData = DEFAULT_CHART_DATA }: { chartData
                   day: "numeric",
                 })
               }}
-              style={{ fontSize: '10px', fontWeight: 500, fill: '#888' }}
+              style={{ fontSize: '10px', fontWeight: 500, fill: '#94a3b8' }}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+              style={{ fontSize: '10px', fontWeight: 500, fill: '#94a3b8' }}
             />
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  className="w-[180px] rounded-[24px] border-zinc-100 bg-white/95 backdrop-blur-xl shadow-2xl shadow-primary/5 font-mono text-zinc-900"
+                  className="w-[190px] rounded-[24px] border border-slate-200 bg-white/95 backdrop-blur-xl shadow-2xl shadow-slate-900/10 font-mono text-slate-900"
                   nameKey={activeChart}
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString("en-US", {
@@ -161,12 +167,27 @@ export function RevenueAnalytics({ chartData = DEFAULT_CHART_DATA }: { chartData
               dataKey={activeChart}
               type="natural"
               fill={`url(#fill${activeChart.charAt(0).toUpperCase() + activeChart.slice(1)})`}
-              stroke={`var(--color-${activeChart})`}
+              stroke={chartConfig[activeChart].color}
               strokeWidth={3}
               stackId="a"
             />
           </AreaChart>
         </ChartContainer>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-slate-400">Peak value</p>
+            <p className="mt-3 text-lg font-semibold text-slate-950">
+              {activeChart === 'revenue' ? `$${Math.max(...chartData.map((point) => point.revenue)).toLocaleString()}` : Math.max(...chartData.map((point) => point.members)).toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-slate-400">Weekly pace</p>
+            <p className="mt-3 text-lg font-semibold text-slate-950">
+              {activeChart === 'revenue' ? `$${Math.round(total.revenue / chartData.length).toLocaleString()}` : Math.round(total.members / chartData.length).toLocaleString()}
+            </p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

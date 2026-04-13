@@ -15,6 +15,12 @@ export const supabase = isValidUrl(supabaseUrl) && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null as any; // Fallback to null (casted for types) if not configured
 
+export type SubscriptionTier = {
+  name: string;
+  price: number;
+  duration: string;
+};
+
 export type Space = {
   id: string;
   creator_telegram_id: number;
@@ -22,17 +28,6 @@ export type Space = {
   description: string;
   cover_image: string;
   channel_link: string;
-  tiers: {
-    tier1: {
-      name: string;
-      price: number;
-      duration: string;
-    };
-    tier2?: {
-      name: string;
-      price: number;
-      duration: string;
-    };
-  };
+  tiers: SubscriptionTier[];
   created_at: string;
 };

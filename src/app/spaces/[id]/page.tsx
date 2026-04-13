@@ -19,18 +19,18 @@ export default async function SpaceDetailPage({ params }: { params: { id: string
   ]
 
   return (
-    <main className="min-h-screen bg-white pb-32">
+    <main className="min-h-screen bg-background pb-32">
       <Header />
 
-      <div className="relative w-full h-[360px] md:h-[450px] bg-zinc-950 overflow-hidden">
+      <div className="relative w-full h-[360px] md:h-[450px] bg-slate-950 overflow-hidden">
         <Image
           src={space.cover_image}
           alt={space.name}
           fill
           className="object-cover opacity-60 scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
 
         <Link
           href="/"

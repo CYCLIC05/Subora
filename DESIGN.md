@@ -1,108 +1,137 @@
-# Design System Inspired by Miro
+# Subora Design System
 
-## 1. Visual Theme & Atmosphere
+## 1. Vision
+Subora is a premium Telegram creator app with a polished, approachable interface. The design should feel modern, calm, and trustworthy while reinforcing the product’s creator-led marketplace and membership focus.
 
-Miro's website is a clean, collaborative-tool-forward platform that communicates "visual thinking" through generous whitespace, pastel accent colors, and a confident geometric font. The design uses a predominantly white canvas with near-black text (`#1c1c1e`) and a distinctive pastel color palette — coral, rose, teal, orange, yellow, moss — each representing different collaboration contexts.
+The visual system is built around:
+- a clean, content-forward layout
+- crisp blue accents for action and trust
+- muted supporting colors for categories and visual structure
+- clear typography with strong hierarchy
+- subtle depth through refined surface layering and soft borders
 
-The typography uses Roobert PRO Medium as the primary display font with OpenType character variants (`"blwf", "cv03", "cv04", "cv09", "cv11"`) and negative letter-spacing (-1.68px at 56px). Noto Sans handles body text with its own stylistic set (`"liga" 0, "ss01", "ss04", "ss05"`). The design is built with Framer, giving it smooth animations and modern component patterns.
+## 2. Brand Personality
+- Friendly, but professional
+- Intuitive and uncluttered
+- Elegant with a tech-forward edge
+- Focused on creator revenue and community value
 
-**Key Characteristics:**
-- White canvas with near-black (`#1c1c1e`) text
-- Roobert PRO Medium with multiple OpenType character variants
-- Pastel accent palette: coral, rose, teal, orange, yellow, moss (light + dark pairs)
-- Blue 450 (`#5b76fe`) as primary interactive color
-- Success green (`#00b473`) for positive states
-- Generous border-radius: 8px–50px range
-- Framer-built with smooth motion patterns
-- Ring shadow border: `rgb(224,226,232) 0px 0px 0px 1px`
-
-## 2. Color Palette & Roles
-
-### Primary
-- **Near Black** (`#1c1c1e`): Primary text
-- **White** (`#ffffff`): `--tw-color-white`, primary surface
-- **Blue 450** (`#5b76fe`): `--tw-color-blue-450`, primary interactive
-- **Actionable Pressed** (`#2a41b6`): `--tw-color-actionable-pressed`
-
-### Pastel Accents (Light/Dark pairs)
-- **Coral**: Light `#ffc6c6` / Dark `#600000`
-- **Rose**: Light `#ffd8f4` / Dark (implied)
-- **Teal**: Light `#c3faf5` / Dark `#187574`
-- **Orange**: Light `#ffe6cd`
-- **Yellow**: Dark `#746019`
-- **Moss**: Dark `#187574`
-- **Pink** (`#fde0f0`): Soft pink surface
-- **Red** (`#fbd4d4`): Light red surface
-- **Dark Red** (`#e3c5c5`): Muted red
+## 3. Color System
+### Core
+- **Paper White** `#FFFFFF` — primary surface
+- **Ink Black** `#1c1c1e` — primary text
+- **Sky Blue** `#5b76fe` — main CTA and selection color
+- **Deep Indigo** `#2a41b6` — pressed / active states
 
 ### Semantic
-- **Success** (`#00b473`): `--tw-color-success-accent`
+- **Success** `#00b473`
+- **Warning** `#f8c948`
+- **Alert** `#ff6b6b`
 
-### Neutral
-- **Slate** (`#555a6a`): Secondary text
-- **Input Placeholder** (`#a5a8b5`): `--tw-color-input-placeholder`
-- **Border** (`#c7cad5`): Button borders
-- **Ring** (`rgb(224,226,232)`): Shadow-as-border
+### Neutrals
+- **Slate** `#555a6a` — secondary text
+- **Soft Gray** `#e9eaef` — borders and surfaces
+- **Muted Gray** `#c7cad5` — dividers / input outlines
+- **Canvas Gray** `#f7f8fb` — subtle panel backgrounds
 
-## 3. Typography Rules
+### Accent Surfaces
+- **Lavender Mist** `#f4ecff`
+- **Mint Whisper** `#e9fbf9`
+- **Peach Glow** `#fff2e6`
+- **Sunbeam** `#fff8d8`
 
-### Font Families
-- **Display**: `Roobert PRO Medium`, fallback: Placeholder — `"blwf", "cv03", "cv04", "cv09", "cv11"`
-- **Display Variants**: `Roobert PRO SemiBold`, `Roobert PRO SemiBold Italic`, `Roobert PRO`
-- **Body**: `Noto Sans` — `"liga" 0, "ss01", "ss04", "ss05"`
+## 4. Typography
+### Font families
+- **Headings**: `Inter` / sans-serif
+- **Body**: `Noto Sans` / sans-serif
+- **Mono / Accent**: `Geist Mono` for system labels and code-like text
 
-### Hierarchy
+### Scale
+| Usage | Font | Size | Weight | Line-height |
+|---|---|---|---|---|
+| Page title | Inter | 48px | 700 | 1.08 |
+| Section heading | Inter | 32px | 700 | 1.1 |
+| Card title | Inter | 22px | 600 | 1.2 |
+| Body headline | Noto Sans | 18px | 600 | 1.4 |
+| Body copy | Noto Sans | 16px | 400 | 1.6 |
+| Button / label | Inter | 16px | 700 | 1.25 |
+| Caption | Noto Sans | 14px | 500 | 1.5 |
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing |
-|------|------|------|--------|-------------|----------------|
-| Display Hero | Roobert PRO Medium | 56px | 400 | 1.15 | -1.68px |
-| Section Heading | Roobert PRO Medium | 48px | 400 | 1.15 | -1.44px |
-| Card Title | Roobert PRO Medium | 24px | 400 | 1.15 | -0.72px |
-| Sub-heading | Noto Sans | 22px | 400 | 1.35 | -0.44px |
-| Feature | Roobert PRO Medium | 18px | 600 | 1.35 | normal |
-| Body | Noto Sans | 18px | 400 | 1.45 | normal |
-| Body Standard | Noto Sans | 16px | 400–600 | 1.50 | -0.16px |
-| Button | Roobert PRO Medium | 17.5px | 700 | 1.29 | 0.175px |
-| Caption | Roobert PRO Medium | 14px | 400 | 1.71 | normal |
-| Small | Roobert PRO Medium | 12px | 400 | 1.15 | -0.36px |
-| Micro Uppercase | Roobert PRO | 10.5px | 400 | 0.90 | uppercase |
+## 5. Layout & Spacing
+- Base spacing scale: `8px`
+- Small gap: `8px`
+- Default gap: `16px`
+- Comfortable gap: `24px`
+- Large gap: `32px`
+- Full bleed sections: `60px+`
 
-## 4. Component Stylings
+### Containers
+- Cards: `16px`–`20px` padding
+- Forms: `20px`–`24px` padding
+- Section panels: `28px`–`32px` padding
 
+### Radius
+- Buttons / chips: `12px`
+- Cards: `16px`
+- Modals / panels: `24px`
+- Large surface blocks: `32px`
+
+## 6. Surface & Elevation
+Keep depth minimal and polished.
+- Primary cards: white surface with `0px 1px 2px rgba(28, 28, 30, 0.06)`
+- Raised panels: `1px solid #e9eaef` with glow `0 0 0 1px rgba(224,226,232,0.75)`
+- Soft surface tints for category blocks, not heavy shadows
+
+## 7. Interaction Patterns
 ### Buttons
-- Outlined: transparent bg, `1px solid #c7cad5`, 8px radius, 7px 12px padding
-- White circle: 50% radius, white bg with shadow
-- Blue primary (implied from interactive color)
+- Primary: sky blue background, white text, `12px` radius
+- Secondary: white background, slate text, `1px solid #c7cad5`
+- Ghost: transparent background, slate text, subtle hover fill
 
-### Cards: 12px–24px radius, pastel backgrounds
-### Inputs: white bg, `1px solid #e9eaef`, 8px radius, 16px padding
+### Inputs
+- Background: `#ffffff`
+- Border: `1px solid #c7cad5`
+- Focus: `1px solid #5b76fe`, shadow ring `rgba(91,118,254,0.16)`
+- Height: `48px` with `16px` horizontal padding
 
-## 5. Layout Principles
-- Spacing: 1–24px base scale
-- Radius: 8px (buttons), 10px–12px (cards), 20px–24px (panels), 40px–50px (large containers)
-- Ring shadow: `rgb(224,226,232) 0px 0px 0px 1px`
+### Cards
+- Use color-tinted headings for space categories
+- Keep card interiors airy with 18px line spacing
+- Prioritize one strong visual or highlight per card
 
-## 6. Depth & Elevation
-Minimal — ring shadow + pastel surface contrast
+## 8. Motion & Feedback
+- Use gentle fades and slide-up reveals for page content
+- Button hover: `scale(1.02)` and brighter blue border
+- Card hover: soften surface and increase shadow contrast slightly
+- Toast / notification motion should feel light and intentional
 
-## 7. Do's and Don'ts
+## 9. Responsive Behavior
+### Breakpoints
+- Small: `<= 640px`
+- Medium: `641px – 1024px`
+- Large: `1025px – 1440px`
+- Extra large: `>= 1441px`
+
+### Principles
+- Collapse side-by-side content into stacked cards on mobile
+- Preserve generous padding and readable text sizes
+- Keep primary actions fixed near the bottom on mobile if inside Telegram Web App
+
+## 10. Design Rules
 ### Do
-- Use pastel light/dark pairs for feature sections
-- Apply Roobert PRO with OpenType character variants
-- Use Blue 450 (#5b76fe) for interactive elements
-### Don't
-- Don't use heavy shadows
-- Don't mix more than 2 pastel accents per section
+- Favor a bright, high-contrast hero with clean CTAs
+- Use blue for primary actions and brand recognition
+- Pair white surfaces with soft pastel accents, not loud color blocks
+- Keep icons simple and consistent
 
-## 8. Responsive Behavior
-Breakpoints: 425px, 576px, 768px, 896px, 1024px, 1200px, 1280px, 1366px, 1700px, 1920px
+### Don’t
+- Don’t overload screens with too many color accents
+- Don’t use heavy drop shadows or crowded layout grids
+- Don’t rely on small text for important actions
 
-## 9. Agent Prompt Guide
-### Quick Color Reference
-- Text: Near Black (`#1c1c1e`)
-- Background: White (`#ffffff`)
-- Interactive: Blue 450 (`#5b76fe`)
-- Success: `#00b473`
-- Border: `#c7cad5`
-### Example Component Prompts
-- "Create hero: white background. Roobert PRO Medium 56px, line-height 1.15, letter-spacing -1.68px. Blue CTA (#5b76fe). Outlined secondary (1px solid #c7cad5, 8px radius)."
+## 11. Implementation Notes
+- Use `Noto Sans` for all paragraph and label text
+- Use `Inter` for headings, buttons, and emphasis
+- Use `Geist Mono` sparingly for system values, Telegram IDs, or status codes
+- Keep form pages and creator dashboards feeling calm and easy to scan
+- The overall brand should feel elevated without being cold

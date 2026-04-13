@@ -2,8 +2,7 @@
 
 import { Header } from "@/components/Header";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { CheckCircle2, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";  
 import confetti from 'canvas-confetti';
 import { Input } from "@/components/ui/input";
 
@@ -36,7 +35,7 @@ export default function CreateSpace() {
             handlePayListingFee();
           };
 
-          WebApp.MainButton.setText("Pay 99 Stars");
+          WebApp.MainButton.setText("Pay listing fee");
           WebApp.MainButton.show();
           WebApp.MainButton.onClick(handlePayment);
 
@@ -59,17 +58,34 @@ export default function CreateSpace() {
     description: '',
     cover_image: '',
     channel_link: '',
-    tier1_name: 'Standard Access',
-    tier1_price: 99,
-    tier1_duration: 'week',
-    tier2_name: 'Premium Access',
-    tier2_price: 299,
-    tier2_duration: 'month',
   });
+
+  const [tiers, setTiers] = useState([
+    { name: 'Standard Access', price: 99, duration: 'week' },
+    { name: 'Premium Access', price: 299, duration: 'month' },
+  ]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleTierChange = (index: number, field: 'name' | 'price' | 'duration', value: string) => {
+    setTiers((current) =>
+      current.map((tier, tierIndex) =>
+        tierIndex === index
+          ? { ...tier, [field]: field === 'price' ? Number(value) : value }
+          : tier
+      )
+    );
+  };
+
+  const handleAddTier = () => {
+    setTiers((current) => [...current, { name: 'New Tier', price: 149, duration: 'month' }]);
+  };
+
+  const handleRemoveTier = (index: number) => {
+    setTiers((current) => current.filter((_, tierIndex) => tierIndex !== index));
   };
 
   const handleCreateRequest = async (e: React.FormEvent) => {
@@ -86,10 +102,7 @@ export default function CreateSpace() {
           description: formData.description,
           cover_image: formData.cover_image,
           channel_link: formData.channel_link,
-          tiers: {
-            tier1: { name: formData.tier1_name, price: Number(formData.tier1_price), duration: formData.tier1_duration },
-            tier2: { name: formData.tier2_name, price: Number(formData.tier2_price), duration: formData.tier2_duration },
-          },
+          tiers,
           creator_telegram_id: (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 0,
         }
 
@@ -120,126 +133,148 @@ export default function CreateSpace() {
   };
 
   return (
-    <main className="min-h-screen bg-white pb-32">
+    <main className="min-h-screen bg-background pb-32">
       <Header />
       
-      <div className="container mx-auto px-4 py-8 max-w-xl">
+      <div className="container mx-auto px-4 py-10 max-w-3xl">
         {step === 1 && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <header className="space-y-2">
-              <h1 className="text-3xl font-heading font-semibold text-zinc-950 tracking-tight">Deployment</h1>
-              <p className="text-sm text-zinc-500 font-medium leading-relaxed">Configuring your community for the Subora ecosystem.</p>
+            <header className="space-y-3">
+              <h1 className="text-4xl font-heading font-semibold text-slate-950 tracking-tight">Launch your space</h1>
+              <p className="text-base text-slate-600 font-medium leading-relaxed">Configure your Telegram community, set membership tiers, and submit for verified placement.</p>
             </header>
 
             <form id="create-space-form" onSubmit={handleCreateRequest} className="space-y-10">
               <section className="space-y-6">
-                <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-50 pb-2">Space Definition</h2>
-                
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-zinc-900 ml-1">Identity</label>
-                    <Input
-                      required
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      placeholder="e.g. Quantitative Insights"
-                      className="h-11 rounded-xl border-zinc-100 bg-zinc-50/50 focus-visible:ring-zinc-200"
-                    />
+                <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex flex-col gap-4 mb-6">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Space Definition</p>
+                      <h2 className="text-xl font-semibold text-slate-950 mt-2">Tell us about your community</h2>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-zinc-900 ml-1">Abstract</label>
-                    <textarea
-                      required
-                      maxLength={120}
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      placeholder="Define the primary value of your space..."
-                      className="w-full h-24 rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 text-sm focus:border-zinc-200 focus:outline-none transition-all placeholder:text-zinc-400"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-6">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-zinc-900 ml-1">Visual Asset URL</label>
+                      <label className="text-xs font-semibold text-slate-900 ml-1">Identity</label>
                       <Input
                         required
-                        name="cover_image"
-                        value={formData.cover_image}
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
-                        placeholder="https://..."
-                        className="h-11 rounded-xl border-zinc-100 bg-zinc-50/50"
+                        placeholder="e.g. Quantitative Insights"
+                        className="h-11 rounded-2xl border-slate-200 bg-slate-50/80 focus-visible:ring-primary/10"
                       />
                     </div>
+
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-zinc-900 ml-1">Terminal Link</label>
-                      <Input
+                      <label className="text-xs font-semibold text-slate-900 ml-1">Abstract</label>
+                      <textarea
                         required
-                        name="channel_link"
-                        value={formData.channel_link}
+                        maxLength={120}
+                        name="description"
+                        value={formData.description}
                         onChange={handleChange}
-                        placeholder="@channel"
-                        className="h-11 rounded-xl border-zinc-100 bg-zinc-50/50"
+                        placeholder="Define the primary value of your space..."
+                        className="w-full h-28 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400"
                       />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-900 ml-1">Visual Asset URL</label>
+                        <Input
+                          required
+                          name="cover_image"
+                          value={formData.cover_image}
+                          onChange={handleChange}
+                          placeholder="https://..."
+                          className="h-11 rounded-2xl border-slate-200 bg-slate-50/80"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-900 ml-1">Terminal Link</label>
+                        <Input
+                          required
+                          name="channel_link"
+                          value={formData.channel_link}
+                          onChange={handleChange}
+                          placeholder="@channel"
+                          className="h-11 rounded-2xl border-slate-200 bg-slate-50/80"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </section>
 
               <section className="space-y-6">
-                <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-50 pb-2">Subscription Logic</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-5 rounded-2xl bg-zinc-50/50 border border-zinc-100 space-y-4">
-                    <p className="text-[10px] font-bold text-zinc-900 uppercase tracking-widest leading-none">Standard Tier</p>
-                    <div className="space-y-3">
-                      <Input 
-                        name="tier1_name" value={formData.tier1_name} onChange={handleChange}
-                        className="h-9 rounded-lg bg-white border-zinc-100 text-xs font-semibold" 
-                        placeholder="Label" 
-                      />
-                      <div className="flex gap-2">
-                        <Input 
-                          type="number" name="tier1_price" value={formData.tier1_price} onChange={handleChange}
-                          className="h-9 rounded-lg bg-white border-zinc-100 text-xs font-bold" 
-                          placeholder="Price" 
-                        />
-                        <select 
-                          name="tier1_duration" value={formData.tier1_duration} onChange={handleChange}
-                          className="h-9 px-2 rounded-lg bg-white border border-zinc-100 text-[10px] font-bold uppercase"
-                        >
-                          <option value="week">Weekly</option>
-                          <option value="month">Monthly</option>
-                        </select>
-                      </div>
+                <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex flex-col gap-4 mb-6">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Subscription Logic</p>
+                      <h2 className="text-xl font-semibold text-slate-950 mt-2">Plan the member experience</h2>
                     </div>
                   </div>
 
-                  <div className="p-5 rounded-2xl border border-zinc-100 space-y-4">
-                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">Premium Extension</p>
-                    <div className="space-y-3 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
-                      <Input 
-                        name="tier2_name" value={formData.tier2_name} onChange={handleChange}
-                        className="h-9 rounded-lg bg-white border-zinc-100 text-xs font-semibold" 
-                        placeholder="Label" 
-                      />
-                      <div className="flex gap-2">
-                        <Input 
-                          type="number" name="tier2_price" value={formData.tier2_price} onChange={handleChange}
-                          className="h-9 rounded-lg bg-white border-zinc-100 text-xs font-bold" 
-                          placeholder="Price" 
-                        />
-                        <select 
-                          name="tier2_duration" value={formData.tier2_duration} onChange={handleChange}
-                          className="h-9 px-2 rounded-lg bg-white border border-zinc-100 text-[10px] font-bold uppercase"
-                        >
-                          <option value="week">Weekly</option>
-                          <option value="month">Monthly</option>
-                        </select>
+                  <div className="space-y-6">
+                    {tiers.map((tier, index) => (
+                      <div key={`${tier.name}-${index}`} className="rounded-3xl bg-slate-50 border border-slate-200 p-5">
+                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                          <div className="space-y-2">
+                            <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest leading-none">Tier {index + 1}</p>
+                            <Input
+                              name={`tier-${index}-name`}
+                              value={tier.name}
+                              onChange={(e) => handleTierChange(index, 'name', e.target.value)}
+                              className="h-9 rounded-2xl bg-white border-slate-200 text-xs font-semibold"
+                              placeholder="Tier label"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-[1fr_auto] md:items-end md:gap-4">
+                            <Input
+                              type="number"
+                              name={`tier-${index}-price`}
+                              value={tier.price}
+                              onChange={(e) => handleTierChange(index, 'price', e.target.value)}
+                              className="h-9 rounded-2xl bg-white border-slate-200 text-xs font-bold"
+                              placeholder="Price"
+                            />
+                            <select
+                              name={`tier-${index}-duration`}
+                              value={tier.duration}
+                              onChange={(e) => handleTierChange(index, 'duration', e.target.value)}
+                              className="h-9 rounded-2xl bg-white border border-slate-200 text-[10px] font-bold uppercase"
+                            >
+                              <option value="week">Weekly</option>
+                              <option value="month">Monthly</option>
+                              <option value="year">Yearly</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between gap-3">
+                          <p className="text-sm text-slate-500">Flexible tier you can rename, price, and remove.</p>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTier(index)}
+                            disabled={tiers.length === 1}
+                            className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={handleAddTier}
+                      className="inline-flex items-center justify-center gap-2 rounded-3xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 transition"
+                    >
+                      Add another tier
+                    </button>
                   </div>
                 </div>
               </section>
@@ -247,11 +282,11 @@ export default function CreateSpace() {
               <footer className="pt-6 text-center space-y-4">
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-zinc-950/20 hover:bg-zinc-800 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex items-center justify-center gap-2 rounded-3xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   Review & Continue
                 </button>
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
                   If you're inside Telegram, use the native main button above.
                 </p>
               </footer>
@@ -262,31 +297,29 @@ export default function CreateSpace() {
         {step === 2 && (
           <div className="animate-in zoom-in-95 fade-in duration-500 py-12 space-y-10">
             <header className="text-center space-y-2">
-              <h2 className="text-3xl font-heading font-semibold text-zinc-950 tracking-tight">Security Deposit</h2>
-              <p className="text-sm text-zinc-500 font-medium">Anti-spam verification fee for the Subora ecosystem.</p>
+              <h2 className="text-3xl font-heading font-semibold text-slate-950 tracking-tight">Security Deposit</h2>
+              <p className="text-base text-slate-600 font-medium">Anti-spam verification fee for the Subora ecosystem.</p>
             </header>
 
-            <div className="p-8 rounded-[32px] bg-zinc-900 text-white shadow-2xl shadow-zinc-950/20 max-w-sm mx-auto space-y-8">
+            <div className="p-8 rounded-[32px] bg-[#0f172a] text-white shadow-2xl shadow-slate-900/20 max-w-sm mx-auto space-y-8">
               <div className="flex justify-between items-center border-b border-white/10 pb-6">
                 <span className="text-xs font-bold uppercase tracking-widest opacity-60">Verification Fee</span>
-                <span className="text-3xl font-heading font-bold tracking-tight">99 Stars</span>
+                <span className="text-3xl font-heading font-bold tracking-tight">99</span>
               </div>
               
-              <ul className="space-y-4">
+              <ul className="space-y-4 text-sm font-medium text-slate-200 opacity-90">
                 {[
                   "Verified placement on Discover",
                   "Creator indexing",
                   "Revenue management terminal access"
                 ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-xs font-medium opacity-80">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    {item}
+                  <li key={i} className="pl-4">
+                    • {item}
                   </li>
                 ))}
               </ul>
 
-              <div className="pt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-40">
-                <Lock className="w-3 h-3" />
+              <div className="pt-4 text-[10px] font-bold uppercase tracking-widest opacity-70 text-center">
                 Encrypted via Telegram
               </div>
             </div>
@@ -295,13 +328,13 @@ export default function CreateSpace() {
               <button
                 onClick={handlePayListingFee}
                 disabled={loading}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex items-center justify-center gap-2 rounded-3xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {loading ? 'Processing payment...' : 'Pay 99 Stars and Launch'}
+                {loading ? 'Processing payment...' : 'Pay listing fee and launch'}
               </button>
               <button
                 onClick={() => setStep(1)}
-                className="text-xs font-bold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-widest"
+                className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest"
               >
                 Modify configuration
               </button>
@@ -312,26 +345,26 @@ export default function CreateSpace() {
         {step === 3 && (
           <div className="animate-in zoom-in-95 fade-in duration-500 text-center py-20 space-y-10">
             <div className="flex justify-center">
-              <div className="w-20 h-20 rounded-full bg-zinc-900 flex items-center justify-center">
-                <CheckCircle2 className="w-10 h-10 text-white" />
+              <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+                <span className="text-4xl font-bold text-white">✓</span>
               </div>
             </div>
             
             <header className="space-y-2">
-              <h2 className="text-4xl font-heading font-semibold text-zinc-950 tracking-tight">Authorized.</h2>
-              <p className="text-zinc-500 font-medium max-w-xs mx-auto">Your community is now successfully indexed within the ecosystem.</p>
+              <h2 className="text-4xl font-heading font-semibold text-slate-950 tracking-tight">Authorized.</h2>
+              <p className="text-slate-600 font-medium max-w-xs mx-auto">Your community is now successfully indexed within the ecosystem.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xs mx-auto">
               <button
                 onClick={() => router.push('/')}
-                className="h-11 px-6 rounded-xl border border-zinc-100 text-xs font-bold text-zinc-900 hover:bg-zinc-50 transition-all"
+                className="h-11 px-6 rounded-3xl border border-slate-200 text-xs font-bold text-slate-900 hover:bg-slate-50 transition-all"
               >
                 Discovery
               </button>
               <button
                 onClick={() => router.push('/dashboard')}
-                className="h-11 px-6 rounded-xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-950/20"
+                className="h-11 px-6 rounded-3xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/15"
               >
                 Management
               </button>

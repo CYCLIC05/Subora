@@ -1,21 +1,154 @@
 # 🚀 Subora Spaces
 
-**Monetize your Telegram communities with ease.** 
+**Monetize your Telegram communities with ease.**
 
-Subora Spaces is a premium Telegram Mini App (TWA) designed for creators. It allows you to list paid "Spaces" (private channels or groups) and collect subscription revenue directly through **Telegram Stars**.
-
-Inspired by the collaborative aesthetic of **Miro** and the community-building power of **Circle.so**, Subora provides a clean, professional, and native-feeling experience for both creators and members.
+Subora Spaces is a Telegram Web App built for creators who want to sell premium membership tiers for private Telegram channels and groups. It combines a curated discovery experience, dynamic subscription tier creation, and a creator dashboard to manage spaces and revenue.
 
 ---
 
-## ✨ Features
+## ✨ What Subora Does
 
-- **Discover Marketplace**: Browse curated private communities with beautiful Miro-style cards.
-- **Tiered Subscriptions**: Creators can offer multiple access tiers (e.g., Weekly vs. Monthly).
-- **Telegram Stars Integration**: Seamless payment flow for listing fees and member subscriptions.
-- **Creator Dashboard**: Track your spaces, revenue, and member growth at a glance.
-- **Native TWA Feel**: Built-in support for the Telegram MainButton, BackButton, and Haptic Feedback.
-- **TON Connect**: Optional wallet integration for future TON blockchain features.
+- Lists private Telegram communities as premium "Spaces".
+- Lets creators define flexible subscription tiers with names, prices, and billing periods.
+- Enables members to select a tier and purchase access using Telegram-native payment flow.
+- Provides a dashboard for creators to monitor space performance, revenue trends, and active memberships.
+
+---
+
+## 🏗 Architecture Overview
+
+### App structure
+- `src/app/`: Next.js App Router pages and routing.
+- `src/components/`: Reusable UI components and page sections.
+- `src/lib/`: Type definitions, mock API data, and shared utilities.
+- `src/app/api/`: API route endpoints for spaces and dashboard data.
+
+### Key components
+- `DiscoverPage`: search and browse available Spaces.
+- `SpaceCard`: visual card for each community listing.
+- `SpacePurchasePanel`: tier selection and Telegram TWA checkout.
+- `DashboardClient`: creator dashboard with analytics and space management.
+- `create/page.tsx`: builder form for new spaces with dynamic tier entry.
+
+### Data model
+- `Space` includes `tiers: SubscriptionTier[]`.
+- Each tier has:
+  - `name`
+  - `price`
+  - `duration`
+- This enables flexible, non-hardcoded pricing plans per space.
+
+### Integration flow
+1. Discover spaces on the home page.
+2. Open a space detail page to review tiers.
+3. Select a tier and complete checkout through Telegram Web App hooks.
+4. Create or manage spaces via the creator dashboard.
+
+---
+
+## 🧠 How It Works
+
+### Member experience
+- Browse curated Telegram communities on the discover page.
+- Filter and select a community card.
+- On the space details page, choose a subscription tier.
+- The Telegram MainButton updates with the selected tier and price.
+- Checkout is handled inside the Telegram Mini App experience.
+
+### Creator experience
+- Use the create page to define a new Space.
+- Add or remove subscription tiers dynamically.
+- Provide basic space details like name, description, cover image, and link.
+- View created spaces and analytics in the dashboard.
+
+### Backend / mock data
+- `src/lib/mockApi.ts` provides in-memory sample spaces, dashboard stats, and revenue points.
+- This mock layer can be replaced with a real Supabase backend or another database.
+
+---
+
+## 🛠 Tech Stack
+
+- **Framework**: Next.js App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 4
+- **Frontend**: React 19
+- **Data**: Supabase-compatible model and mock API
+- **Telegram**: `@twa-dev/sdk` for Web App button and haptic feedback
+- **Wallets**: `@tonconnect/ui-react` for optional TON integration
+- **Animations**: Framer Motion
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+
+- Node.js 18+
+- Supabase account (optional for production)
+- Telegram bot token if you want to run the Web App integration
+
+### 2. Install
+
+```bash
+git clone https://github.com/your-username/subora-spaces.git
+cd subora-spaces
+npm install
+```
+
+### 3. Environment
+
+Create `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+TELEGRAM_BOT_TOKEN=your_bot_token
+```
+
+### 4. Run
+
+```bash
+npm run dev
+```
+
+---
+
+## 📦 Database Schema
+
+Run this in Supabase if you want a matching backend:
+
+```sql
+create table public.spaces (
+  id uuid default gen_random_uuid() primary key,
+  creator_telegram_id bigint not null,
+  name text not null,
+  description text not null,
+  cover_image text not null,
+  channel_link text not null,
+  tiers jsonb not null,
+  created_at timestamp with time zone default now()
+);
+
+alter table public.spaces enable row level security;
+
+create policy "Public spaces are viewable by everyone" on public.spaces for select using (true);
+create policy "Anyone can insert" on public.spaces for insert with check (true);
+```
+
+---
+
+## 📱 Telegram Mini App Notes
+
+- Uses `MainButton` to surface the purchase action.
+- Supports `BackButton` and `HapticFeedback` when available.
+- Designed to run inside Telegram Web App or standard browser fallback.
+
+---
+
+## 📄 License
+
+MIT © Taiwo Oyewole
 
 ---
 

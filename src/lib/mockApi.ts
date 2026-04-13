@@ -10,10 +10,10 @@ const MOCK_SPACES: Space[] = [
     description: 'Real-time market analysis and trade setups for high-performing traders.',
     cover_image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80',
     channel_link: '@alphatrading',
-    tiers: {
-      tier1: { name: 'Weekly Access', price: 99, duration: 'week' },
-      tier2: { name: 'Monthly Access', price: 299, duration: 'month' },
-    },
+    tiers: [
+      { name: 'Weekly Access', price: 99, duration: 'week' },
+      { name: 'Monthly Access', price: 299, duration: 'month' },
+    ],
     created_at: new Date().toISOString(),
   },
   {
@@ -23,10 +23,10 @@ const MOCK_SPACES: Space[] = [
     description: 'Technical deep-dives and early access to the next generation of TON apps.',
     cover_image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&q=80',
     channel_link: '@tonbuilders',
-    tiers: {
-      tier1: { name: 'Monthly Access', price: 49, duration: 'month' },
-      tier2: { name: 'Yearly Access', price: 499, duration: 'year' },
-    },
+    tiers: [
+      { name: 'Monthly Access', price: 49, duration: 'month' },
+      { name: 'Yearly Access', price: 499, duration: 'year' },
+    ],
     created_at: new Date().toISOString(),
   },
   {
@@ -36,9 +36,9 @@ const MOCK_SPACES: Space[] = [
     description: 'Global economic trends and strategic asset allocation for long-term growth.',
     cover_image: 'https://images.unsplash.com/photo-1611974714405-08e13768b726?w=1200&q=80',
     channel_link: '@macroinsights',
-    tiers: {
-      tier1: { name: 'Monthly Access', price: 150, duration: 'month' },
-    },
+    tiers: [
+      { name: 'Monthly Access', price: 150, duration: 'month' },
+    ],
     created_at: new Date().toISOString(),
   },
 ]
@@ -63,8 +63,8 @@ export type DashboardData = {
 
 const DASHBOARD_STATS: DashboardStat[] = [
   { name: 'Active Subscriptions', value: '1,248', delta: '+12%' },
-  { name: 'Current Cycle Revenue', value: '12.4k Stars', delta: '+8%' },
-  { name: 'Average Subscription LTV', value: '450 Stars', delta: '+2%' },
+  { name: 'Current Cycle Revenue', value: '12.4k', delta: '+8%' },
+  { name: 'Average Subscription LTV', value: '450', delta: '+2%' },
 ]
 
 const REVENUE_DATA: RevenuePoint[] = [
