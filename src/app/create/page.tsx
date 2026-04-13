@@ -1,24 +1,10 @@
 'use client';
 
 import { Header } from "@/components/Header";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Image as ImageIcon, 
-  Link as LinkIcon, 
-  Type, 
-  AlignLeft, 
-  DollarSign, 
-  Calendar,
-  CheckCircle2,
-  Lock,
-  ArrowRight
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { CheckCircle2, Lock } from "lucide-react";
 import confetti from 'canvas-confetti';
-import WebApp from "@twa-dev/sdk";
-import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 
 export default function CreateSpace() {
@@ -27,37 +13,45 @@ export default function CreateSpace() {
   const [step, setStep] = useState(1); // 1: Form, 2: Payment, 3: Success
 
   useEffect(() => {
-    if (step === 1) {
+    let cleanup = () => {};
+    const initMainButton = async () => {
       try {
-        WebApp.MainButton.setText("Review & Continue");
-        WebApp.MainButton.show();
-        const handleFormSubmit = () => {
-          document.getElementById('create-space-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-        };
-        WebApp.MainButton.onClick(handleFormSubmit);
-        return () => {
+        const WebApp = (await import('@twa-dev/sdk')).default;
+
+        if (step === 1) {
+          const handleFormSubmit = () => {
+            document.getElementById('create-space-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+          };
+
+          WebApp.MainButton.setText("Review & Continue");
+          WebApp.MainButton.show();
+          WebApp.MainButton.onClick(handleFormSubmit);
+
+          cleanup = () => {
+            WebApp.MainButton.hide();
+            WebApp.MainButton.offClick(handleFormSubmit);
+          };
+        } else if (step === 2) {
+          const handlePayment = () => {
+            handlePayListingFee();
+          };
+
+          WebApp.MainButton.setText("Pay 99 Stars");
+          WebApp.MainButton.show();
+          WebApp.MainButton.onClick(handlePayment);
+
+          cleanup = () => {
+            WebApp.MainButton.hide();
+            WebApp.MainButton.offClick(handlePayment);
+          };
+        } else {
           WebApp.MainButton.hide();
-          WebApp.MainButton.offClick(handleFormSubmit);
-        };
+        }
       } catch (e) {}
-    } else if (step === 2) {
-      try {
-        WebApp.MainButton.setText("Pay 99 Stars");
-        WebApp.MainButton.show();
-        const handlePayment = () => {
-          handlePayListingFee();
-        };
-        WebApp.MainButton.onClick(handlePayment);
-        return () => {
-          WebApp.MainButton.hide();
-          WebApp.MainButton.offClick(handlePayment);
-        };
-      } catch (e) {}
-    } else {
-      try {
-        WebApp.MainButton.hide();
-      } catch (e) {}
-    }
+    };
+
+    initMainButton();
+    return () => cleanup();
   }, [step]);
 
   const [formData, setFormData] = useState({
@@ -86,37 +80,43 @@ export default function CreateSpace() {
   const handlePayListingFee = async () => {
     setLoading(true);
     setTimeout(async () => {
-      let error = null;
-      if (supabase) {
-        const { error: supabaseError } = await supabase
-          .from('spaces')
-          .insert([{
-            name: formData.name,
-            description: formData.description,
-            cover_image: formData.cover_image,
-            channel_link: formData.channel_link,
-            tiers: {
-              tier1: { name: formData.tier1_name, price: Number(formData.tier1_price), duration: formData.tier1_duration },
-              tier2: { name: formData.tier2_name, price: Number(formData.tier2_price), duration: formData.tier2_duration }
-            },
-            creator_telegram_id: (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 0,
-          }]);
-        error = supabaseError;
-      }
+      try {
+        const payload = {
+          name: formData.name,
+          description: formData.description,
+          cover_image: formData.cover_image,
+          channel_link: formData.channel_link,
+          tiers: {
+            tier1: { name: formData.tier1_name, price: Number(formData.tier1_price), duration: formData.tier1_duration },
+            tier2: { name: formData.tier2_name, price: Number(formData.tier2_price), duration: formData.tier2_duration },
+          },
+          creator_telegram_id: (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 0,
+        }
 
-      if (error) {
-        console.error("Error saving space:", error);
-      } else {
-        setStep(3);
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#000000', '#71717a', '#a1a1aa']
-        });
+        const response = await fetch('/api/spaces', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+
+        if (!response.ok) {
+          const result = await response.json()
+          console.error('Error saving space:', result)
+        } else {
+          setStep(3)
+          confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#000000', '#71717a', '#a1a1aa'],
+          })
+        }
+      } catch (error) {
+        console.error('Error saving space:', error)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false);
-    }, 1500);
+    }, 1500)
   };
 
   return (
@@ -244,9 +244,15 @@ export default function CreateSpace() {
                 </div>
               </section>
 
-              <footer className="pt-6 text-center">
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] animate-pulse">
-                  System configuration in progress
+              <footer className="pt-6 text-center space-y-4">
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-zinc-950/20 hover:bg-zinc-800 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  Review & Continue
+                </button>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+                  If you're inside Telegram, use the native main button above.
                 </p>
               </footer>
             </form>
@@ -285,8 +291,15 @@ export default function CreateSpace() {
               </div>
             </div>
 
-            <div className="text-center">
-               <button 
+            <div className="space-y-4 text-center">
+              <button
+                onClick={handlePayListingFee}
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loading ? 'Processing payment...' : 'Pay 99 Stars and Launch'}
+              </button>
+              <button
                 onClick={() => setStep(1)}
                 className="text-xs font-bold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-widest"
               >

@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Compass, PencilLine } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import WebApp from '@twa-dev/sdk';
 
 export function BottomNavigation() {
   const pathname = usePathname();
@@ -16,8 +15,9 @@ export function BottomNavigation() {
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   ];
 
-  const handleClick = () => {
+  const handleClick = async () => {
     try {
+      const WebApp = (await import('@twa-dev/sdk')).default;
       WebApp.HapticFeedback.impactOccurred('light');
     } catch (e) {}
   };

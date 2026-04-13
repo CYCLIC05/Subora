@@ -2,14 +2,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Space } from '@/lib/supabase';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
-import WebApp from '@twa-dev/sdk';
 
 export function SpaceCard({ space }: { space: Space }) {
   const lowestPrice = space.tiers.tier1.price;
   const duration = space.tiers.tier1.duration;
 
-  const handleHaptic = () => {
+  const handleHaptic = async () => {
     try {
+      const WebApp = (await import('@twa-dev/sdk')).default;
       WebApp.HapticFeedback.impactOccurred('light');
     } catch (e) {}
   };

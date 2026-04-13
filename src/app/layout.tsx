@@ -22,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable, geistMono.variable)} suppressHydrationWarning>
-      <body className={`${inter.className} ${noto.className} antialiased min-h-screen bg-white text-zinc-900 overflow-x-hidden`}>
+    <html lang="en" className={cn("font-sans", geist.variable, geistMono.variable, inter.className, noto.className)} suppressHydrationWarning>
+      <body suppressHydrationWarning className="antialiased min-h-screen bg-white text-zinc-900 overflow-x-hidden">
         <Providers>
           <div className="pb-32">
             {children}

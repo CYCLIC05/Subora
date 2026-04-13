@@ -16,19 +16,25 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-const chartData = [
-  { date: "2024-03-01", revenue: 450, members: 12 },
-  { date: "2024-03-02", revenue: 580, members: 15 },
-  { date: "2024-03-03", revenue: 520, members: 18 },
-  { date: "2024-03-04", revenue: 690, members: 22 },
-  { date: "2024-03-05", revenue: 840, members: 26 },
-  { date: "2024-03-06", revenue: 1100, members: 32 },
-  { date: "2024-03-07", revenue: 1050, members: 35 },
-  { date: "2024-03-08", revenue: 1300, members: 42 },
-  { date: "2024-03-09", revenue: 1550, members: 48 },
-  { date: "2024-03-10", revenue: 1800, members: 55 },
-  { date: "2024-03-11", revenue: 2100, members: 62 },
-  { date: "2024-03-12", revenue: 2450, members: 70 },
+export type RevenuePoint = {
+  date: string
+  revenue: number
+  members: number
+}
+
+const DEFAULT_CHART_DATA: RevenuePoint[] = [
+  { date: '2024-03-01', revenue: 450, members: 12 },
+  { date: '2024-03-02', revenue: 580, members: 15 },
+  { date: '2024-03-03', revenue: 520, members: 18 },
+  { date: '2024-03-04', revenue: 690, members: 22 },
+  { date: '2024-03-05', revenue: 840, members: 26 },
+  { date: '2024-03-06', revenue: 1100, members: 32 },
+  { date: '2024-03-07', revenue: 1050, members: 35 },
+  { date: '2024-03-08', revenue: 1300, members: 42 },
+  { date: '2024-03-09', revenue: 1550, members: 48 },
+  { date: '2024-03-10', revenue: 1800, members: 55 },
+  { date: '2024-03-11', revenue: 2100, members: 62 },
+  { date: '2024-03-12', revenue: 2450, members: 70 },
 ]
 
 const chartConfig = {
@@ -42,7 +48,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function RevenueAnalytics() {
+export function RevenueAnalytics({ chartData = DEFAULT_CHART_DATA }: { chartData?: RevenuePoint[] }) {
   const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>("revenue")
 
   const total = React.useMemo(
@@ -50,7 +56,7 @@ export function RevenueAnalytics() {
       revenue: chartData.reduce((acc, curr) => acc + curr.revenue, 0),
       members: chartData.reduce((acc, curr) => acc + curr.members, 0),
     }),
-    []
+    [chartData]
   )
 
   return (
@@ -141,7 +147,7 @@ export function RevenueAnalytics() {
               content={
                 <ChartTooltipContent
                   className="w-[180px] rounded-[24px] border-zinc-100 bg-white/95 backdrop-blur-xl shadow-2xl shadow-primary/5 font-mono text-zinc-900"
-                  nameKey="views"
+                  nameKey={activeChart}
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString("en-US", {
                       month: "long",
