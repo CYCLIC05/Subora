@@ -14,7 +14,9 @@ export function SpaceCard({ space }: { space: Space }) {
     try {
       const WebApp = (await import('@twa-dev/sdk')).default;
       WebApp.HapticFeedback.impactOccurred('light');
-    } catch (e) {}
+    } catch (error) {
+      console.debug('Haptic feedback unavailable', error);
+    }
   };
 
   return (

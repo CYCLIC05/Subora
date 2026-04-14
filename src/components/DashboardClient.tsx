@@ -25,7 +25,9 @@ export function DashboardClient({
     try {
       const WebApp = (await import('@twa-dev/sdk')).default
       WebApp.HapticFeedback.impactOccurred('light')
-    } catch (e) {}
+    } catch (error) {
+      console.warn('Haptic feedback unavailable', error)
+    }
   }
 
   useEffect(() => {

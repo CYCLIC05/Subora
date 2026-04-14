@@ -2,55 +2,13 @@
 
 import Link from 'next/link';
 import { Header } from "@/components/Header";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import confetti from 'canvas-confetti';
 import { Input } from "@/components/ui/input";
 
 export default function CreateSpace() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Form, 2: Payment, 3: Success
-
-  useEffect(() => {
-    let cleanup = () => {};
-    const initMainButton = async () => {
-      try {
-        const WebApp = (await import('@twa-dev/sdk')).default;
-
-        if (step === 1) {
-          const handleFormSubmit = () => {
-            document.getElementById('create-space-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-          };
-
-          WebApp.MainButton.setText("Review space");
-          WebApp.MainButton.show();
-          WebApp.MainButton.onClick(handleFormSubmit);
-
-          cleanup = () => {
-            WebApp.MainButton.hide();
-            WebApp.MainButton.offClick(handleFormSubmit);
-          };
-        } else if (step === 2) {
-          const handlePayment = () => {
-            handlePayListingFee();
-          };
-
-          WebApp.MainButton.setText("Pay listing fee");
-          WebApp.MainButton.show();
-          WebApp.MainButton.onClick(handlePayment);
-
-          cleanup = () => {
-            WebApp.MainButton.hide();
-            WebApp.MainButton.offClick(handlePayment);
-          };
-        } else {
-          WebApp.MainButton.hide();
-        }
-      } catch (e) {}
-    };
-
-    initMainButton();
-    return () => cleanup();
-  }, [step]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -92,17 +50,25 @@ export default function CreateSpace() {
     setStep(2);
   };
 
-  const handlePayListingFee = async () => {
+  const handlePayListingFee = useCallback(async () => {
     setLoading(true);
     setTimeout(async () => {
       try {
+        const telegramId = (window as unknown as {
+          Telegram?: {
+            WebApp?: {
+              initDataUnsafe?: { user?: { id?: number } }
+            }
+          }
+        }).Telegram?.WebApp?.initDataUnsafe?.user?.id ?? 0
+
         const payload = {
           name: formData.name,
           description: formData.description,
           cover_image: formData.cover_image,
           channel_link: formData.channel_link,
           tiers,
-          creator_telegram_id: (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 0,
+          creator_telegram_id: telegramId,
         }
 
         const response = await fetch('/api/spaces', {
@@ -128,8 +94,52 @@ export default function CreateSpace() {
       } finally {
         setLoading(false)
       }
-    }, 1500)
-  };
+    }, 1500);
+  }, [formData, tiers]);
+
+  useEffect(() => {
+    let cleanup = () => {}
+    const initMainButton = async () => {
+      try {
+        const WebApp = (await import('@twa-dev/sdk')).default
+
+        if (step === 1) {
+          const handleFormSubmit = () => {
+            document.getElementById('create-space-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+          }
+
+          WebApp.MainButton.setText('Review space')
+          WebApp.MainButton.show()
+          WebApp.MainButton.onClick(handleFormSubmit)
+
+          cleanup = () => {
+            WebApp.MainButton.hide()
+            WebApp.MainButton.offClick(handleFormSubmit)
+          }
+        } else if (step === 2) {
+          const handlePayment = () => {
+            handlePayListingFee()
+          }
+
+          WebApp.MainButton.setText('Pay listing fee')
+          WebApp.MainButton.show()
+          WebApp.MainButton.onClick(handlePayment)
+
+          cleanup = () => {
+            WebApp.MainButton.hide()
+            WebApp.MainButton.offClick(handlePayment)
+          }
+        } else {
+          WebApp.MainButton.hide()
+        }
+      } catch (error) {
+        console.error('Telegram WebApp error', error)
+      }
+    }
+
+    initMainButton()
+    return () => cleanup()
+  }, [step, handlePayListingFee])
 
   return (
     <main className="min-h-screen bg-background pb-32">
@@ -286,7 +296,7 @@ export default function CreateSpace() {
                   Review space
                 </button>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                  If you're inside Telegram, use the native main button above.
+                  If you are inside Telegram, use the native main button above.
                 </p>
               </footer>
             </form>

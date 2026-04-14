@@ -6,14 +6,16 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const isValidUrl = (url: string) => {
   try {
     return url.startsWith('http');
-  } catch {
+  } catch (error) {
     return false;
   }
 };
 
-export const supabase = isValidUrl(supabaseUrl) && supabaseAnonKey
+type SupabaseClientOrNull = ReturnType<typeof createClient> | null
+
+export const supabase: SupabaseClientOrNull = isValidUrl(supabaseUrl) && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
-  : null as any; // Fallback to null (casted for types) if not configured
+  : null
 
 export type SubscriptionTier = {
   name: string;

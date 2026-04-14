@@ -38,7 +38,9 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           WebApp.MainButton.offClick(handleMainButtonClick)
           WebApp.MainButton.hide()
         }
-      } catch (e) {}
+      } catch (error) {
+        console.warn('Telegram WebApp not available', error)
+      }
     }
 
     initMainButton()
@@ -55,7 +57,8 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
       await new Promise((resolve) => setTimeout(resolve, 900))
       setCheckoutState('complete')
       alert(`Success! You have joined ${space.name} on the ${currentTier.name} plan.`)
-    } catch {
+    } catch (error) {
+      console.warn('Checkout failed', error)
       setCheckoutState('idle')
     }
   }
