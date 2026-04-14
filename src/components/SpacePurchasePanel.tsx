@@ -66,11 +66,14 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
     <div className="sticky top-28 space-y-8">
       <div className="rounded-[40px] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5">
         <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Your access plan</p>
-        <div className="mt-4 flex flex-wrap items-end gap-3">
-          <span className="text-7xl font-heading font-bold tracking-tight text-slate-950">
-            {currentTier.price}
-          </span>
-          <span className="pb-1 text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">/ {currentTier.duration}</span>
+        <div className="mt-4 flex flex-col gap-1">
+          <div className="flex items-baseline gap-2">
+            <span className="text-8xl font-heading font-bold tracking-tighter text-slate-950">
+              {currentTier.price}
+            </span>
+            <span className="text-lg font-bold text-slate-500 uppercase tracking-widest">Stars</span>
+          </div>
+          <span className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-400">per {currentTier.duration}</span>
         </div>
         <p className="mt-3 text-sm text-slate-600">Includes 24/7 premium alerts, gated discussions, and exclusive creator drops.</p>
         <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2">
@@ -121,26 +124,29 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
         })}
       </div>
 
-      <button
-        onClick={handleLocalCheckout}
-        disabled={checkoutState !== 'idle'}
-        className="w-full rounded-[28px] bg-primary px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {checkoutState === 'processing'
-          ? 'Unlocking access...'
-          : checkoutState === 'complete'
-          ? 'Access granted'
-          : 'Unlock Access'}
-      </button>
-
-      <div className="rounded-[32px] border border-slate-200 bg-zinc-50 p-5 text-sm text-slate-600 space-y-3">
-        {trustLines.map((line) => (
-          <p key={line} className="flex items-center gap-2 text-slate-600">
-            <span className="text-primary font-bold">•</span>
-            {line}
-          </p>
-        ))}
+      <div className="space-y-4">
+        <button
+          onClick={handleLocalCheckout}
+          disabled={checkoutState !== 'idle'}
+          className="w-full rounded-[30px] bg-slate-950 px-6 py-5 text-xl font-bold text-white shadow-2xl shadow-slate-950/20 hover:bg-slate-900 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {checkoutState === 'processing'
+            ? 'Accessing...'
+            : checkoutState === 'complete'
+            ? 'Welcome Inside'
+            : 'Join Space'}
+        </button>
+        
+        <div className="flex flex-col gap-2 px-2">
+          {trustLines.map((line) => (
+            <div key={line} className="flex items-center gap-2.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+              <div className="w-1 h-1 rounded-full bg-primary" />
+              {line}
+            </div>
+          ))}
+        </div>
       </div>
+
 
       <footer className="text-center space-y-6 px-4 pt-6 border-t border-zinc-100/50">
         <div className="text-[11px] font-bold uppercase tracking-widest text-slate-950 opacity-80">

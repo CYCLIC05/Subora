@@ -46,23 +46,22 @@ export function SpaceCard({ space }: { space: Space }) {
       <div className="p-6 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <div className="flex items-start justify-between gap-3">
-            <h3 className="font-heading text-lg font-semibold text-slate-950 line-clamp-1 flex-1">
+            <h3 className="font-heading text-xl font-bold text-slate-950 line-clamp-1 flex-1">
               {space.name}
             </h3>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Powered by Telegram
+          <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+            <span className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
+              by <span className="text-slate-950">{space.channel_link}</span>
             </span>
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 font-bold text-slate-900">{space.subscribers.toLocaleString()} members</span>
+            <span className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg">{space.subscribers.toLocaleString()} members</span>
           </div>
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-mono font-bold text-slate-950 tracking-tighter">{lowestPriceTier.price}</span>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">per {lowestPriceTier.duration}</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-4xl font-heading font-bold text-slate-950 tracking-tighter">{lowestPriceTier.price}</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Stars / {lowestPriceTier.duration}</span>
           </div>
           
           <Link

@@ -76,8 +76,9 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
               Get daily alpha, private discussions, and exclusive drops.
             </p>
             <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm font-medium">
-              <span className="flex items-center gap-2.5">
-                <Users className="w-4 h-4 opacity-70" /> by {space.channel_link}
+              <span className="flex items-center gap-2.5 bg-white/10 px-3 py-1.5 rounded-xl backdrop-blur-sm">
+                <Users className="w-4 h-4 opacity-100 text-primary" /> 
+                <span>by <span className="text-white font-bold">{space.channel_link}</span></span>
               </span>
               <span className="flex items-center gap-2.5">
                 <BadgeCheck className="w-4 h-4 text-emerald-300" /> {space.subscribers.toLocaleString()} members already inside
@@ -94,62 +95,33 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-24">
           <div className="lg:col-span-2 space-y-20">
             <section className="space-y-8">
-            <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Why join</p>
-              <p className="mt-4 text-3xl md:text-4xl font-heading font-semibold text-slate-950 leading-tight tracking-tight">
-                Real-time market alpha, private creator threads, and member-only drops.
+              <div className="rounded-[40px] border border-slate-200 bg-white p-10 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-16 translate-x-16" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary mb-6">The Hook</p>
+              <h2 className="text-4xl md:text-5xl font-heading font-semibold text-slate-950 leading-[1.1] tracking-tight">
+                Private alpha, daily insights, and a serious community.
+              </h2>
+              <p className="mt-6 text-lg text-slate-600 font-medium leading-relaxed">
+                This is more than a channel — it's a high-signal environment designed for participants who value speed and accuracy.
               </p>
-              <div className="mt-6 grid gap-4">
-                {['Daily alpha alerts', 'Private creator discussions', 'Exclusive access to drops'].map((benefit) => (
-                  <div key={benefit} className="flex items-start gap-3">
-                    <span className="mt-1 text-primary text-xl">•</span>
-                    <p className="text-sm md:text-base font-semibold text-slate-700">{benefit}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           </section>
 
-            <section className="space-y-8 relative overflow-hidden rounded-[32px] border border-zinc-100 bg-zinc-50/50 p-8 shadow-sm">
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white z-10" />
-              <div className="absolute bottom-10 left-0 right-0 z-20 flex flex-col items-center justify-center text-center px-6">
-                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-zinc-900/5 mb-5 border border-zinc-100">
-                  <Lock className="w-6 h-6 text-zinc-900" />
-                </div>
-                <h3 className="text-xl font-bold text-zinc-900 mb-2 tracking-tight">Exclusive Content Locked</h3>
-                <p className="text-sm text-zinc-500 font-medium max-w-[280px]">Select a service plan to unlock real-time updates and premium insights.</p>
-              </div>
-              <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-6 mb-6">Latest from Vault</h2>
-
-              <div className="space-y-4 filter blur-[8px] opacity-40 pointer-events-none select-none">
-                {[1, 2, 3].map((item) => (
-                  <div key={item} className="bg-white p-5 rounded-2xl border border-zinc-100 shadow-sm flex gap-4">
-                    <div className="w-12 h-12 bg-zinc-200 rounded-xl" />
-                    <div className="space-y-3 flex-1 py-1">
-                      <div className="h-3 bg-zinc-200 rounded w-1/3" />
-                      <div className="h-2 bg-zinc-100 rounded w-3/4" />
-                      <div className="h-2 bg-zinc-100 rounded w-1/2" />
-                    </div>
+          <section className="space-y-10">
+            <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em] border-b border-slate-100 pb-6">Your Membership Includes</h2>
+            <div className="grid gap-4">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="flex items-center gap-5 p-8 rounded-[36px] bg-slate-50 border border-slate-100 group hover:border-primary/20 hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all cursor-default relative overflow-hidden">
+                  <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform z-10">
+                    <Check className="w-5 h-5" />
                   </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="space-y-10">
-              <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-50 pb-6">What you get</h2>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-center gap-5 p-6 rounded-[32px] bg-zinc-50/50 border border-zinc-100 group hover:border-primary/20 hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all cursor-default relative overflow-hidden">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-2xl flex items-center justify-center group-hover:scale-110 z-10">
-                      <Check className="w-4 h-4" />
-                    </div>
-                    <span className="text-zinc-900 text-sm md:text-base font-semibold tracking-tight z-10">{benefit}</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/[0.03] to-primary/0 translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]" />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
+                  <span className="text-slate-900 text-lg md:text-xl font-semibold tracking-tight z-10">{benefit}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/[0.02] to-primary/0 translate-x-[-100%] group-hover:animate-[shimmer_2s_infinite]" />
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
 
           <div className="lg:col-span-1">
             <SpacePurchasePanel space={space} />
