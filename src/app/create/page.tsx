@@ -45,8 +45,8 @@ export default function CreateSpace() {
     setTiers((current) => current.filter((_, tierIndex) => tierIndex !== index));
   };
 
-  const handleCreateRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateRequest = async (e?: React.FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
     setStep(2);
   };
 
@@ -105,7 +105,12 @@ export default function CreateSpace() {
 
         if (step === 1) {
           const handleFormSubmit = () => {
-            document.getElementById('create-space-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+            const form = document.getElementById('create-space-form') as HTMLFormElement | null
+            if (form?.requestSubmit) {
+              form.requestSubmit()
+            } else {
+              form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+            }
           }
 
           WebApp.MainButton.setText('Review space')
@@ -113,8 +118,17 @@ export default function CreateSpace() {
           WebApp.MainButton.onClick(handleFormSubmit)
 
           cleanup = () => {
-            WebApp.MainButton.hide()
-            WebApp.MainButton.offClick(handleFormSubmit)
+            try {
+              WebApp.MainButton.offClick?.(handleFormSubmit)
+            } catch (cleanupError) {
+              console.debug('Telegram cleanup failed', cleanupError)
+            }
+
+            try {
+              WebApp.MainButton.hide?.()
+            } catch (cleanupError) {
+              console.debug('Telegram cleanup failed', cleanupError)
+            }
           }
         } else if (step === 2) {
           const handlePayment = () => {
@@ -126,11 +140,24 @@ export default function CreateSpace() {
           WebApp.MainButton.onClick(handlePayment)
 
           cleanup = () => {
-            WebApp.MainButton.hide()
-            WebApp.MainButton.offClick(handlePayment)
+            try {
+              WebApp.MainButton.offClick?.(handlePayment)
+            } catch (cleanupError) {
+              console.debug('Telegram cleanup failed', cleanupError)
+            }
+
+            try {
+              WebApp.MainButton.hide?.()
+            } catch (cleanupError) {
+              console.debug('Telegram cleanup failed', cleanupError)
+            }
           }
         } else {
-          WebApp.MainButton.hide()
+          try {
+            WebApp.MainButton.hide?.()
+          } catch (cleanupError) {
+            console.debug('Telegram cleanup failed', cleanupError)
+          }
         }
       } catch (error) {
         console.error('Telegram WebApp error', error)

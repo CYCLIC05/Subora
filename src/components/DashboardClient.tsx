@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Plus, ExternalLink, ShieldCheck, TrendingUp, Users } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Space } from '@/lib/supabase'
 import { DashboardStat, RevenuePoint } from '@/lib/mockApi'
 
@@ -58,12 +59,21 @@ export function DashboardClient({
     <main className="min-h-screen bg-background pb-32">
       <Header />
 
-      {notification && (
-        <div className="fixed right-6 top-24 z-50 max-w-sm rounded-[32px] border border-slate-200 bg-slate-950/95 p-5 shadow-2xl shadow-slate-950/20 backdrop-blur-md text-white">
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-400">{notification.title}</p>
-          <p className="mt-2 text-sm font-semibold">{notification.message}</p>
-        </div>
-      )}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            key="notification"
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed right-6 top-24 z-50 max-w-sm rounded-[32px] border border-slate-200 bg-slate-950/95 p-5 shadow-2xl shadow-slate-950/20 backdrop-blur-md text-white"
+          >
+            <p className="text-xs uppercase tracking-[0.35em] text-slate-400">{notification.title}</p>
+            <p className="mt-2 text-sm font-semibold">{notification.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-10">

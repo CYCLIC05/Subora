@@ -55,8 +55,9 @@ export function SpaceCard({ space }: { space: Space }) {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">per {lowestPriceTier.duration}</span>
           </div>
           
-          <Link 
-            href={`/spaces/${encodeURIComponent(String(space.id))}`}
+          <Link
+            href={`/spaces/${space.id}`}
+            prefetch={false}
             onClick={handleHaptic}
             className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-3xl bg-primary text-white text-sm font-semibold shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all active:scale-95"
           >

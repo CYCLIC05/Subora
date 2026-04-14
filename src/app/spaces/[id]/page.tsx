@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Check, ChevronLeft, Users, ShieldCheck, Lock, BadgeCheck } from 'lucide-react'
@@ -6,10 +5,9 @@ import { Header } from '@/components/Header'
 import { SpacePurchasePanel } from '@/components/SpacePurchasePanel'
 import { getSpaceById } from '@/lib/mockApi'
 
-export default async function SpaceDetailPage({ params }: { params: { id: string } }) {
-  const space = await getSpaceById(params.id)
-  if (!space) return notFound()
-
+export default async function SpaceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const space = await getSpaceById(id)
   const benefits = [
     'Instant private channel access',
     'Encrypted high-signal updates',
@@ -18,8 +16,26 @@ export default async function SpaceDetailPage({ params }: { params: { id: string
     '24/7 Priority ecosystem support',
   ]
 
+  if (!space) {
+    return (
+      <main className="min-h-screen bg-background pb-32">
+        <Header />
+        <div className="container mx-auto px-6 py-20 max-w-3xl text-center">
+          <div className="inline-flex items-center justify-center rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 border border-red-100 mb-8">
+            Space not found
+          </div>
+          <h1 className="text-3xl font-heading font-semibold text-slate-950 mb-4">We couldn’t find that space.</h1>
+          <p className="text-base text-slate-600 mb-8">The link may be outdated or the space id is invalid. Return to discovery to choose another community.</p>
+          <Link href="/" className="inline-flex items-center justify-center rounded-3xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all">
+            Return to Discovery
+          </Link>
+        </div>
+      </main>
+    )
+  }
+
   return (
-    <main className="min-h-screen bg-background pb-32">
+      <main className="min-h-screen bg-background pb-32">
       <Header />
 
       <div className="relative w-full h-[360px] md:h-[450px] bg-slate-950 overflow-hidden">
@@ -48,15 +64,18 @@ export default async function SpaceDetailPage({ params }: { params: { id: string
             <h1 className="text-4xl md:text-6xl font-heading font-semibold text-white mb-4 tracking-tighter leading-[0.95]">
               {space.name}
             </h1>
-            <p className="max-w-3xl text-base md:text-xl text-white/90 font-medium leading-relaxed mb-6">
+            <p className="max-w-3xl text-base md:text-xl text-white/90 font-medium leading-relaxed mb-4">
               {space.description}
+            </p>
+            <p className="max-w-3xl text-sm md:text-base text-slate-200 font-medium leading-relaxed mb-6">
+              Get daily alpha, private discussions, and exclusive drops.
             </p>
             <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm font-medium">
               <span className="flex items-center gap-2.5">
                 <Users className="w-4 h-4 opacity-70" /> by {space.channel_link}
               </span>
               <span className="flex items-center gap-2.5">
-                <BadgeCheck className="w-4 h-4 text-emerald-300" /> Instant Telegram access
+                <BadgeCheck className="w-4 h-4 text-emerald-300" /> {space.subscribers.toLocaleString()} members already inside
               </span>
               <span className="flex items-center gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-primary" /> Powered by Telegram Stars
@@ -73,10 +92,10 @@ export default async function SpaceDetailPage({ params }: { params: { id: string
             <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
               <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Why join</p>
               <p className="mt-4 text-3xl md:text-4xl font-heading font-semibold text-slate-950 leading-tight tracking-tight">
-                {space.description}
+                Real-time market alpha, private creator threads, and member-only drops.
               </p>
               <div className="mt-6 grid gap-4">
-                {['Daily signals', 'Private community', 'Exclusive drops'].map((benefit) => (
+                {['Daily alpha alerts', 'Private creator discussions', 'Exclusive access to drops'].map((benefit) => (
                   <div key={benefit} className="flex items-start gap-3">
                     <span className="mt-1 text-primary text-xl">•</span>
                     <p className="text-sm md:text-base font-semibold text-slate-700">{benefit}</p>

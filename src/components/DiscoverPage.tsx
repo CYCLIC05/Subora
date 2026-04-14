@@ -52,7 +52,7 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
               placeholder="Search by community, niche or keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-[32px] py-4.5 pl-14 pr-6 text-sm font-medium shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/30 transition-all placeholder:text-slate-400"
+              className="w-full bg-white border border-slate-200 rounded-[32px] py-4 pl-14 pr-6 text-sm font-medium shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/30 transition-all placeholder:text-slate-400"
             />
           </div>
         </section>
