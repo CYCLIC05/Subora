@@ -16,7 +16,7 @@ const MOCK_SPACES: Space[] = [
     ],
     subscribers: 420,
     is_trending: true,
-    created_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(), // 2 hours ago
   },
   {
     id: '2',
@@ -31,7 +31,7 @@ const MOCK_SPACES: Space[] = [
     ],
     subscribers: 1_280,
     is_trending: true,
-    created_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 3600000 * 24).toISOString(), // 1 day ago
   },
   {
     id: '3',
@@ -44,7 +44,7 @@ const MOCK_SPACES: Space[] = [
       { name: 'Monthly Access', price: 150, duration: 'month' },
     ],
     subscribers: 720,
-    created_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 3600000 * 4).toISOString(), // 4 hours ago
   },
 ]
 

@@ -133,9 +133,34 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           {checkoutState === 'processing'
             ? 'Accessing...'
             : checkoutState === 'complete'
-            ? 'Welcome Inside'
+            ? 'Success!'
             : 'Join Space'}
         </button>
+
+        {checkoutState === 'complete' && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-primary/[0.08] border border-primary/20 rounded-[30px] p-6 text-center space-y-4"
+          >
+            <p className="text-sm font-bold text-primary italic">You're in! Access is unlocked.</p>
+            <p className="text-xs text-slate-700 font-medium leading-relaxed">
+              Invite your network to join this High-Value community and help us grow the ecosystem.
+            </p>
+            <button
+              onClick={async () => {
+                const WebApp = (await import('@twa-dev/sdk')).default
+                const username = WebApp.initDataUnsafe.user?.username || 'user'
+                const inviteLink = `https://t.me/SuboraBot/app?startapp=space_${space.id}_ref_${username}`
+                const shareText = `I just joined this premium Telegram Space: ${space.name}. Access early alpha & insights here 👇\n\n${inviteLink}`
+                WebApp.switchInlineQuery(shareText, ['users', 'groups', 'channels'])
+              }}
+              className="w-full bg-primary text-white py-3 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-primary/90 transition-all font-heading"
+            >
+              Share with Friends
+            </button>
+          </motion.div>
+        )}
         
         <div className="flex flex-col gap-2 px-2">
           {trustLines.map((line) => (

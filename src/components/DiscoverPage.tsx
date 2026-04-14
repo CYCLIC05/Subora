@@ -25,6 +25,11 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
     [spaces]
   )
 
+  const recentlyLaunched = useMemo(
+    () => [...spaces].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 3),
+    [spaces]
+  )
+
   return (
     <main className="min-h-screen bg-background">
       <Header />
@@ -41,15 +46,36 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
             Verified Creator Hub
           </div>
           <h1 className="text-5xl md:text-6xl font-heading font-semibold text-slate-950 tracking-tight leading-[1.02]">
-            Handcrafted <br />
-            Telegram Spaces.
+            High-Value <br />
+            Communities.
           </h1>
           <p className="text-base md:text-lg text-slate-600 font-medium leading-relaxed max-w-xl mx-auto">
-            Direct access to high-signal communities, curated for creators and members with secure Telegram-native access.
+            Direct access to the most exclusive Telegram alpha, curated for participants who demand high-signal discovery and secure access.
           </p>
         </motion.section>
 
-        <section className="max-w-xl mx-auto">
+        <section className="max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div className="bg-primary/[0.03] border border-primary/10 rounded-[32px] p-6 flex items-start gap-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-950">Discover premium Spaces</p>
+                <p className="text-xs text-slate-500 font-medium mt-1">Exclusive alpha and high-signal communities only.</p>
+              </div>
+            </div>
+            <div className="bg-primary/[0.03] border border-primary/10 rounded-[32px] p-6 flex items-start gap-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-950">Subscribe with Stars</p>
+                <p className="text-xs text-slate-500 font-medium mt-1">Instant Telegram access after secure payment.</p>
+              </div>
+            </div>
+          </div>
+          
           <div className="relative group">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
             <input
@@ -74,6 +100,22 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {trendingSpaces.map((space) => (
                 <SpaceCard key={space.id} space={space} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {recentlyLaunched.length > 0 && !searchQuery && (
+          <section className="space-y-8">
+            <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-primary">Recently Published</h2>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Latest Access
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {recentlyLaunched.map((space) => (
+                <SpaceCard key={`recent-${space.id}`} space={space} />
               ))}
             </div>
           </section>
