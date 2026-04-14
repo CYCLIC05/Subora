@@ -41,19 +41,25 @@ export default async function SpaceDetailPage({ params }: { params: { id: string
 
         <div className="absolute bottom-12 left-0 right-0 px-6">
           <div className="container mx-auto max-w-5xl">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 border border-primary/20 shadow-sm shadow-primary/5">
+            <div className="inline-flex items-center gap-2 bg-white/90 text-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 border border-white/90 shadow-sm shadow-slate-900/10">
               <ShieldCheck className="w-3.5 h-3.5" />
               Verified Community
             </div>
-            <h1 className="text-4xl md:text-7xl font-heading font-semibold text-zinc-950 mb-6 tracking-tighter leading-[0.9]">
+            <h1 className="text-4xl md:text-6xl font-heading font-semibold text-white mb-4 tracking-tighter leading-[0.95]">
               {space.name}
             </h1>
-            <div className="flex flex-wrap items-center gap-8 text-zinc-500 text-sm font-medium">
+            <p className="max-w-3xl text-base md:text-xl text-white/90 font-medium leading-relaxed mb-6">
+              {space.description}
+            </p>
+            <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm font-medium">
               <span className="flex items-center gap-2.5">
-                <Users className="w-4 h-4 opacity-40" /> 1,248 Active Members
+                <Users className="w-4 h-4 opacity-70" /> by {space.channel_link}
               </span>
               <span className="flex items-center gap-2.5">
-                <BadgeCheck className="w-4 h-4 text-emerald-500" /> Secure Ecosystem
+                <BadgeCheck className="w-4 h-4 text-emerald-300" /> Instant Telegram access
+              </span>
+              <span className="flex items-center gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-primary" /> Powered by Telegram Stars
               </span>
             </div>
           </div>
@@ -64,11 +70,21 @@ export default async function SpaceDetailPage({ params }: { params: { id: string
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-24">
           <div className="lg:col-span-2 space-y-20">
             <section className="space-y-8">
-              <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-50 pb-6">Executive Abstract</h2>
-              <p className="text-zinc-700 text-2xl leading-relaxed font-medium tracking-tight">
+            <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Why join</p>
+              <p className="mt-4 text-3xl md:text-4xl font-heading font-semibold text-slate-950 leading-tight tracking-tight">
                 {space.description}
               </p>
-            </section>
+              <div className="mt-6 grid gap-4">
+                {['Daily signals', 'Private community', 'Exclusive drops'].map((benefit) => (
+                  <div key={benefit} className="flex items-start gap-3">
+                    <span className="mt-1 text-primary text-xl">•</span>
+                    <p className="text-sm md:text-base font-semibold text-slate-700">{benefit}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
             <section className="space-y-8 relative overflow-hidden rounded-[32px] border border-zinc-100 bg-zinc-50/50 p-8 shadow-sm">
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white z-10" />
@@ -96,12 +112,12 @@ export default async function SpaceDetailPage({ params }: { params: { id: string
             </section>
 
             <section className="space-y-10">
-              <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-50 pb-6">Member Deliverables</h2>
+              <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-50 pb-6">What you get</h2>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {benefits.map((benefit, index) => (
                   <li key={index} className="flex items-center gap-5 p-6 rounded-[32px] bg-zinc-50/50 border border-zinc-100 group hover:border-primary/20 hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all cursor-default relative overflow-hidden">
-                    <div className="flex-shrink-0 w-8 h-8 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-primary transition-all group-hover:scale-110 group-hover:rotate-12 z-10">
-                      <Check className="w-4 h-4 text-white" />
+                    <div className="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-2xl flex items-center justify-center group-hover:scale-110 z-10">
+                      <Check className="w-4 h-4" />
                     </div>
                     <span className="text-zinc-900 text-sm md:text-base font-semibold tracking-tight z-10">{benefit}</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/[0.03] to-primary/0 translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]" />

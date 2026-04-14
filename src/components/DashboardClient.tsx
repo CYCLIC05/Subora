@@ -5,6 +5,7 @@ import { SpaceCard } from '@/components/SpaceCard'
 import { RevenueAnalytics } from '@/components/RevenueAnalytics'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { Plus, ExternalLink, ShieldCheck, TrendingUp, Users } from 'lucide-react'
 import { Space } from '@/lib/supabase'
 import { DashboardStat, RevenuePoint } from '@/lib/mockApi'
@@ -18,6 +19,8 @@ export function DashboardClient({
   stats: DashboardStat[]
   revenueData: RevenuePoint[]
 }) {
+  const [notification, setNotification] = useState<{ title: string; message: string } | null>(null)
+
   const handleHaptic = async () => {
     try {
       const WebApp = (await import('@twa-dev/sdk')).default
@@ -25,9 +28,40 @@ export function DashboardClient({
     } catch (e) {}
   }
 
+  useEffect(() => {
+    if (!spaces.length) {
+      return
+    }
+
+    const space = spaces[Math.floor(Math.random() * spaces.length)]
+
+    const showTimer = window.setTimeout(() => {
+      setNotification({
+        title: 'New subscriber',
+        message: `A new member just joined ${space.name}`,
+      })
+    }, 4300)
+
+    const hideTimer = window.setTimeout(() => {
+      setNotification(null)
+    }, 9800)
+
+    return () => {
+      window.clearTimeout(showTimer)
+      window.clearTimeout(hideTimer)
+    }
+  }, [spaces])
+
   return (
     <main className="min-h-screen bg-background pb-32">
       <Header />
+
+      {notification && (
+        <div className="fixed right-6 top-24 z-50 max-w-sm rounded-[32px] border border-slate-200 bg-slate-950/95 p-5 shadow-2xl shadow-slate-950/20 backdrop-blur-md text-white">
+          <p className="text-xs uppercase tracking-[0.35em] text-slate-400">{notification.title}</p>
+          <p className="mt-2 text-sm font-semibold">{notification.message}</p>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-10">
@@ -146,9 +180,14 @@ export function DashboardClient({
                     <div key={space.id} className="group relative">
                       <SpaceCard space={space} />
                       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Link href={space.channel_link} className="bg-white shadow-md p-2 rounded-full text-slate-950 hover:text-slate-600">
+                        <a
+                          href={`https://t.me/${space.channel_link.replace(/^@/, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-white shadow-md p-2 rounded-full text-slate-950 hover:text-slate-600"
+                        >
                           <ExternalLink className="w-4 h-4" />
-                        </Link>
+                        </a>
                       </div>
                     </div>
                   ))}

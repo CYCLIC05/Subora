@@ -1,13 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { Header } from "@/components/Header";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";  
 import confetti from 'canvas-confetti';
 import { Input } from "@/components/ui/input";
 
 export default function CreateSpace() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Form, 2: Payment, 3: Success
 
@@ -22,7 +21,7 @@ export default function CreateSpace() {
             document.getElementById('create-space-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
           };
 
-          WebApp.MainButton.setText("Review & Continue");
+          WebApp.MainButton.setText("Review space");
           WebApp.MainButton.show();
           WebApp.MainButton.onClick(handleFormSubmit);
 
@@ -284,7 +283,7 @@ export default function CreateSpace() {
                   type="submit"
                   className="inline-flex items-center justify-center gap-2 rounded-3xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Review & Continue
+                  Review space
                 </button>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
                   If you're inside Telegram, use the native main button above.
@@ -356,18 +355,18 @@ export default function CreateSpace() {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xs mx-auto">
-              <button
-                onClick={() => router.push('/')}
-                className="h-11 px-6 rounded-3xl border border-slate-200 text-xs font-bold text-slate-900 hover:bg-slate-50 transition-all"
+              <Link
+                href="/"
+                className="inline-flex h-11 items-center justify-center rounded-3xl border border-slate-200 bg-white px-6 text-xs font-bold text-slate-900 hover:bg-slate-50 transition-all"
               >
                 Discovery
-              </button>
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="h-11 px-6 rounded-3xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/15"
+              </Link>
+              <Link
+                href="/dashboard"
+                className="inline-flex h-11 items-center justify-center rounded-3xl bg-primary px-6 text-xs font-bold text-white hover:bg-primary/90 transition-all shadow-lg shadow-primary/15"
               >
                 Management
-              </button>
+              </Link>
             </div>
           </div>
         )}

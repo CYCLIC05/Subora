@@ -3,9 +3,10 @@ import { getSpaceById } from '@/lib/mockApi'
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const space = await getSpaceById(params.id)
+  const { id } = await params
+  const space = await getSpaceById(id)
   if (!space) {
     return NextResponse.json({ error: 'Space not found' }, { status: 404 })
   }

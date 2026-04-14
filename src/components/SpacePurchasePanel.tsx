@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react'
 import { Space } from '@/lib/supabase'
 import { motion } from 'framer-motion'
 
+const trustLines = [
+  'Instant access after payment',
+  'Secure via Stars',
+  'No hidden fees',
+]
+
 export function SpacePurchasePanel({ space }: { space: Space }) {
   const [selectedTierIndex, setSelectedTierIndex] = useState(0)
 
@@ -19,12 +25,12 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
         const WebApp = (await import('@twa-dev/sdk')).default
         const currentTier = space.tiers[selectedTierIndex] ?? space.tiers[0]
 
-        WebApp.MainButton.setText(`Pay ${currentTier.price} • Secure Escrow`)
+        WebApp.MainButton.setText(`Join Space • ${currentTier.price}`)
         WebApp.MainButton.show()
 
         const handleMainButtonClick = () => {
           WebApp.HapticFeedback.notificationOccurred('success')
-          alert(`Proceeding to encrypted Vault checkout for ${space.name} - ${currentTier.name}`)
+          alert(`Proceeding to encrypted checkout for ${space.name} - ${currentTier.name}`)
         }
 
         WebApp.MainButton.onClick(handleMainButtonClick)
@@ -56,67 +62,77 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
 
   return (
     <div className="sticky top-28 space-y-8">
-      <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Select Service Plan</h2>
+      <div className="rounded-[40px] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Your access plan</p>
+        <div className="mt-4 flex items-end gap-3">
+          <span className="text-6xl font-heading font-bold tracking-tight text-slate-950">{currentTier.price}</span>
+          <span className="pb-1 text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">/ {currentTier.duration}</span>
+        </div>
+        <p className="mt-3 text-sm text-slate-600">Premium access to exclusive signals, community updates, and drops.</p>
+      </div>
 
-      {tiers.map((tier, index) => {
-        const isSelected = selectedTierIndex === index
+      <div className="space-y-4">
+        {tiers.map((tier, index) => {
+          const isSelected = selectedTierIndex === index
 
-        return (
-          <motion.div
-            key={`${tier.name}-${index}`}
-            onClick={() => setSelectedTierIndex(index)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`relative p-8 rounded-[40px] border-2 cursor-pointer transition-all overflow-hidden shadow-xl ${
-              isSelected
-                ? 'border-primary bg-primary/[0.06] shadow-primary/15'
-                : 'border-slate-200 bg-white hover:border-slate-300 shadow-slate-200/60'
-            }`}
-          >
-            {isSelected && <div className="absolute inset-0 bg-primary/[0.06]" />}
-            <div className="relative z-10 mb-8">
-              <h3 className="font-heading text-xl font-bold tracking-tight text-slate-950">{tier.name}</h3>
-              {isSelected && <p className="mt-2 text-[10px] text-primary font-bold uppercase tracking-widest">Selected</p>}
-            </div>
-
-            <div className="space-y-4 relative z-10">
-              <div className="flex items-baseline gap-3">
-                <span className="text-5xl font-mono font-bold tracking-tighter text-zinc-950">{tier.price}</span>
-                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">per {tier.duration}</span>
-              </div>
-              <p className="text-sm font-semibold text-zinc-500 tracking-tight">Full access for one {tier.duration}</p>
-            </div>
-
-            {isSelected && (
-              <div className="relative z-10 pt-8">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-primary bg-white/90 p-4 rounded-2xl border border-primary/10 text-center">
-                  Escrow Ready
+          return (
+            <motion.button
+              key={`${tier.name}-${index}`}
+              type="button"
+              onClick={() => setSelectedTierIndex(index)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`relative w-full rounded-[30px] border p-5 text-left transition-all ${
+                isSelected
+                  ? 'border-primary bg-primary/[0.08] shadow-primary/10'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }`}>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-base font-semibold text-slate-950">{tier.name}</p>
+                  <p className="mt-1 text-sm text-slate-500">Full access for one {tier.duration}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-mono font-bold text-slate-950">{tier.price}</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">per {tier.duration}</p>
                 </div>
               </div>
-            )}
-          </motion.div>
-        )
-      })}
+              {isSelected && (
+                <div className="mt-4 rounded-2xl bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">Selected tier</div>
+              )}
+            </motion.button>
+          )
+        })}
+      </div>
 
       <button
         onClick={handleLocalCheckout}
-        disabled={checkoutState === 'processing'}
-        className="w-full rounded-3xl bg-primary px-5 py-4 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+        disabled={checkoutState !== 'idle'}
+        className="w-full rounded-[28px] bg-primary px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all disabled:cursor-not-allowed disabled:opacity-70"
       >
         {checkoutState === 'processing'
-          ? 'Processing purchase...'
+          ? 'Joining space...'
           : checkoutState === 'complete'
-          ? 'Purchase complete'
-          : `Buy ${currentTier.name} for ${currentTier.price}`}
+          ? 'Access granted'
+          : 'Join Space'}
       </button>
 
-      <footer className="text-center space-y-6 px-10 pt-8 border-t border-zinc-100/50">
-        <div className="text-[11px] font-bold uppercase tracking-widest text-zinc-950 opacity-75">
-          Powered by Telegram
+      <div className="rounded-[32px] border border-slate-200 bg-zinc-50 p-5 text-sm text-slate-600 space-y-3">
+        {trustLines.map((line) => (
+          <p key={line} className="flex items-center gap-2 text-slate-600">
+            <span className="text-primary font-bold">•</span>
+            {line}
+          </p>
+        ))}
+      </div>
+
+      <footer className="text-center space-y-6 px-4 pt-6 border-t border-zinc-100/50">
+        <div className="text-[11px] font-bold uppercase tracking-widest text-slate-950 opacity-80">
+          Powered by Telegram Stars
         </div>
-        <div className="space-y-1">
-          <p className="text-[9px] text-zinc-400 font-bold tracking-[0.2em]">SMART CONTRACT ESCROW</p>
-          <p className="text-[9px] text-zinc-400 font-bold tracking-[0.1em] opacity-80">FUNDS RELEASED AFTER 24H VERIFICATION</p>
+        <div className="space-y-1 text-[10px] text-slate-500 font-semibold uppercase tracking-[0.18em]">
+          <p>Instant access after payment</p>
+          <p>No hidden fees · Secure purchase</p>
         </div>
       </footer>
     </div>

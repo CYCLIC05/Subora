@@ -14,6 +14,7 @@ const MOCK_SPACES: Space[] = [
       { name: 'Weekly Access', price: 99, duration: 'week' },
       { name: 'Monthly Access', price: 299, duration: 'month' },
     ],
+    subscribers: 420,
     created_at: new Date().toISOString(),
   },
   {
@@ -27,6 +28,7 @@ const MOCK_SPACES: Space[] = [
       { name: 'Monthly Access', price: 49, duration: 'month' },
       { name: 'Yearly Access', price: 499, duration: 'year' },
     ],
+    subscribers: 1_280,
     created_at: new Date().toISOString(),
   },
   {
@@ -39,6 +41,7 @@ const MOCK_SPACES: Space[] = [
     tiers: [
       { name: 'Monthly Access', price: 150, duration: 'month' },
     ],
+    subscribers: 720,
     created_at: new Date().toISOString(),
   },
 ]

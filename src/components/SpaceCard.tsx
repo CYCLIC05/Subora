@@ -41,7 +41,10 @@ export function SpaceCard({ space }: { space: Space }) {
               {space.name}
             </h3>
           </div>
-          <p className="text-xs text-slate-500 font-medium">Powered by Telegram</p>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
+            <span>Powered by Telegram</span>
+            <span className="rounded-full bg-slate-100 px-2 py-1">{space.subscribers.toLocaleString()} subscribers</span>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -51,11 +54,11 @@ export function SpaceCard({ space }: { space: Space }) {
           </div>
           
           <Link 
-            href={`/spaces/${space.id}`}
+            href={`/spaces/${encodeURIComponent(String(space.id))}`}
             onClick={handleHaptic}
             className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-3xl bg-primary text-white text-sm font-semibold shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all active:scale-95"
           >
-            Access Space
+            Join Space
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

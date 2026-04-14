@@ -29,5 +29,6 @@ export type Space = {
   cover_image: string;
   channel_link: string;
   tiers: SubscriptionTier[];
+  subscribers: number;
   created_at: string;
 };
