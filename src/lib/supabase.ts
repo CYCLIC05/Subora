@@ -32,5 +32,6 @@ export type Space = {
   channel_link: string;
   tiers: SubscriptionTier[];
   subscribers: number;
+  is_trending?: boolean;
   created_at: string;
 };

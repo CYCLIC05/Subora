@@ -73,6 +73,18 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           <span className="pb-1 text-sm font-semibold uppercase tracking-[0.32em] text-slate-500">/ {currentTier.duration}</span>
         </div>
         <p className="mt-3 text-sm text-slate-600">Includes 24/7 premium alerts, gated discussions, and exclusive creator drops.</p>
+        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2">
+          <div className="flex -space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+                <div className="w-full h-full bg-gradient-to-br from-slate-300 to-slate-400" />
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] font-bold text-slate-900 uppercase tracking-tight">
+            Join {space.subscribers.toLocaleString()}+ active members
+          </p>
+        </div>
       </div>
 
       <div className="space-y-4">

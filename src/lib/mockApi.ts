@@ -15,6 +15,7 @@ const MOCK_SPACES: Space[] = [
       { name: 'Monthly Access', price: 299, duration: 'month' },
     ],
     subscribers: 420,
+    is_trending: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -29,6 +30,7 @@ const MOCK_SPACES: Space[] = [
       { name: 'Yearly Access', price: 499, duration: 'year' },
     ],
     subscribers: 1_280,
+    is_trending: true,
     created_at: new Date().toISOString(),
   },
   {

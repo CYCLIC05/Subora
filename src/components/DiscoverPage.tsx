@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Header } from '@/components/Header'
 import { SpaceCard } from '@/components/SpaceCard'
 import { Space } from '@/lib/supabase'
-import { Search, ShieldCheck } from 'lucide-react'
+import { Search, ShieldCheck, TrendingUp } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 export function DiscoverPage({ spaces }: { spaces: Space[] }) {
@@ -18,6 +18,11 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
           space.description.toLowerCase().includes(searchQuery.toLowerCase())
       ),
     [searchQuery, spaces]
+  )
+
+  const trendingSpaces = useMemo(
+    () => spaces.filter((s) => s.is_trending).slice(0, 3),
+    [spaces]
   )
 
   return (
@@ -56,6 +61,23 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
             />
           </div>
         </section>
+
+        {trendingSpaces.length > 0 && !searchQuery && (
+          <section className="space-y-8">
+            <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trending Now</h2>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest">
+                <TrendingUp className="w-3.5 h-3.5" />
+                High Momentum
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {trendingSpaces.map((space) => (
+                <SpaceCard key={space.id} space={space} />
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="grid gap-4 md:grid-cols-3">
           {[

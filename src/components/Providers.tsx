@@ -2,6 +2,7 @@
 
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const TonConnectAvailabilityContext = createContext(false);
 
@@ -20,8 +21,37 @@ export function Providers({ children }: { children: React.ReactNode }) {
         WebApp.ready();
         WebApp.expand();
         WebApp.enableClosingConfirmation();
+
+        // Handle Deep Linking & Referrals
+        const startParam = WebApp.initDataUnsafe.start_param;
+        if (startParam) {
+          console.log('Detected start_param:', startParam);
+          
+          // Pattern: space_{id}_ref_{username}
+          const parts = startParam.split('_');
+          let spaceId = '';
+          let referrerId = '';
+
+          for (let i = 0; i < parts.length; i++) {
+            if (parts[i] === 'space' && parts[i + 1]) {
+              spaceId = parts[i + 1];
+            } else if (parts[i] === 'ref' && parts[i + 1]) {
+              referrerId = parts[i + 1];
+            }
+          }
+
+          if (referrerId) {
+            localStorage.setItem('subora_referrer', referrerId);
+            console.log('Referrer stored:', referrerId);
+          }
+
+          if (spaceId) {
+            console.log('Redirecting to space:', spaceId);
+            window.location.href = `/spaces/${spaceId}`;
+          }
+        }
       } catch (e) {
-        console.warn('Telegram WebApp not found', e);
+        console.warn('Telegram WebApp not found or failed to initialize', e);
       }
     };
 

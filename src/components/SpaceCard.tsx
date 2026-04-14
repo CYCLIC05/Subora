@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Space } from '@/lib/supabase';
-import { ShieldCheck, ArrowRight } from 'lucide-react';
+import { ShieldCheck, ArrowRight, TrendingUp } from 'lucide-react';
 
 export function SpaceCard({ space }: { space: Space }) {
   const primaryTier = space.tiers[0] ?? { name: 'Entry', price: 0, duration: 'month' };
@@ -34,6 +34,13 @@ export function SpaceCard({ space }: { space: Space }) {
           <ShieldCheck className="w-3.5 h-3.5 text-primary" />
           <span className="text-[10px] font-semibold text-slate-900 uppercase tracking-tight">Verified</span>
         </div>
+
+        {space.is_trending && (
+          <div className="absolute top-4 left-4 bg-primary/95 backdrop-blur shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-primary/20 transition-transform group-hover:scale-105">
+            <TrendingUp className="w-3.5 h-3.5 text-white" />
+            <span className="text-[10px] font-bold text-white uppercase tracking-tight">Trending</span>
+          </div>
+        )}
       </div>
       
       <div className="p-6 flex flex-col gap-5">
@@ -44,8 +51,11 @@ export function SpaceCard({ space }: { space: Space }) {
             </h3>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
-            <span>Powered by Telegram</span>
-            <span className="rounded-full bg-slate-100 px-2 py-1">{space.subscribers.toLocaleString()} subscribers</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Powered by Telegram
+            </span>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 font-bold text-slate-900">{space.subscribers.toLocaleString()} members</span>
           </div>
         </div>
 

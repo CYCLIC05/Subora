@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Check, ChevronLeft, Users, ShieldCheck, Lock, BadgeCheck } from 'lucide-react'
+import { Check, ChevronLeft, Users, ShieldCheck, Lock, BadgeCheck, Share2 } from 'lucide-react'
 import { Header } from '@/components/Header'
 import { SpacePurchasePanel } from '@/components/SpacePurchasePanel'
 import { getSpaceById } from '@/lib/mockApi'
+import { ShareButton } from '@/components/ShareButton'
 
 export default async function SpaceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -54,6 +55,10 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
+        
+        <div className="absolute top-6 right-6 z-10">
+          <ShareButton space={space} />
+        </div>
 
         <div className="absolute bottom-12 left-0 right-0 px-6">
           <div className="container mx-auto max-w-5xl">
