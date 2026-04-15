@@ -101,7 +101,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const manifestUrl = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ?? '/tonconnect-manifest.json';
+  const manifestUrl = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ?? (typeof window !== 'undefined' ? `${window.location.origin}/tonconnect-manifest.json` : '');
 
   const content = (
     <TonConnectAvailabilityContext.Provider value={isTonConnectAvailable && !hasTonConnectError}>

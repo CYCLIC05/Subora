@@ -9,7 +9,8 @@ import { useEffect, useState } from 'react'
 import { Plus, ExternalLink, ShieldCheck, TrendingUp, Users } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Space } from '@/lib/supabase'
-import { DashboardStat, RevenuePoint } from '@/lib/mockApi'
+import { DashboardStat } from '@/lib/mockApi'
+import { RevenuePoint } from '@/lib/supabase'
 
 export function DashboardClient({
   spaces,
@@ -125,8 +126,12 @@ export function DashboardClient({
           <div className="grid gap-4">
             <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
               <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Strategy</p>
-              <h3 className="mt-4 text-xl font-semibold text-slate-950">Focus for the week</h3>
-              <p className="mt-3 text-sm leading-6 text-slate-600">Launch the new membership tier for your top performing space and push engagement reminders to high-value members.</p>
+              <h3 className="mt-4 text-xl font-semibold text-slate-950">Next logical step</h3>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {spaces.length === 0 
+                  ? "Launch your first community space to start building your Telegram ecosystem."
+                  : `You have ${spaces.length} active spaces. Focus on driving engagement in your top performing channel to increase retention.`}
+              </p>
             </div>
             <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
               <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Global Market</p>
@@ -157,8 +162,14 @@ export function DashboardClient({
               <div className="space-y-4">
                 <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
                   <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Performance snapshot</p>
-                  <p className="mt-4 text-2xl font-semibold text-slate-950">Momentum is accelerating</p>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">Revenue and member growth are both trending upward — exciting signals for your next launch.</p>
+                  <p className="mt-4 text-2xl font-semibold text-slate-950">
+                    {revenueData.length > 1 ? "Active tracking enabled" : "Awaiting data points"}
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    {revenueData.length > 1 
+                      ? "Your ecosystem is currently being monitored in real-time. Signals are trending based on your latest snapshots."
+                      : "Start welcoming members to see your growth momentum and revenue signals here."}
+                  </p>
                   <div className="mt-6 grid gap-3">
                     <div className="flex items-center justify-between rounded-3xl bg-slate-50 p-4">
                       <span className="text-sm text-slate-600">Peak single-day revenue</span>
@@ -176,11 +187,19 @@ export function DashboardClient({
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <p className="text-sm uppercase tracking-[0.35em] text-slate-400">Top channel</p>
-                      <p className="mt-3 text-xl font-semibold text-slate-950">Gaming Hub</p>
+                      <p className="mt-3 text-xl font-semibold text-slate-950">
+                        {spaces.length > 0 ? [...spaces].sort((a,b) => (b.subscribers || 0) - (a.subscribers || 0))[0].name : "None yet"}
+                      </p>
                     </div>
-                    <span className="rounded-3xl bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">Momentum</span>
+                    {spaces.length > 0 && (
+                      <span className="rounded-3xl bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">Momentum</span>
+                    )}
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-slate-600">This space drove the strongest engagement and revenue this period.</p>
+                  <p className="mt-4 text-sm leading-6 text-slate-600">
+                    {spaces.length > 0 
+                      ? "This space is currently driving the strongest engagement in your network."
+                      : "Once you launch and grow your spaces, your top performer will be highlighted here."}
+                  </p>
                 </div>
               </div>
             </div>
@@ -224,13 +243,19 @@ export function DashboardClient({
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                     <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Peak revenue day</p>
-                    <p className="mt-3 text-2xl font-semibold text-slate-950">$2.45k</p>
-                    <p className="mt-2 text-sm text-slate-500">March 12</p>
+                    <p className="mt-3 text-2xl font-semibold text-slate-950">
+                      {revenueData.length > 0 ? `${Math.max(...revenueData.map(p => p.revenue)).toLocaleString()} Stars` : "0"}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500">
+                      {revenueData.length > 0 ? new Date([...revenueData].sort((a,b) => b.revenue - a.revenue)[0].date).toLocaleDateString() : "No data"}
+                    </p>
                   </div>
                   <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Best member surge</p>
-                    <p className="mt-3 text-2xl font-semibold text-slate-950">70</p>
-                    <p className="mt-2 text-sm text-slate-500">New members on March 12</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Total member base</p>
+                    <p className="mt-3 text-2xl font-semibold text-slate-950">
+                      {spaces.reduce((sum, s) => sum + (s.subscribers || 0), 0).toLocaleString()}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500">Active across all spaces</p>
                   </div>
                 </div>
               </div>
