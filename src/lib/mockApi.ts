@@ -21,10 +21,7 @@ export type DashboardData = {
   tonPrice: number
 }
 
-const FALLBACK_REVENUE: RevenuePoint[] = [
-  { date: '2024-03-01', revenue: 450, members: 12 },
-  { date: '2024-03-12', revenue: 2450, members: 70 },
-]
+const FALLBACK_REVENUE: RevenuePoint[] = []
 
 const isSupabaseReady = Boolean(supabase)
 

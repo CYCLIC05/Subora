@@ -7,26 +7,35 @@ export function ShareButton({ space }: { space: Space }) {
   const handleShare = async () => {
     try {
       const WebApp = (await import('@twa-dev/sdk')).default
-      
-      // Get current user for referral tracking
       const username = WebApp.initDataUnsafe.user?.username || 'user'
-      
-      // Generate the invite link with deep link parameter and referral
       const inviteLink = `https://t.me/SuboraBot/app?startapp=space_${space.id}_ref_${username}`
+      const shareText = `Join this premium Telegram Space: ${space.name} - Private alpha & daily insights.\n\n${inviteLink}`
       
-      const shareText = `Join this premium Telegram Space: ${space.name} - Private alpha & daily insights. Subscribe instantly with Stars 👇\n\n${inviteLink}`
-      
-      // Use Telegram's native inline query sharing
-      WebApp.switchInlineQuery(shareText, ['users', 'groups', 'channels'])
-      
-      // Provide light haptic feedback
-      WebApp.HapticFeedback.notificationOccurred('success')
+      // Check if the current Telegram version supports switchInlineQuery (v6.7+)
+      if (WebApp.isVersionAtLeast('6.7')) {
+        WebApp.switchInlineQuery(shareText, ['users', 'groups', 'channels'])
+        WebApp.HapticFeedback.notificationOccurred('success')
+      } else {
+        // Fallback for older Telegram versions or desktop: Copy to clipboard
+        navigator.clipboard.writeText(shareText)
+        
+        // Show a native Telegram popup if available, otherwise use alert
+        if (WebApp.showPopup) {
+          WebApp.showPopup({
+            title: 'Link copied!',
+            message: 'Your custom invite link was copied to your clipboard. Paste it in any chat to share.',
+            buttons: [{ type: 'ok' }]
+          })
+        } else {
+          alert('Invite link copied to clipboard!')
+        }
+        
+        WebApp.HapticFeedback.notificationOccurred('warning')
+      }
     } catch (error) {
       console.warn('Telegram sharing failed', error)
-      
-      // Fallback: Copy to clipboard if not in Telegram
-      const inviteLink = `https://t.me/SuboraBot/app?startapp=space_${space.id}`
-      navigator.clipboard.writeText(inviteLink)
+      const fallbackLink = `https://t.me/SuboraBot/app?startapp=space_${space.id}`
+      navigator.clipboard.writeText(fallbackLink)
       alert('Link copied to clipboard!')
     }
   }
