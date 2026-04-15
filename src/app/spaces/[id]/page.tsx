@@ -44,6 +44,7 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
           src={space.cover_image}
           alt={space.name}
           fill
+          sizes="100vw"
           className="object-cover opacity-60 scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />

@@ -26,6 +26,7 @@ export function SpaceCard({ space }: { space: Space }) {
           src={space.cover_image || 'https://images.unsplash.com/photo-1522071823991-b5ae72643156?w=800&q=80'} 
           alt={space.name}
           fill
+          sizes="100vw"
           className="object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 to-transparent" />

@@ -1,4 +1,4 @@
-import { Space } from '@/lib/supabase'
+import { Space, supabase } from '@/lib/supabase'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -10,6 +10,7 @@ const MOCK_SPACES: Space[] = [
     description: 'Real-time market analysis and trade setups for high-performing traders.',
     cover_image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80',
     channel_link: '@alphatrading',
+    payment_address: 'EQD8mQ_z1fJnQzFb_ZKM1FjUHjJHjsjxJi9Td5WPUs47I7qb',
     tiers: [
       { name: 'Weekly Access', price: 99, duration: 'week' },
       { name: 'Monthly Access', price: 299, duration: 'month' },
@@ -25,11 +26,12 @@ const MOCK_SPACES: Space[] = [
     description: 'Technical deep-dives and early access to the next generation of TON apps.',
     cover_image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&q=80',
     channel_link: '@tonbuilders',
+    payment_address: 'EQCjgd0Vj-7weymWTaa7dnmzlM9RkE8fOqWOGow8JJEg4zaDS',
     tiers: [
       { name: 'Monthly Access', price: 49, duration: 'month' },
       { name: 'Yearly Access', price: 499, duration: 'year' },
     ],
-    subscribers: 1_280,
+    subscribers: 1280,
     is_trending: true,
     created_at: new Date(Date.now() - 3600000 * 24).toISOString(), // 1 day ago
   },
@@ -38,8 +40,9 @@ const MOCK_SPACES: Space[] = [
     creator_telegram_id: 789,
     name: 'Macro Insights',
     description: 'Global economic trends and strategic asset allocation for long-term growth.',
-    cover_image: 'https://images.unsplash.com/photo-1611974714405-08e13768b726?w=1200&q=80',
+    cover_image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80',
     channel_link: '@macroinsights',
+    payment_address: 'EQDW1zJZcKLlfISW0eXnY5GpQpSldVV1A7l8C7oH1P8dQiTxa',
     tiers: [
       { name: 'Monthly Access', price: 150, duration: 'month' },
     ],
@@ -67,8 +70,8 @@ export type DashboardData = {
 }
 
 const DASHBOARD_STATS: DashboardStat[] = [
-  { name: 'Active Subscriptions', value: '1,248', delta: '+12%' },
-  { name: 'Current Cycle Revenue', value: '12.4k', delta: '+8%' },
+  { name: 'Active Spaces', value: '3', delta: '+12%' },
+  { name: 'Total Members', value: '2,420', delta: '+8%' },
   { name: 'Average Subscription LTV', value: '450', delta: '+2%' },
 ]
 
@@ -87,34 +90,104 @@ const REVENUE_DATA: RevenuePoint[] = [
   { date: '2024-03-12', revenue: 2450, members: 70 },
 ]
 
-export const getDiscoverSpaces = async () => {
+const isSupabaseReady = Boolean(supabase)
+
+const spaceSelect = `id, creator_telegram_id, name, description, cover_image, channel_link, tiers, subscribers, is_trending, created_at`
+
+export const getDiscoverSpaces = async (): Promise<Space[]> => {
+  if (isSupabaseReady) {
+    const response = await (supabase! as any)
+      .from('spaces')
+      .select(spaceSelect)
+      .order('created_at', { ascending: false })
+
+    const data = response.data as Space[] | null
+    if (data?.length) {
+      return data
+    }
+  }
+
   await delay(150)
   return [...MOCK_SPACES]
 }
 
-export const getSpaceById = async (id: string) => {
+export const getSpaceById = async (id: string): Promise<Space | null> => {
+  if (isSupabaseReady) {
+    const response = await (supabase! as any)
+      .from('spaces')
+      .select(spaceSelect)
+      .eq('id', id)
+      .single()
+
+    const data = response.data as Space | null
+    if (data) {
+      return data
+    }
+  }
+
   await delay(150)
   return MOCK_SPACES.find((space) => space.id === id) ?? null
 }
 
 export const getDashboardData = async (): Promise<DashboardData> => {
-  await delay(120)
+  let spaces: Space[] = MOCK_SPACES
+
+  if (isSupabaseReady) {
+    const response = await (supabase! as any)
+      .from('spaces')
+      .select(spaceSelect)
+      .order('created_at', { ascending: false })
+
+    const data = response.data as Space[] | null
+    if (data) {
+      spaces = data
+    }
+  }
+
+  const totalMembers = spaces.reduce((sum, space) => sum + (space.subscribers ?? 0), 0)
+  const totalTierValue = spaces.reduce(
+    (sum, space) => sum + (space.tiers?.reduce((tierSum, tier) => tierSum + (tier.price ?? 0), 0) ?? 0),
+    0
+  )
+
+  const stats: DashboardStat[] = [
+    { name: 'Active Spaces', value: spaces.length.toLocaleString(), delta: '+12%' },
+    { name: 'Total Members', value: totalMembers.toLocaleString(), delta: '+8%' },
+    { name: 'Estimated Revenue', value: `$${totalTierValue.toLocaleString()}`, delta: '+6%' },
+  ]
+
   return {
-    stats: DASHBOARD_STATS,
-    spaces: [...MOCK_SPACES],
+    stats,
+    spaces,
     revenueData: REVENUE_DATA,
   }
 }
 
-export type CreateSpacePayload = Omit<Space, 'id' | 'created_at'>
+export type CreateSpacePayload = Omit<Space, 'id' | 'created_at' | 'subscribers' | 'is_trending'> & Partial<Pick<Space, 'subscribers' | 'is_trending'>>
 
 export const createSpace = async (payload: CreateSpacePayload): Promise<Space> => {
-  await delay(250)
   const newSpace: Space = {
     id: crypto.randomUUID?.() ?? `${Date.now()}`,
     created_at: new Date().toISOString(),
+    subscribers: 0,
+    is_trending: false,
     ...payload,
   }
+
+  if (isSupabaseReady) {
+    const response = await (supabase! as any)
+      .from('spaces')
+      .insert(newSpace)
+      .select(spaceSelect)
+      .single()
+
+    const data = response.data as Space | null
+    if (data) {
+      return data
+    }
+  }
+
+  await delay(250)
   MOCK_SPACES.push(newSpace)
   return newSpace
 }

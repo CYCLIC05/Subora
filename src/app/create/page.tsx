@@ -198,7 +198,7 @@ export default function CreateSpace() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="e.g. Quantitative Insights"
+                        placeholder="e.g. Quantum Alpha Syndicate"
                         className="h-11 rounded-2xl border-slate-200 bg-slate-50/80 focus-visible:ring-primary/10"
                       />
                     </div>
@@ -211,7 +211,7 @@ export default function CreateSpace() {
                         name="description"
                         value={formData.description}
                         onChange={handleChange}
-                        placeholder="Define the primary value of your space..."
+                        placeholder="Describe the core value of your Telegram channel..."
                         className="w-full h-28 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400"
                       />
                     </div>
@@ -224,7 +224,7 @@ export default function CreateSpace() {
                           name="cover_image"
                           value={formData.cover_image}
                           onChange={handleChange}
-                          placeholder="https://..."
+                          placeholder="https://images.unsplash.com/..."
                           className="h-11 rounded-2xl border-slate-200 bg-slate-50/80"
                         />
                       </div>
@@ -235,7 +235,7 @@ export default function CreateSpace() {
                           name="channel_link"
                           value={formData.channel_link}
                           onChange={handleChange}
-                          placeholder="@channel"
+                          placeholder="@suboraalpha"
                           className="h-11 rounded-2xl border-slate-200 bg-slate-50/80"
                         />
                       </div>
@@ -264,7 +264,7 @@ export default function CreateSpace() {
                               value={tier.name}
                               onChange={(e) => handleTierChange(index, 'name', e.target.value)}
                               className="h-9 rounded-2xl bg-white border-slate-200 text-xs font-semibold"
-                              placeholder="Tier label"
+                              placeholder="Founders Circle"
                             />
                           </div>
 
@@ -275,7 +275,7 @@ export default function CreateSpace() {
                               value={tier.price}
                               onChange={(e) => handleTierChange(index, 'price', e.target.value)}
                               className="h-9 rounded-2xl bg-white border-slate-200 text-xs font-bold"
-                              placeholder="Price"
+                              placeholder="149"
                             />
                             <select
                               name={`tier-${index}-duration`}

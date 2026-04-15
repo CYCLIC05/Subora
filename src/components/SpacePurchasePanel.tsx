@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { SendTransactionRequest } from '@tonconnect/ui'
+import { TonConnectButton, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react'
 import { Space } from '@/lib/supabase'
 import { motion } from 'framer-motion'
 
@@ -11,6 +13,61 @@ const trustLines = [
 
 export function SpacePurchasePanel({ space }: { space: Space }) {
   const [selectedTierIndex, setSelectedTierIndex] = useState(0)
+  const [tonConnectUI] = useTonConnectUI()
+  const walletAddress = useTonAddress()
+  const paymentAddress = space.payment_address ?? process.env.NEXT_PUBLIC_TON_PAYMENT_ADDRESS ?? ''
+  const network = process.env.NEXT_PUBLIC_TON_NETWORK ?? '-239'
+
+  const isWalletConnected = Boolean(walletAddress)
+
+  const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'complete'>('idle')
+  const tiers = space.tiers.length ? space.tiers : [{ name: 'Standard Access', price: 0, duration: 'month' }]
+  const currentTier = tiers[selectedTierIndex] ?? tiers[0]
+
+  const handleTonCheckout = useCallback(async () => {
+    if (!paymentAddress) {
+      alert('Payment address is not configured for this space. Please contact the creator.')
+      return
+    }
+
+    if (!tonConnectUI) {
+      alert('Wallet integration is not available in this browser session.')
+      return
+    }
+
+    if (!walletAddress) {
+      alert('Please connect your TON wallet before paying.')
+      return
+    }
+
+    setCheckoutState('processing')
+
+    try {
+      const amountNano = String(currentTier.price * 1_000_000_000)
+      const tx: SendTransactionRequest = {
+        validUntil: Math.floor(Date.now() / 1000) + 300,
+        network,
+        messages: [
+          {
+            address: paymentAddress,
+            amount: amountNano,
+          },
+        ],
+      }
+
+      await tonConnectUI.sendTransaction(tx, {
+        onRequestSent: () => {
+          console.log('TON payment request sent')
+        },
+      })
+
+      setCheckoutState('complete')
+    } catch (error) {
+      console.warn('Payment failed', error)
+      alert('Payment failed. Make sure your wallet is connected and try again.')
+      setCheckoutState('idle')
+    }
+  }, [currentTier.price, network, paymentAddress, tonConnectUI, walletAddress])
 
   useEffect(() => {
     if (!space) {
@@ -27,9 +84,9 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
         WebApp.MainButton.setText(`Join Space • ${currentTier.price}`)
         WebApp.MainButton.show()
 
-        const handleMainButtonClick = () => {
+        const handleMainButtonClick = async () => {
           WebApp.HapticFeedback.notificationOccurred('success')
-          alert(`Proceeding to encrypted checkout for ${space.name} - ${currentTier.name}`)
+          await handleTonCheckout()
         }
 
         WebApp.MainButton.onClick(handleMainButtonClick)
@@ -44,23 +101,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
 
     initMainButton()
     return () => cleanup()
-  }, [space, selectedTierIndex])
-
-  const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'complete'>('idle')
-  const tiers = space.tiers.length ? space.tiers : [{ name: 'Standard Access', price: 0, duration: 'month' }]
-  const currentTier = tiers[selectedTierIndex] ?? tiers[0]
-
-  const handleLocalCheckout = async () => {
-    setCheckoutState('processing')
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 900))
-      setCheckoutState('complete')
-      alert(`Success! You have joined ${space.name} on the ${currentTier.name} plan.`)
-    } catch (error) {
-      console.warn('Checkout failed', error)
-      setCheckoutState('idle')
-    }
-  }
+  }, [space, selectedTierIndex, handleTonCheckout])
 
   return (
     <div className="sticky top-28 space-y-8">
@@ -125,16 +166,35 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
       </div>
 
       <div className="space-y-4">
+        <div className="rounded-[32px] border border-slate-200 bg-slate-50 p-5">
+          <p className="text-sm font-semibold text-slate-950">Wallet connection needed</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Connect a TON wallet to authorize payment and unlock automated access for this space.
+          </p>
+          {isWalletConnected ? (
+            <p className="mt-3 text-xs font-semibold text-emerald-700">Connected wallet: {walletAddress}</p>
+          ) : (
+            <div className="mt-4">
+              <TonConnectButton className="w-full rounded-3xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-900 transition" />
+            </div>
+          )}
+          {!paymentAddress && (
+            <p className="mt-4 text-xs text-rose-500">No payment address configured for this community.</p>
+          )}
+        </div>
+
         <button
-          onClick={handleLocalCheckout}
-          disabled={checkoutState !== 'idle'}
+          onClick={handleTonCheckout}
+          disabled={checkoutState !== 'idle' || !paymentAddress || !isWalletConnected}
           className="w-full rounded-[30px] bg-slate-950 px-6 py-5 text-xl font-bold text-white shadow-2xl shadow-slate-950/20 hover:bg-slate-900 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {checkoutState === 'processing'
-            ? 'Accessing...'
+            ? 'Processing payment...'
             : checkoutState === 'complete'
             ? 'Success!'
-            : 'Join Space'}
+            : isWalletConnected
+            ? `Pay ${currentTier.price} Stars`
+            : 'Connect wallet to pay'}
         </button>
 
         {checkoutState === 'complete' && (
