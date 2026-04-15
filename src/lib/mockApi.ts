@@ -49,6 +49,36 @@ const MOCK_SPACES: Space[] = [
     subscribers: 720,
     created_at: new Date(Date.now() - 3600000 * 4).toISOString(), // 4 hours ago
   },
+  {
+    id: '4',
+    creator_telegram_id: 101,
+    name: 'DeFi Alpha Elite',
+    description: 'The definitive source for decentralized finance yields, protocols, and security.',
+    cover_image: 'https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=1200&q=80',
+    channel_link: '@defielite',
+    payment_address: 'EQA_0N8iK6-v4R2-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z',
+    tiers: [
+      { name: 'Quarterly Pass', price: 599, duration: 'quarter' },
+      { name: 'Annual Pass', price: 1999, duration: 'year' },
+    ],
+    subscribers: 85,
+    is_trending: true,
+    created_at: new Date(Date.now() - 3600000 * 1).toISOString(), // 1 hour ago
+  },
+  {
+    id: '5',
+    creator_telegram_id: 202,
+    name: 'NFT Insider Circle',
+    description: 'Direct mint access, floor price analysis, and exclusive whitelist opportunities.',
+    cover_image: 'https://images.unsplash.com/photo-1644363212450-9377ca536338?w=1200&q=80',
+    channel_link: '@nftinsider',
+    payment_address: 'EQA-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z',
+    tiers: [
+      { name: 'Season Pass', price: 199, duration: 'month' },
+    ],
+    subscribers: 590,
+    created_at: new Date(Date.now() - 3600000 * 48).toISOString(), // 2 days ago
+  },
 ]
 
 export type DashboardStat = {

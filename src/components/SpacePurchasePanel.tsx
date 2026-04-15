@@ -201,23 +201,24 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-primary/[0.08] border border-primary/20 rounded-[30px] p-6 text-center space-y-4"
+            className="bg-primary/[0.08] border border-primary/20 rounded-[30px] p-6 text-center space-y-4 relative overflow-hidden"
           >
-            <p className="text-sm font-bold text-primary italic">You're in! Access is unlocked.</p>
-            <p className="text-xs text-slate-700 font-medium leading-relaxed">
-              Invite your network to join this High-Value community and help us grow the ecosystem.
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -translate-y-12 translate-x-12" />
+            <p className="text-sm font-bold text-primary italic relative z-10">You're in! Access is unlocked.</p>
+            <p className="text-sm text-slate-800 font-semibold leading-relaxed relative z-10">
+              High-value access is better with friends. Invite them now to join the Alpha.
             </p>
             <button
               onClick={async () => {
                 const WebApp = (await import('@twa-dev/sdk')).default
                 const username = WebApp.initDataUnsafe.user?.username || 'user'
                 const inviteLink = `https://t.me/SuboraBot/app?startapp=space_${space.id}_ref_${username}`
-                const shareText = `I just joined this premium Telegram Space: ${space.name}. Access early alpha & insights here 👇\n\n${inviteLink}`
+                const shareText = `I just joined ${space.name} on Subora. The alpha inside is insane. Join me here: ${inviteLink}`
                 WebApp.switchInlineQuery(shareText, ['users', 'groups', 'channels'])
               }}
-              className="w-full bg-primary text-white py-3 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-primary/90 transition-all font-heading"
+              className="w-full bg-primary text-white py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all font-heading shadow-lg shadow-primary/20 relative z-10"
             >
-              Share with Friends
+              Invite a Friend
             </button>
           </motion.div>
         )}

@@ -88,40 +88,46 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
                 <ShieldCheck className="w-4 h-4 text-primary" /> Powered by Telegram Stars
               </span>
             </div>
+
+            <div className="mt-10 p-8 rounded-[32px] bg-white/10 backdrop-blur-md border border-white/20 inline-block max-w-xl">
+               <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary mb-3">The Value Hook</p>
+               <h2 className="text-2xl md:text-3xl font-heading font-semibold text-white leading-tight tracking-tight">
+                 Private alpha, daily insights, and a serious community.
+               </h2>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-20 max-w-5xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-24">
-          <div className="lg:col-span-2 space-y-20">
-            <section className="space-y-8">
-              <div className="rounded-[40px] border border-slate-200 bg-white p-10 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-16 translate-x-16" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary mb-6">The Hook</p>
-              <h2 className="text-4xl md:text-5xl font-heading font-semibold text-slate-950 leading-[1.1] tracking-tight">
-                Private alpha, daily insights, and a serious community.
-              </h2>
-              <p className="mt-6 text-lg text-slate-600 font-medium leading-relaxed">
-                This is more than a channel — it's a high-signal environment designed for participants who value speed and accuracy.
-              </p>
-            </div>
-          </section>
-
-          <section className="space-y-10">
-            <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em] border-b border-slate-100 pb-6">Your Membership Includes</h2>
-            <div className="grid gap-4">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-5 p-8 rounded-[36px] bg-slate-50 border border-slate-100 group hover:border-primary/20 hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all cursor-default relative overflow-hidden">
-                  <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform z-10">
-                    <Check className="w-5 h-5" />
+          <div className="lg:col-span-2 space-y-24">
+            <section className="space-y-12">
+              <div className="space-y-4">
+                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em] transition-all">Strategic Access</p>
+                <h2 className="text-4xl md:text-5xl font-heading font-bold text-slate-950 tracking-tighter leading-none">
+                  What you get inside.
+                </h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                {[
+                  { title: 'Daily Insights', desc: 'Real-time market alpha and technical deep-dives.', color: 'bg-blue-50' },
+                  { title: 'Private Discussions', desc: 'Secure networking with other high-signal participants.', color: 'bg-emerald-50' },
+                  { title: 'Exclusive Updates', desc: 'Early access to protocol drops and strategic shifts.', color: 'bg-amber-50' },
+                ].map((item, index) => (
+                  <div key={index} className={`flex items-start gap-6 p-8 rounded-[40px] ${item.color} border border-slate-100/50 hover:bg-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all group cursor-default`}>
+                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      <Check className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-950 mb-1">{item.title}</h3>
+                      <p className="text-slate-600 font-medium leading-relaxed">{item.desc}</p>
+                    </div>
                   </div>
-                  <span className="text-slate-900 text-lg md:text-xl font-semibold tracking-tight z-10">{benefit}</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/[0.02] to-primary/0 translate-x-[-100%] group-hover:animate-[shimmer_2s_infinite]" />
-                </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
         </div>
 
           <div className="lg:col-span-1">

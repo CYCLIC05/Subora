@@ -14,6 +14,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [isTonConnectAvailable, setIsTonConnectAvailable] = useState(false);
   const [hasTonConnectError, setHasTonConnectError] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     const initTWA = async () => {
       try {
@@ -47,7 +49,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
           if (spaceId) {
             console.log('Redirecting to space:', spaceId);
-            window.location.href = `/spaces/${spaceId}`;
+            router.replace(`/spaces/${spaceId}`);
           }
         }
       } catch (e) {
