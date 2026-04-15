@@ -15,10 +15,12 @@ export function DashboardClient({
   spaces,
   stats,
   revenueData,
+  tonPrice,
 }: {
   spaces: Space[]
   stats: DashboardStat[]
   revenueData: RevenuePoint[]
+  tonPrice: number
 }) {
   const [notification, setNotification] = useState<{ title: string; message: string } | null>(null)
 
@@ -127,15 +129,15 @@ export function DashboardClient({
               <p className="mt-3 text-sm leading-6 text-slate-600">Launch the new membership tier for your top performing space and push engagement reminders to high-value members.</p>
             </div>
             <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Quick wins</p>
+              <p className="text-sm uppercase tracking-[0.32em] text-slate-500">Global Market</p>
               <div className="mt-5 grid gap-3">
                 <div className="rounded-3xl bg-slate-50 p-4">
-                  <p className="text-sm font-semibold text-slate-950">Best revenue day</p>
-                  <p className="mt-2 text-sm text-slate-500">Sunday revenue was strongest at $625.</p>
+                  <p className="text-sm font-semibold text-slate-950">TON/USD Price</p>
+                  <p className="mt-2 text-sm text-slate-500">The Open Network is currently trading at ${tonPrice.toFixed(2)}.</p>
                 </div>
                 <div className="rounded-3xl bg-slate-50 p-4">
-                  <p className="text-sm font-semibold text-slate-950">Top performing space</p>
-                  <p className="mt-2 text-sm text-slate-500">Gaming Hub drove 48 new members this week.</p>
+                  <p className="text-sm font-semibold text-slate-950">Active Ecosystems</p>
+                  <p className="mt-2 text-sm text-slate-500">{spaces.length} verified spaces are currently live on Subora.</p>
                 </div>
               </div>
             </div>
@@ -159,12 +161,14 @@ export function DashboardClient({
                   <p className="mt-3 text-sm leading-6 text-slate-600">Revenue and member growth are both trending upward — exciting signals for your next launch.</p>
                   <div className="mt-6 grid gap-3">
                     <div className="flex items-center justify-between rounded-3xl bg-slate-50 p-4">
-                      <span className="text-sm text-slate-600">Avg. revenue per day</span>
-                      <strong className="text-slate-950">$1.38k</strong>
+                      <span className="text-sm text-slate-600">Peak single-day revenue</span>
+                      <strong className="text-slate-950">
+                        {Math.max(...revenueData.map(p => p.revenue)).toLocaleString()} Stars
+                      </strong>
                     </div>
                     <div className="flex items-center justify-between rounded-3xl bg-slate-50 p-4">
-                      <span className="text-sm text-slate-600">Engagement score</span>
-                      <strong className="text-slate-950">82</strong>
+                      <span className="text-sm text-slate-600">Current TON Valuation</span>
+                      <strong className="text-slate-950">${tonPrice.toFixed(2)}</strong>
                     </div>
                   </div>
                 </div>

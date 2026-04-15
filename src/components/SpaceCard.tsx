@@ -37,9 +37,16 @@ export function SpaceCard({ space }: { space: Space }) {
         </div>
 
         {space.is_trending && (
-          <div className="absolute top-4 left-4 bg-primary/95 backdrop-blur shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-primary/20 transition-transform group-hover:scale-105">
+          <div className="absolute top-4 left-4 bg-primary/95 backdrop-blur shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-primary/20 transition-transform group-hover:scale-105 z-10">
             <TrendingUp className="w-3.5 h-3.5 text-white" />
             <span className="text-[10px] font-bold text-white uppercase tracking-tight">Trending</span>
+          </div>
+        )}
+
+        {space.is_active_today && (
+          <div className="absolute bottom-4 left-4 bg-slate-950/80 backdrop-blur shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/10 transition-transform group-hover:scale-105 z-10">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-bold text-white uppercase tracking-tight">Active Today</span>
           </div>
         )}
       </div>
@@ -51,11 +58,13 @@ export function SpaceCard({ space }: { space: Space }) {
               {space.name}
             </h3>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-            <span className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
-              by <span className="text-slate-950">{space.channel_link}</span>
+          <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+            <span className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl">
+              by <span className="text-slate-950 tracking-tight">{space.channel_link}</span>
             </span>
-            <span className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg">{space.subscribers.toLocaleString()} members</span>
+            <span className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-100/50">
+              {space.subscribers.toLocaleString()} members
+            </span>
           </div>
         </div>
 

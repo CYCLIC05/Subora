@@ -1,85 +1,10 @@
-import { Space, supabase } from '@/lib/supabase'
+import { Space, supabase, RevenuePoint } from '@/lib/supabase'
+import { getTonPriceInUSD, STAR_TO_USD } from '@/lib/tonPrice'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const MOCK_SPACES: Space[] = [
-  {
-    id: '1',
-    creator_telegram_id: 123,
-    name: 'Alpha Trading Signals',
-    description: 'Real-time market analysis and trade setups for high-performing traders.',
-    cover_image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80',
-    channel_link: '@alphatrading',
-    payment_address: 'EQD8mQ_z1fJnQzFb_ZKM1FjUHjJHjsjxJi9Td5WPUs47I7qb',
-    tiers: [
-      { name: 'Weekly Access', price: 99, duration: 'week' },
-      { name: 'Monthly Access', price: 299, duration: 'month' },
-    ],
-    subscribers: 420,
-    is_trending: true,
-    created_at: new Date(Date.now() - 3600000 * 2).toISOString(), // 2 hours ago
-  },
-  {
-    id: '2',
-    creator_telegram_id: 456,
-    name: 'TON Builders Labs',
-    description: 'Technical deep-dives and early access to the next generation of TON apps.',
-    cover_image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&q=80',
-    channel_link: '@tonbuilders',
-    payment_address: 'EQCjgd0Vj-7weymWTaa7dnmzlM9RkE8fOqWOGow8JJEg4zaDS',
-    tiers: [
-      { name: 'Monthly Access', price: 49, duration: 'month' },
-      { name: 'Yearly Access', price: 499, duration: 'year' },
-    ],
-    subscribers: 1280,
-    is_trending: true,
-    created_at: new Date(Date.now() - 3600000 * 24).toISOString(), // 1 day ago
-  },
-  {
-    id: '3',
-    creator_telegram_id: 789,
-    name: 'Macro Insights',
-    description: 'Global economic trends and strategic asset allocation for long-term growth.',
-    cover_image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80',
-    channel_link: '@macroinsights',
-    payment_address: 'EQDW1zJZcKLlfISW0eXnY5GpQpSldVV1A7l8C7oH1P8dQiTxa',
-    tiers: [
-      { name: 'Monthly Access', price: 150, duration: 'month' },
-    ],
-    subscribers: 720,
-    created_at: new Date(Date.now() - 3600000 * 4).toISOString(), // 4 hours ago
-  },
-  {
-    id: '4',
-    creator_telegram_id: 101,
-    name: 'DeFi Alpha Elite',
-    description: 'The definitive source for decentralized finance yields, protocols, and security.',
-    cover_image: 'https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=1200&q=80',
-    channel_link: '@defielite',
-    payment_address: 'EQA_0N8iK6-v4R2-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z',
-    tiers: [
-      { name: 'Quarterly Pass', price: 599, duration: 'quarter' },
-      { name: 'Annual Pass', price: 1999, duration: 'year' },
-    ],
-    subscribers: 85,
-    is_trending: true,
-    created_at: new Date(Date.now() - 3600000 * 1).toISOString(), // 1 hour ago
-  },
-  {
-    id: '5',
-    creator_telegram_id: 202,
-    name: 'NFT Insider Circle',
-    description: 'Direct mint access, floor price analysis, and exclusive whitelist opportunities.',
-    cover_image: 'https://images.unsplash.com/photo-1644363212450-9377ca536338?w=1200&q=80',
-    channel_link: '@nftinsider',
-    payment_address: 'EQA-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z-z',
-    tiers: [
-      { name: 'Season Pass', price: 199, duration: 'month' },
-    ],
-    subscribers: 590,
-    created_at: new Date(Date.now() - 3600000 * 48).toISOString(), // 2 days ago
-  },
-]
+// ALL MOCK DATA REMOVED - TRANSITIONED TO SUPABASE PRIMARY SOURCE
+
 
 export type DashboardStat = {
   name: string
@@ -87,109 +12,146 @@ export type DashboardStat = {
   delta: string
 }
 
-export type RevenuePoint = {
-  date: string
-  revenue: number
-  members: number
-}
+// Removed unused RevenuePoint type as it is now shared from @/lib/supabase
 
 export type DashboardData = {
   stats: DashboardStat[]
   spaces: Space[]
   revenueData: RevenuePoint[]
+  tonPrice: number
 }
 
-const DASHBOARD_STATS: DashboardStat[] = [
-  { name: 'Active Spaces', value: '3', delta: '+12%' },
-  { name: 'Total Members', value: '2,420', delta: '+8%' },
-  { name: 'Average Subscription LTV', value: '450', delta: '+2%' },
-]
-
-const REVENUE_DATA: RevenuePoint[] = [
+const FALLBACK_REVENUE: RevenuePoint[] = [
   { date: '2024-03-01', revenue: 450, members: 12 },
-  { date: '2024-03-02', revenue: 580, members: 15 },
-  { date: '2024-03-03', revenue: 520, members: 18 },
-  { date: '2024-03-04', revenue: 690, members: 22 },
-  { date: '2024-03-05', revenue: 840, members: 26 },
-  { date: '2024-03-06', revenue: 1100, members: 32 },
-  { date: '2024-03-07', revenue: 1050, members: 35 },
-  { date: '2024-03-08', revenue: 1300, members: 42 },
-  { date: '2024-03-09', revenue: 1550, members: 48 },
-  { date: '2024-03-10', revenue: 1800, members: 55 },
-  { date: '2024-03-11', revenue: 2100, members: 62 },
   { date: '2024-03-12', revenue: 2450, members: 70 },
 ]
 
 const isSupabaseReady = Boolean(supabase)
 
-const spaceSelect = `id, creator_telegram_id, name, description, cover_image, channel_link, tiers, subscribers, is_trending, created_at`
+const spaceSelect = `id, creator_telegram_id, name, description, cover_image, channel_link, tiers, subscribers, is_trending, is_active_today, created_at`
 
 export const getDiscoverSpaces = async (): Promise<Space[]> => {
   if (isSupabaseReady) {
-    const response = await (supabase! as any)
-      .from('spaces')
-      .select(spaceSelect)
-      .order('created_at', { ascending: false })
+    try {
+      const response = await (supabase! as any)
+        .from('spaces')
+        .select(spaceSelect)
+        .order('created_at', { ascending: false })
 
-    const data = response.data as Space[] | null
-    if (data?.length) {
-      return data
+      if (response.error) {
+        console.error('Supabase query error:', response.error)
+        return []
+      }
+
+      const data = response.data as Space[] | null
+      console.log(`Connected to Subora DB: Found ${data?.length || 0} spaces.`)
+      return data || []
+    } catch (error) {
+      console.error('Failed to fetch spaces from Supabase:', error)
+      return []
     }
   }
 
-  await delay(150)
-  return [...MOCK_SPACES]
+  console.warn('Supabase not configured. Please check your .env.local')
+  return []
 }
 
 export const getSpaceById = async (id: string): Promise<Space | null> => {
   if (isSupabaseReady) {
-    const response = await (supabase! as any)
-      .from('spaces')
-      .select(spaceSelect)
-      .eq('id', id)
-      .single()
+    try {
+      const response = await (supabase! as any)
+        .from('spaces')
+        .select(spaceSelect)
+        .eq('id', id)
+        .single()
 
-    const data = response.data as Space | null
-    if (data) {
-      return data
+      if (response.error) {
+        console.warn(`Space ${id} not found in DB`)
+        return null
+      }
+
+      return response.data as Space | null
+    } catch (error) {
+      console.error(`Error fetching space ${id}:`, error)
+      return null
     }
   }
 
-  await delay(150)
-  return MOCK_SPACES.find((space) => space.id === id) ?? null
+  return null
 }
 
 export const getDashboardData = async (): Promise<DashboardData> => {
-  let spaces: Space[] = MOCK_SPACES
+  let spaces: Space[] = []
+  let chartData: RevenuePoint[] = []
+  const tonPrice = await getTonPriceInUSD()
+  const today = new Date().toISOString().split('T')[0]
 
   if (isSupabaseReady) {
-    const response = await (supabase! as any)
-      .from('spaces')
-      .select(spaceSelect)
-      .order('created_at', { ascending: false })
+    try {
+      // 1. Fetch current spaces
+      const spacesResponse = await (supabase! as any)
+        .from('spaces')
+        .select(spaceSelect)
+        .order('created_at', { ascending: false })
+      
+      if (spacesResponse.data) {
+        spaces = spacesResponse.data
+      }
 
-    const data = response.data as Space[] | null
-    if (data) {
-      spaces = data
+      // 2. Fetch daily analytics (revenue points)
+      const pointsResponse = await (supabase! as any)
+        .from('revenue_points')
+        .select('*')
+        .order('date', { ascending: true })
+
+      if (pointsResponse.data) {
+        chartData = pointsResponse.data
+      }
+
+      // 3. Lazy Snapshot Logic: If no entry for today, create one
+      const hasToday = chartData.some(p => p.date === today)
+      if (!hasToday && spaces.length > 0) {
+        const currentRevenue = spaces.reduce((sum, space) => {
+          const price = space.tiers?.[0]?.price || 0
+          return sum + (space.subscribers * price)
+        }, 0)
+        const currentMembers = spaces.reduce((sum, space) => sum + (space.subscribers || 0), 0)
+
+        const newPoint = { date: today, revenue: currentRevenue, members: currentMembers }
+        
+        // Background insert so we don't slow down the load
+        ;(supabase! as any).from('revenue_points').insert(newPoint).then(() => {
+          console.log(`Auto-snapshot created for ${today}`)
+        })
+
+        chartData.push(newPoint)
+      }
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
     }
   }
 
   const totalMembers = spaces.reduce((sum, space) => sum + (space.subscribers ?? 0), 0)
-  const totalTierValue = spaces.reduce(
-    (sum, space) => sum + (space.tiers?.reduce((tierSum, tier) => tierSum + (tier.price ?? 0), 0) ?? 0),
-    0
-  )
+  const totalStars = spaces.reduce((sum, space) => {
+    const price = space.tiers?.[0]?.price || 0
+    return sum + (space.subscribers * price)
+  }, 0)
+  
+  const totalUSD = totalStars * STAR_TO_USD
+  const totalTON = totalUSD / tonPrice
 
   const stats: DashboardStat[] = [
     { name: 'Active Spaces', value: spaces.length.toLocaleString(), delta: '+12%' },
-    { name: 'Total Members', value: totalMembers.toLocaleString(), delta: '+8%' },
-    { name: 'Estimated Revenue', value: `$${totalTierValue.toLocaleString()}`, delta: '+6%' },
+    { name: 'Total members', value: totalMembers.toLocaleString(), delta: '+8%' },
+    { name: 'Est. Valuation', value: `~${totalTON.toFixed(1)} TON`, delta: `$${totalUSD.toLocaleString()}` },
   ]
 
   return {
     stats,
     spaces,
-    revenueData: REVENUE_DATA,
+    revenueData: chartData.length > 0 ? chartData : FALLBACK_REVENUE,
+    tonPrice
   }
 }
 
@@ -217,7 +179,5 @@ export const createSpace = async (payload: CreateSpacePayload): Promise<Space> =
     }
   }
 
-  await delay(250)
-  MOCK_SPACES.push(newSpace)
   return newSpace
 }

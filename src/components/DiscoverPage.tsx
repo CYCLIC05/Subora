@@ -46,11 +46,11 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
             Verified Creator Hub
           </div>
           <h1 className="text-5xl md:text-7xl font-heading font-semibold text-slate-950 tracking-tight leading-[0.95]">
-            Discover <br />
-            Premium Spaces.
+            Premium Spaces <br />
+            in One Place.
           </h1>
           <p className="text-base md:text-xl text-slate-600 font-medium leading-relaxed max-w-xl mx-auto">
-            Find high-value Telegram communities faster. Subora is the discovery layer for the best alpha, insights, and networking.
+            Find high-value Telegram communities faster. Subora is the discovery layer for serious alpha and private discussions.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
@@ -128,10 +128,10 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
         </section>
 
         {trendingSpaces.length > 0 && !searchQuery && (
-          <section className="space-y-8">
-            <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-4">
-              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trending Now</h2>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest">
+          <section className="space-y-8 bg-primary/5 rounded-[48px] p-8 border border-primary/10">
+            <div className="flex items-center justify-between gap-4 border-b border-primary/10 pb-4">
+              <h2 className="text-[10px] font-bold text-slate-950 uppercase tracking-widest">Trending Now</h2>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest bg-white px-2 py-1 rounded-lg shadow-sm">
                 <TrendingUp className="w-3.5 h-3.5" />
                 High Momentum
               </div>

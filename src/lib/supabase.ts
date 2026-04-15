@@ -23,6 +23,12 @@ export type SubscriptionTier = {
   duration: string;
 };
 
+export type RevenuePoint = {
+  date: string;
+  revenue: number;
+  members: number;
+};
+
 export type Space = {
   id: string;
   creator_telegram_id: number;
@@ -34,5 +40,6 @@ export type Space = {
   subscribers: number;
   payment_address?: string;
   is_trending?: boolean;
+  is_active_today?: boolean;
   created_at: string;
 };

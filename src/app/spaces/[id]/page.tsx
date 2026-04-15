@@ -89,11 +89,16 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
               </span>
             </div>
 
-            <div className="mt-10 p-8 rounded-[32px] bg-white/10 backdrop-blur-md border border-white/20 inline-block max-w-xl">
-               <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary mb-3">The Value Hook</p>
-               <h2 className="text-2xl md:text-3xl font-heading font-semibold text-white leading-tight tracking-tight">
-                 Private alpha, daily insights, and a serious community.
+            <div className="mt-10 p-8 rounded-[32px] bg-white/10 backdrop-blur-md border border-white/20 inline-block max-w-xl relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-16 translate-x-16" />
+               <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary mb-3">Elite Access</p>
+               <h2 className="text-2xl md:text-3xl font-heading font-semibold text-white leading-tight tracking-tight relative z-10">
+                 Private Alpha. Real Value. Zero Noise.
                </h2>
+               <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-400/10 px-2.5 py-1 rounded-full border border-emerald-400/20 w-fit">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Active Today
+               </div>
             </div>
           </div>
         </div>
@@ -112,17 +117,18 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
               
               <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                 {[
-                  { title: 'Daily Insights', desc: 'Real-time market alpha and technical deep-dives.', color: 'bg-blue-50' },
-                  { title: 'Private Discussions', desc: 'Secure networking with other high-signal participants.', color: 'bg-emerald-50' },
-                  { title: 'Exclusive Updates', desc: 'Early access to protocol drops and strategic shifts.', color: 'bg-amber-50' },
+                  { title: 'Daily Insights', desc: 'Institutional-grade market alpha and technical deep-dives.', color: 'bg-blue-50/50' },
+                  { title: 'Private Discussions', desc: 'Secure networking and debate with high-signal participants.', color: 'bg-emerald-50/50' },
+                  { title: 'Exclusive Drops', desc: 'First-mover access to protocol alpha and strategic shifts.', color: 'bg-amber-50/50' },
                 ].map((item, index) => (
-                  <div key={index} className={`flex items-start gap-6 p-8 rounded-[40px] ${item.color} border border-slate-100/50 hover:bg-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all group cursor-default`}>
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                      <Check className="w-6 h-6 text-primary" />
+                  <div key={index} className={`flex items-start gap-8 p-10 rounded-[40px] ${item.color} border border-slate-100 transition-all group cursor-default relative overflow-hidden`}>
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/40 rounded-full blur-2xl translate-x-12 -translate-y-12" />
+                    <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform relative z-10">
+                      <Check className="w-7 h-7 text-primary" />
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-950 mb-1">{item.title}</h3>
-                      <p className="text-slate-600 font-medium leading-relaxed">{item.desc}</p>
+                    <div className="relative z-10">
+                      <h3 className="text-2xl font-bold text-slate-950 mb-1.5">{item.title}</h3>
+                      <p className="text-slate-600 text-lg font-medium leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 ))}
