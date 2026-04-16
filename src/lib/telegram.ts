@@ -54,3 +54,17 @@ export async function handleTelegramWebhookUpdate(update: unknown) {
   console.log('Received Telegram webhook update', JSON.stringify(update))
   return { received: true }
 }
+
+export async function generateSingleUseInviteLink(chatId: string): Promise<string | null> {
+  try {
+    const bot = createBot()
+    // generates a link that expires after 1 use
+    const inviteLink = await (bot as any).createChatInviteLink(chatId, {
+      member_limit: 1,
+    })
+    return inviteLink.invite_link
+  } catch (error) {
+    console.error('Error generating single-use invite link', error)
+    return null
+  }
+}

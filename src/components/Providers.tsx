@@ -69,6 +69,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       const message = reason instanceof Error ? reason.message : String(reason);
 
       if (message.includes('Failed to fetch')) {
+        if (message.toLowerCase().includes('analytics') || String(reason).toLowerCase().includes('analytics')) {
+          return; // Ignore harmless analytics blockings via ad-blockers
+        }
         console.warn('TonConnect wallet list fetch failed, disabling wallet UI for this session.', reason);
         event.preventDefault();
         setIsTonConnectAvailable(false);
@@ -79,6 +82,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const handleErrorEvent = (event: ErrorEvent) => {
       const message = event.error?.message ?? event.message;
       if (typeof message === 'string' && message.includes('Failed to fetch')) {
+        if (message.toLowerCase().includes('analytics')) {
+          return; // Ignore harmless analytics blockings via ad-blockers
+        }
         console.warn('TonConnect wallet list fetch failed, disabling wallet UI for this session.', event.error || message);
         event.preventDefault();
         setIsTonConnectAvailable(false);
@@ -101,20 +107,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const manifestUrl = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ?? (typeof window !== 'undefined' ? `${window.location.origin}/tonconnect-manifest.json` : '');
-
-  const content = (
-    <TonConnectAvailabilityContext.Provider value={isTonConnectAvailable && !hasTonConnectError}>
-      {children}
-    </TonConnectAvailabilityContext.Provider>
-  );
-
-  if (!isTonConnectAvailable || hasTonConnectError) {
-    return content;
-  }
+  const manifestUrl = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ?? (typeof window !== 'undefined' ? `${window.location.origin}/tonconnect-manifest.json` : 'https://subora-spaces.vercel.app/tonconnect-manifest.json');
 
   return (
-    <TonConnectAvailabilityContext.Provider value={true}>
+    <TonConnectAvailabilityContext.Provider value={isTonConnectAvailable && !hasTonConnectError}>
       <TonConnectUIProvider manifestUrl={manifestUrl}>
         {children}
       </TonConnectUIProvider>

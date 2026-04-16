@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSpace, getDiscoverSpaces } from '@/lib/mockApi'
 import { notifySpaceCreated } from '@/lib/telegram'
+import { revalidatePath } from 'next/cache'
 
 export async function GET() {
   const spaces = await getDiscoverSpaces()
@@ -17,5 +18,6 @@ export async function POST(request: Request) {
     console.error('Telegram notification failed', error)
   }
 
+  revalidatePath('/')
   return NextResponse.json(created)
 }

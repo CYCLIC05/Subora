@@ -1,4 +1,4 @@
-'use client'
+  'use client'
 
 import { useCallback, useEffect, useState } from 'react'
 import { SendTransactionRequest } from '@tonconnect/ui'
@@ -21,6 +21,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
   const isWalletConnected = Boolean(walletAddress)
 
   const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'complete'>('idle')
+  const [accessUrl, setAccessUrl] = useState<string | null>(null)
   const tiers = space.tiers.length ? space.tiers : [{ name: 'Standard Access', price: 0, duration: 'month' }]
   const currentTier = tiers[selectedTierIndex] ?? tiers[0]
 
@@ -60,6 +61,23 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           console.log('TON payment request sent')
         },
       })
+
+      try {
+        const res = await fetch('/api/purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ spaceId: space.id, walletAddress })
+        })
+        const data = await res.json()
+        if (data.accessUrl) {
+          setAccessUrl(data.accessUrl)
+        } else {
+          setAccessUrl(space.channel_link)
+        }
+      } catch (e) {
+        console.error('Failed to verify purchase', e)
+        setAccessUrl(space.channel_link)
+      }
 
       setCheckoutState('complete')
     } catch (error) {
@@ -206,8 +224,18 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -translate-y-12 translate-x-12" />
             <p className="text-sm font-bold text-primary italic relative z-10">You're in! Access is unlocked.</p>
             <p className="text-sm text-slate-800 font-semibold leading-relaxed relative z-10">
-              High-value access is better with friends. Invite them now to join the Alpha.
+              Click below to enter the community, then invite your friends to join the Alpha.
             </p>
+            {accessUrl && (
+              <a 
+                href={accessUrl.startsWith('http') ? accessUrl : `https://t.me/${accessUrl.replace(/^@/, '')}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block w-full bg-slate-950 text-white py-4 rounded-2xl text-[12px] font-bold uppercase tracking-widest hover:bg-slate-900 transition-all font-heading shadow-xl relative z-10 mb-3"
+              >
+                Open Private Channel
+              </a>
+            )}
             <button
               onClick={async () => {
                 const WebApp = (await import('@twa-dev/sdk')).default

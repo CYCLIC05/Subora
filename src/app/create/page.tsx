@@ -27,6 +27,17 @@ export default function CreateSpace() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, cover_image: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleTierChange = (index: number, field: 'name' | 'price' | 'duration', value: string) => {
     setTiers((current) =>
       current.map((tier, tierIndex) =>
@@ -218,17 +229,16 @@ export default function CreateSpace() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-900 ml-1">Visual Asset URL</label>
+                        <label className="text-xs font-semibold text-slate-900 ml-1">Visual Asset (PNG/JPG)</label>
                         <Input
+                          type="file"
+                          accept="image/png, image/jpeg"
                           required
-                          name="cover_image"
-                          value={formData.cover_image}
-                          onChange={handleChange}
-                          placeholder="https://images.unsplash.com/..."
-                          className="h-11 rounded-2xl border-slate-200 bg-slate-50/80"
+                          onChange={handleImageUpload}
+                          className="h-11 rounded-2xl border-slate-200 bg-slate-50/80 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-primary/5 file:text-primary hover:file:bg-primary/10 file:cursor-pointer pb-2 text-xs text-slate-600 cursor-pointer pt-[9px]"
                         />
                       </div>
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 flex flex-col justify-end">
                         <label className="text-xs font-semibold text-slate-900 ml-1">Terminal Link</label>
                         <Input
                           required
