@@ -91,6 +91,7 @@ export default function CreateSpace() {
         if (!response.ok) {
           const result = await response.json()
           console.error('Error saving space:', result)
+          alert(result.error || 'There was an error saving your space. The image might be too large or database is locked.')
         } else {
           setStep(3)
           confetti({
@@ -402,12 +403,12 @@ export default function CreateSpace() {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xs mx-auto">
-              <Link
+              <a
                 href="/"
                 className="inline-flex h-11 items-center justify-center rounded-3xl border border-slate-200 bg-white px-6 text-xs font-bold text-slate-900 hover:bg-slate-50 transition-all"
               >
                 Discovery
-              </Link>
+              </a>
               <Link
                 href="/dashboard"
                 className="inline-flex h-11 items-center justify-center rounded-3xl bg-primary px-6 text-xs font-bold text-white hover:bg-primary/90 transition-all shadow-lg shadow-primary/15"

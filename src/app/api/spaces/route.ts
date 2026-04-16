@@ -9,15 +9,20 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const payload = await request.json()
-  const created = await createSpace(payload)
-
   try {
-    await notifySpaceCreated(created)
-  } catch (error) {
-    console.error('Telegram notification failed', error)
-  }
+    const payload = await request.json()
+    const created = await createSpace(payload)
 
-  revalidatePath('/')
-  return NextResponse.json(created)
+    try {
+      await notifySpaceCreated(created)
+    } catch (error) {
+      console.error('Telegram notification failed', error)
+    }
+
+    revalidatePath('/')
+    return NextResponse.json(created)
+  } catch (error) {
+    console.error('Failed to create space:', error)
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown database error' }, { status: 500 })
+  }
 }

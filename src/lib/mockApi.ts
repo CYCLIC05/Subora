@@ -170,6 +170,11 @@ export const createSpace = async (payload: CreateSpacePayload): Promise<Space> =
       .select(spaceSelect)
       .single()
 
+    if (response.error) {
+      console.error('Supabase insert error details:', response.error)
+      throw new Error(`Database Error: ${response.error.message || 'Failed to insert space'}`)
+    }
+
     const data = response.data as Space | null
     if (data) {
       return data
