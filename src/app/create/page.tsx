@@ -32,7 +32,36 @@ export default function CreateSpace() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, cover_image: reader.result as string }));
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Compress to tiny WebP/JPEG for quick database storage
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+          setFormData(prev => ({ ...prev, cover_image: compressedBase64 }));
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -89,9 +118,15 @@ export default function CreateSpace() {
         })
 
         if (!response.ok) {
-          const result = await response.json()
-          console.error('Error saving space:', result)
-          alert(result.error || 'There was an error saving your space. The image might be too large or database is locked.')
+          let errorMsg = 'There was an error saving your space.';
+          try {
+            const result = await response.json();
+            errorMsg = result.error || errorMsg;
+          } catch (jsonErr) {
+            errorMsg = `Server error ${response.status}: Payload might be too large.`;
+          }
+          console.error('Error saving space:', errorMsg);
+          alert(errorMsg);
         } else {
           setStep(3)
           confetti({
@@ -240,15 +275,16 @@ export default function CreateSpace() {
                         />
                       </div>
                       <div className="space-y-1.5 flex flex-col justify-end">
-                        <label className="text-xs font-semibold text-slate-900 ml-1">Terminal Link</label>
+                        <label className="text-xs font-semibold text-slate-900 ml-1">Telegram Channel username or ID</label>
                         <Input
                           required
                           name="channel_link"
                           value={formData.channel_link}
                           onChange={handleChange}
-                          placeholder="@suboraalpha"
+                          placeholder="@yourchannel or -100123456789"
                           className="h-11 rounded-2xl border-slate-200 bg-slate-50/80"
                         />
+                        <p className="text-[10px] text-slate-400 ml-1">Add our bot as admin to your channel, then paste the channel username or ID here.</p>
                       </div>
                     </div>
                   </div>

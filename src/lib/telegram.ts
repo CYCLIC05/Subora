@@ -1,7 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api'
 import { Space } from '@/lib/supabase'
 
-const token = process.env.BOT_TOKEN
+const token = process.env.TELEGRAM_BOT_TOKEN
 const adminChatId = process.env.TELEGRAM_CHAT_ID
 
 function createBot() {
@@ -53,6 +53,27 @@ export async function notifySpaceCreated(space: Space) {
 export async function handleTelegramWebhookUpdate(update: unknown) {
   console.log('Received Telegram webhook update', JSON.stringify(update))
   return { received: true }
+}
+
+export async function sendTelegramAccessLink(chatId: string, accessUrl: string, spaceName: string) {
+  try {
+    const bot = createBot()
+    const options: any = {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [[
+          { text: 'Join Channel', url: accessUrl }
+        ]],
+      },
+    }
+    return bot.sendMessage(chatId,
+      `✅ Your access link for *${spaceName}* is ready!\n\nTap below to join the private channel.`,
+      options
+    )
+  } catch (error) {
+    console.error('Error sending Telegram access link', error)
+    return null
+  }
 }
 
 export async function generateSingleUseInviteLink(chatId: string): Promise<string | null> {

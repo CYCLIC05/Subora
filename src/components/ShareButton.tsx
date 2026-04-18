@@ -19,8 +19,8 @@ export function ShareButton({ space }: { space: Space }) {
         // Fallback for older Telegram versions or desktop: Copy to clipboard
         navigator.clipboard.writeText(shareText)
         
-        // Show a native Telegram popup if available, otherwise use alert
-        if (WebApp.showPopup) {
+        // Use Telegram popup only when the version supports it.
+        if (WebApp.showPopup && WebApp.isVersionAtLeast('6.1')) {
           WebApp.showPopup({
             title: 'Link copied!',
             message: 'Your custom invite link was copied to your clipboard. Paste it in any chat to share.',
@@ -29,7 +29,7 @@ export function ShareButton({ space }: { space: Space }) {
         } else {
           alert('Invite link copied to clipboard!')
         }
-        
+
         WebApp.HapticFeedback.notificationOccurred('warning')
       }
     } catch (error) {

@@ -22,6 +22,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
 
   const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'complete'>('idle')
   const [accessUrl, setAccessUrl] = useState<string | null>(null)
+  const [testAmount, setTestAmount] = useState<string>('1')
   const tiers = space.tiers.length ? space.tiers : [{ name: 'Standard Access', price: 0, duration: 'month' }]
   const currentTier = tiers[selectedTierIndex] ?? tiers[0]
 
@@ -44,7 +45,8 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
     setCheckoutState('processing')
 
     try {
-      const amountNano = String(currentTier.price * 1_000_000_000)
+      const requestedAmount = Number(testAmount) > 0 ? Number(testAmount) : currentTier.price
+      const amountNano = String(requestedAmount * 1_000_000_000)
       const tx: SendTransactionRequest = {
         validUntil: Math.floor(Date.now() / 1000) + 300,
         network,
@@ -62,11 +64,19 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
         },
       })
 
+      let telegramUserId: number | undefined
+      try {
+        const WebApp = (await import('@twa-dev/sdk')).default
+        telegramUserId = WebApp.initDataUnsafe.user?.id
+      } catch (error) {
+        console.warn('Telegram WebApp user id unavailable', error)
+      }
+
       try {
         const res = await fetch('/api/purchase', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ spaceId: space.id, walletAddress })
+          body: JSON.stringify({ spaceId: space.id, walletAddress, telegramUserId })
         })
         const data = await res.json()
         if (data.accessUrl) {
@@ -135,6 +145,19 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           <span className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-400">per {currentTier.duration}</span>
         </div>
         <p className="mt-3 text-sm text-slate-600">Includes 24/7 premium alerts, gated discussions, and exclusive creator drops.</p>
+        <div className="mt-4 space-y-3 rounded-3xl border border-slate-100 bg-slate-50 p-4">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Test payment amount</label>
+          <input
+            type="number"
+            min="0"
+            step="0.001"
+            value={testAmount}
+            onChange={(e) => setTestAmount(e.target.value)}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
+            placeholder="Enter TON amount for test payment"
+          />
+          <p className="text-[10px] text-slate-400">For testing, any TON amount is accepted regardless of the tier price. Leave blank to use the tier price.</p>
+        </div>
         <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2">
           <div className="flex -space-x-2">
             {[1, 2, 3].map((i) => (
