@@ -4,7 +4,7 @@ import { Check, ChevronLeft, Users, Lock, Share2 } from 'lucide-react'
 import { Metadata } from 'next'
 import { Header } from '@/components/Header'
 import { SpacePurchasePanel } from '@/components/SpacePurchasePanel'
-import { getSpaceById } from '@/lib/mockApi'
+import { getSpaceById } from '@/lib/database'
 import { ShareButton } from '@/components/ShareButton'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

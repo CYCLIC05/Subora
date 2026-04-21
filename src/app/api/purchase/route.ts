@@ -155,22 +155,22 @@ export async function POST(request: Request) {
       telegram_user_id: telegramUserId ?? null,
       wallet_address: walletAddress ?? null,
       referral_source: referralSource ?? null,
+      currency: currency || 'TON',
+      amount_paid: Number(amount) || 0,
+      invite_link: accessUrl,
       join_time: new Date().toISOString(),
     })
 
-    // TODO: Implement transactions table in Supabase schema to track payment details
-    // For now, subscription is recorded in space_subscriptions which is sufficient for V1
-    /* 
+    // --- Record auditable transaction ---
     await supabase.from('transactions').insert({
       space_id: spaceId,
       telegram_user_id: telegramUserId ?? null,
       wallet_address: walletAddress ?? null,
-      amount: amount,
+      amount: Number(amount) || 0,
       currency: currency || 'TON',
       tx_hash: txHash || null,
       status: 'success'
     })
-    */
 
     // Update subscribers count
     await supabase

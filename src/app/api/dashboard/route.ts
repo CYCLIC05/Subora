@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getDashboardData } from '@/lib/mockApi'
+import { getDashboardData } from '@/lib/database'
 
 export async function GET() {
   const data = await getDashboardData()

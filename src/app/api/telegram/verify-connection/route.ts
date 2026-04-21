@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       
       const isAdmin = ['administrator', 'creator'].includes(chatMember.status)
       // Note: 'can_invite_users' is typically present for administrators
-      const hasInvitePermission = (chatMember as any).can_invite_users === true || chatMember.status === 'creator'
+      const hasInvitePermission = chatMember.can_invite_users === true || chatMember.status === 'creator'
 
       if (!isAdmin) {
         return NextResponse.json({ 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ 
         success: true, 
         message: 'Bot connected and authorized successfully!',
-        chatTitle: (chatMember as any).chat?.title
+        chatTitle: chatMember.chat?.title
       })
 
     } catch (botError: any) {

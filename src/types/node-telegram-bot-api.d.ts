@@ -32,10 +32,27 @@ declare module 'node-telegram-bot-api' {
     member_limit?: number;
   }
 
+  export interface ChatMember {
+    status: 'creator' | 'administrator' | 'member' | 'restricted' | 'left' | 'kicked';
+    user: {
+      id: number;
+      is_bot: boolean;
+      first_name: string;
+      last_name?: string;
+      username?: string;
+    };
+    can_invite_users?: boolean;
+    chat?: {
+      id: number;
+      title?: string;
+      type?: string;
+    };
+  }
+
   export default class TelegramBot {
     constructor(token: string, options: { polling: boolean });
-    getMe(): Promise<any>;
-    getChatMember(chatId: string | number, userId: number): Promise<any>;
+    getMe(): Promise<{ id: number; first_name: string; username: string }>;
+    getChatMember(chatId: string | number, userId: number): Promise<ChatMember>;
     sendMessage(chatId: string | number, text: string, options?: SendMessageOptions): Promise<any>;
     createChatInviteLink(
       chatId: string | number,

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createSpace, getDiscoverSpaces } from '@/lib/mockApi'
+import { createSpace, getDiscoverSpaces } from '@/lib/database'
 import { notifySpaceCreated } from '@/lib/telegram'
 import { revalidatePath } from 'next/cache'
 

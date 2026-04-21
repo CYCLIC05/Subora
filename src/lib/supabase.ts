@@ -52,6 +52,25 @@ export type SpaceSubscription = {
   join_time: string;
 };
 
+export type Transaction = {
+  id?: string;
+  space_id: string | null;
+  telegram_user_id: number | null;
+  wallet_address: string | null;
+  amount: number;
+  currency: string;
+  tx_hash: string | null;
+  status: string;
+  created_at?: string;
+};
+
+export type SearchQuery = {
+  id?: string;
+  query: string;
+  count: number;
+  last_searched: string;
+};
+
 type Database = {
   public: {
     Tables: {
@@ -67,9 +86,32 @@ type Database = {
         Update: Partial<SpaceSubscription>;
         Relationships: [];
       };
+      transactions: {
+        Row: Transaction;
+        Insert: Omit<Transaction, 'id' | 'created_at'> & { id?: string; created_at?: string };
+        Update: Partial<Transaction>;
+        Relationships: [];
+      };
+      revenue_points: {
+        Row: RevenuePoint;
+        Insert: Omit<RevenuePoint, 'date'> & { date: string };
+        Update: Partial<RevenuePoint>;
+        Relationships: [];
+      };
+      search_queries: {
+        Row: SearchQuery;
+        Insert: Omit<SearchQuery, 'id' | 'last_searched'> & { id?: string; last_searched?: string };
+        Update: Partial<SearchQuery>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      track_search_query: {
+        Args: { search_term: string };
+        Returns: void;
+      };
+    };
   };
 };
 

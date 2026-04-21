@@ -40,8 +40,8 @@ export function RevenueAnalytics({ chartData = [] }: { chartData?: RevenuePoint[
 
   const total = React.useMemo(
     () => ({
-      revenue: chartData.reduce((acc, curr) => acc + curr.revenue, 0),
-      members: chartData.reduce((acc, curr) => acc + curr.members, 0),
+      revenue: chartData.length > 0 ? chartData[chartData.length - 1].revenue : 0,
+      members: chartData.length > 0 ? chartData[chartData.length - 1].members : 0,
     }),
     [chartData]
   )

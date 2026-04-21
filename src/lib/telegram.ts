@@ -195,7 +195,30 @@ export async function generateSingleUseInviteLink(channelLink: string): Promise<
       `Ensure the Subora bot is an admin with "Invite Users" permission in that channel. ` +
       `Telegram error: ${desc}`
     )
-    return null
+/**
+ * Sends a message to a list of users, handling rate limits and basic errors.
+ * Returns the count of successfully sent messages.
+ */
+export async function broadcastToUsers(userIds: (number | string)[], text: string): Promise<{ success: number; failed: number }> {
+  const bot = createBot()
+  let success = 0
+  let failed = 0
+
+  // Telegram allows ~30 messages/sec for bots to users.
+  // We'll process in small batches with a delay.
+  for (const userId of userIds) {
+    try {
+      await bot.sendMessage(userId, text, { parse_mode: 'Markdown' })
+      success++
+      
+      // Mandatory small delay to avoid hitting rate limits (50ms ideally)
+      await new Promise(resolve => setTimeout(resolve, 50))
+    } catch (error: any) {
+      console.error(`Broadcast failed for user ${userId}:`, error?.response?.body?.description || error.message)
+      failed++
+    }
   }
+
+  return { success, failed }
 }
 

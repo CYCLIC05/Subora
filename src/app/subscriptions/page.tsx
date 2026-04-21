@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Space, supabase } from '@/lib/supabase';
-import { SubscriptionWithSpace, getUserSubscriptions } from '@/lib/mockApi';
+import { SubscriptionWithSpace, getUserSubscriptions } from '@/lib/database';
 import { Header } from '@/components/Header';
 import { SpaceCard } from '@/components/SpaceCard';
 import { Compass, ExternalLink, Ghost, Loader2, Lock } from 'lucide-react';

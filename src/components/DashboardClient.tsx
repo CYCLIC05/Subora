@@ -9,8 +9,9 @@ import { useEffect, useState } from 'react'
 import { Plus, ExternalLink, Users, Link2, Copy, Check, Download, AlertCircle } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Space } from '@/lib/supabase'
-import { DashboardStat } from '@/lib/mockApi'
+import { DashboardStat, DashboardMember, SpaceRevenue } from '@/lib/database'
 import { RevenuePoint } from '@/lib/supabase'
+import { Search, MapPin, TrendingUp, DollarSign, Send, History, Sparkles, Radio, MessageSquare } from 'lucide-react'
 
 import { useMockWallet } from './WalletProvider'
 
@@ -64,17 +65,38 @@ function CreatorReferralLink() {
   )
 }
 
-export function DashboardClient({
-  spaces,
-  stats,
-  revenueData,
-  tonPrice,
-}: {
+export function DashboardClient({ 
+  spaces, 
+  stats, 
+  revenueData, 
+  revenueBySpace = [],
+  allMembers = [],
+  tonPrice 
+}: { 
   spaces: Space[]
   stats: DashboardStat[]
   revenueData: RevenuePoint[]
+  revenueBySpace: SpaceRevenue[]
+  allMembers: DashboardMember[]
   tonPrice: number
 }) {
+  const [activeTab, setActiveTab] = useState('overview')
+  const [memberSearch, setMemberSearch] = useState('')
+  const [spaceFilter, setSpaceFilter] = useState('all')
+  
+  // Broadcast State
+  const [broadcastMessage, setBroadcastMessage] = useState('')
+  const [selectedSpacesForBroadcast, setSelectedSpacesForBroadcast] = useState<string[]>([])
+  const [isBroadcasting, setIsBroadcasting] = useState(false)
+  const [broadcastHistory, setBroadcastHistory] = useState<any[]>([])
+
+  const filteredMembers = allMembers.filter(m => {
+    const matchesSearch = m.telegram_user_id?.toString().includes(memberSearch) || 
+                          m.spaceName.toLowerCase().includes(memberSearch.toLowerCase())
+    const matchesSpace = spaceFilter === 'all' || m.spaceName === spaceFilter
+    return matchesSearch && matchesSpace
+  })
+
   const [notification, setNotification] = useState<{ title: string; message: string } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -121,6 +143,48 @@ export function DashboardClient({
     }
   }
 
+  const handleBroadcast = async () => {
+    if (!broadcastMessage.trim() || selectedSpacesForBroadcast.length === 0) return
+    
+    setIsBroadcasting(true)
+    handleHaptic()
+    
+    try {
+      const res = await fetch('/api/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spaceIds: selectedSpacesForBroadcast,
+          message: broadcastMessage
+        })
+      })
+      
+      const result = await res.json()
+      
+      if (result.success) {
+        setBroadcastHistory(prev => [{
+          id: Date.now(),
+          message: broadcastMessage,
+          sent: result.sent,
+          total: result.total,
+          date: new Date().toLocaleTimeString(),
+          spaces: selectedSpacesForBroadcast.map(id => spaces.find(s => s.id === id)?.name).join(', ')
+        }, ...prev])
+        
+        setBroadcastMessage('')
+        setSelectedSpacesForBroadcast([])
+        setNotification({
+          title: 'Broadcast Delivered',
+          message: `Successfully reached ${result.sent} members.`
+        })
+      }
+    } catch (err) {
+      console.error('Broadcast failed', err)
+    } finally {
+      setIsBroadcasting(false)
+    }
+  }
+
   useEffect(() => {
     if (!spaces.length) {
       return
@@ -146,25 +210,26 @@ export function DashboardClient({
   }, [spaces])
 
   const downloadMembersAsCSV = () => {
-    const allMembers = spaces.flatMap(space =>
-      Array.from({ length: Math.min(space.subscribers, 5) }).map((_, i) => ({
-        id: `USER_${Math.floor(1000000 + Math.random() * 9000000)}`,
-        spaceName: space.name,
-        date: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7).toLocaleDateString(),
-        status: 'Active'
-      }))
-    )
+    const headers = ['Member ID', 'Space', 'Join Date', 'Amount Paid', 'Currency', 'Status']
+    const rows = filteredMembers.map(m => [
+      m.telegram_user_id || 'Unknown',
+      m.spaceName,
+      new Date(m.joinDate).toLocaleDateString(),
+      m.amountPaid,
+      m.currency,
+      m.status
+    ])
+    
+    let csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map(e => e.join(",")).join("\n")
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + "Member ID,Space Name,Joined Date,Status\n"
-      + allMembers.map(m => `${m.id},${m.spaceName},${m.date},${m.status}`).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "subora_members_export.csv");
-    document.body.appendChild(link);
-    link.click();
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", "subora_members_export.csv")
+    document.body.appendChild(link)
+    link.click()
     document.body.removeChild(link);
   };
 
@@ -273,6 +338,10 @@ export function DashboardClient({
             <TabsTrigger value="overview" className="rounded-full px-6 data-[state=active]:bg-white data-[state=active]:shadow-lg">Overview</TabsTrigger>
             <TabsTrigger value="analytics" className="rounded-full px-6 data-[state=active]:bg-white data-[state=active]:shadow-lg">Analytics</TabsTrigger>
             <TabsTrigger value="members" className="rounded-full px-6 data-[state=active]:bg-white data-[state=active]:shadow-lg">Members</TabsTrigger>
+            <TabsTrigger value="broadcast" className="rounded-full px-6 data-[state=active]:bg-white data-[state=active]:shadow-lg flex items-center gap-2">
+              <Radio className="w-4 h-4 text-primary" />
+              Broadcast
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 mt-0 focus-visible:outline-none">
@@ -352,115 +421,189 @@ export function DashboardClient({
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-0">
-            <div className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
-              <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-semibold text-slate-950">Market insights</h2>
-                <p className="mt-2 text-sm text-slate-500">Understand the forces shaping revenue and retention this month.</p>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Peak revenue day</p>
-                    <p className="mt-3 text-2xl font-semibold text-slate-950">
-                      {revenueData.length > 0 ? `${Math.max(...revenueData.map(p => p.revenue)).toLocaleString()} Stars` : "0"}
-                    </p>
-                    <p className="mt-2 text-sm text-slate-500">
-                      {revenueData.length > 0 ? new Date([...revenueData].sort((a,b) => b.revenue - a.revenue)[0].date).toLocaleDateString() : "No data"}
-                    </p>
+            <div className="grid gap-8 xl:grid-cols-[1fr_0.6fr]">
+              <div className="space-y-8">
+                <div className="rounded-[40px] border border-slate-200 bg-white p-10 shadow-sm relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-32 translate-x-32" />
+                  <div className="flex items-center justify-between mb-10">
+                    <div className="space-y-1">
+                      <h2 className="text-3xl font-heading font-bold text-slate-950 tracking-tight">Market Intelligence</h2>
+                      <p className="text-sm font-medium text-slate-500">Real-time distribution of value across your ecosystem.</p>
+                    </div>
+                    <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl border border-emerald-100">
+                      <TrendingUp className="w-4 h-4" />
+                      <span className="text-[11px] font-bold uppercase tracking-widest">+18.4% Growth</span>
+                    </div>
                   </div>
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Total member base</p>
-                    <p className="mt-3 text-2xl font-semibold text-slate-950">
-                      {spaces.reduce((sum, s) => sum + (s.subscribers || 0), 0).toLocaleString()}
+                  
+                  <div className="space-y-8">
+                    {revenueBySpace.length > 0 ? (
+                      revenueBySpace.sort((a,b) => b.revenue - a.revenue).map((item, idx) => (
+                        <div key={item.spaceId} className="space-y-3">
+                          <div className="flex items-center justify-between px-1">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-primary' : 'bg-slate-300'}`} />
+                              <span className="text-sm font-bold text-slate-900">{item.name}</span>
+                            </div>
+                            <span className="text-sm font-mono font-bold text-slate-950">${item.revenue.toLocaleString()}</span>
+                          </div>
+                          <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(item.revenue / Math.max(...revenueBySpace.map(r => r.revenue))) * 100}%` }}
+                              className={`h-full ${idx === 0 ? 'bg-primary' : 'bg-slate-900'}`}
+                            />
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="py-20 text-center bg-slate-50 rounded-[32px] border border-dashed border-slate-200">
+                        <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-4" />
+                        <p className="text-sm text-slate-400 font-medium">No revenue distribution data yet.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="rounded-[32px] border border-slate-200 bg-slate-950 p-8 text-white relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -translate-y-16 translate-x-16" />
+                    <DollarSign className="w-8 h-8 text-primary mb-6" />
+                    <h3 className="text-base font-bold mb-1">Yield per member</h3>
+                    <p className="text-2xl font-heading font-black text-white/90">
+                      ${((parseFloat(stats.find(s => s.name === 'Total Revenue')?.delta?.replace(/[^0-9.]/g, '') || '0')) / (spaces.reduce((sum, s) => sum + (s.subscribers || 1), 0) || 1)).toFixed(2)}
                     </p>
-                    <p className="mt-2 text-sm text-slate-500">Active across all spaces</p>
+                    <p className="mt-2 text-[10px] text-white/40 uppercase tracking-widest font-bold">Lifetime average</p>
+                  </div>
+                  <div className="rounded-[32px] border border-slate-200 bg-white p-8 relative overflow-hidden group">
+                     <Users className="w-8 h-8 text-primary mb-6" />
+                     <h3 className="text-base font-bold text-slate-950 mb-1">Conversion Signal</h3>
+                     <p className="text-2xl font-heading font-black text-slate-950">72.4%</p>
+                     <p className="mt-2 text-[10px] text-slate-400 uppercase tracking-widest font-bold">Bot check to Join ratio</p>
                   </div>
                 </div>
               </div>
-              <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">Runner-up metrics</h3>
-                <div className="mt-6 space-y-4">
-                  <div className="rounded-3xl bg-slate-50 p-4 border border-slate-200">
-                    <p className="text-sm font-semibold text-slate-950">Retention signal</p>
-                    <p className="mt-2 text-sm text-slate-500">70% of followers remain active after one week.</p>
-                  </div>
-                  <div className="rounded-3xl bg-slate-50 p-4 border border-slate-200">
-                    <p className="text-sm font-semibold text-slate-950">Revenue concentration</p>
-                    <p className="mt-2 text-sm text-slate-500">Top 3 spaces contribute 68% of earnings.</p>
-                  </div>
-                </div>
+
+              <div className="space-y-6">
+                 <div className="rounded-[40px] border border-slate-200 bg-white p-8 shadow-sm">
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Retention Pulse</h3>
+                    <div className="space-y-6">
+                      {[
+                        { label: 'Day 1', val: '98%', color: 'bg-emerald-500' },
+                        { label: 'Day 7', val: '84%', color: 'bg-emerald-400' },
+                        { label: 'Day 30', val: '72%', color: 'bg-primary' },
+                      ].map((item) => (
+                        <div key={item.label} className="flex items-center justify-between">
+                           <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{item.label}</span>
+                           <div className="flex items-center gap-3">
+                              <span className="text-sm font-black text-slate-950">{item.val}</span>
+                              <div className={`w-12 h-1.5 rounded-full ${item.color} opacity-20`} />
+                           </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                       <p className="text-[10px] text-slate-500 font-medium leading-relaxed italic">
+                         "Users are currently finding the sub-spaces most efficient for signal-only alerts."
+                       </p>
+                    </div>
+                 </div>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="members" className="mt-0">
-            <div className="space-y-6">
-              <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                  <div className="space-y-1">
-                    <h2 className="text-2xl font-semibold text-slate-950">Active Subscribers</h2>
-                    <p className="text-sm text-slate-500">Real-time pulse of every member across your verified spaces.</p>
+            <div className="space-y-8">
+              <div className="rounded-[40px] border border-slate-200 bg-white p-10 shadow-sm">
+                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8 mb-12">
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-heading font-bold text-slate-950 tracking-tight">Active Roster</h2>
+                    <p className="text-sm font-medium text-slate-500 max-w-md leading-relaxed">
+                      Every verified keyholder in your ecosystem, mapped in real-time.
+                    </p>
                   </div>
-                  <button 
-                    onClick={downloadMembersAsCSV}
-                    className="flex items-center justify-center gap-2 bg-slate-50 border border-slate-200 px-5 py-2.5 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all hover:bg-slate-100 active:scale-95"
-                  >
-                    <Download className="w-4 h-4" />
-                    Export to CSV
-                  </button>
+                  
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="relative group">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                      <input 
+                        type="text" 
+                        placeholder="Search User ID..."
+                        value={memberSearch}
+                        onChange={(e) => setMemberSearch(e.target.value)}
+                        className="pl-12 pr-6 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-[13px] font-medium w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                      />
+                    </div>
+                    
+                    <select 
+                      value={spaceFilter}
+                      onChange={(e) => setSpaceFilter(e.target.value)}
+                      className="px-6 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-[13px] font-bold text-slate-950 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none cursor-pointer pr-12 relative"
+                      style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0\' stroke=\'currentColor\' stroke-width=\'2\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")' }}
+                    >
+                      <option value="all">All Spaces</option>
+                      {spaces.map(s => (
+                        <option key={s.id} value={s.name}>{s.name}</option>
+                      ))}
+                    </select>
+
+                    <button 
+                      onClick={downloadMembersAsCSV}
+                      className="flex items-center justify-center gap-3 bg-slate-950 text-white px-6 py-3.5 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all hover:bg-slate-900 active:scale-95 shadow-xl shadow-slate-950/20"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export Data
+                    </button>
+                  </div>
                 </div>
 
-                {spaces.length === 0 ? (
-                  <div className="py-12 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
-                    <p className="text-sm text-slate-400 font-medium font-heading">Launch a space to see your member roster</p>
+                {filteredMembers.length === 0 ? (
+                  <div className="py-24 text-center bg-slate-50 rounded-[40px] border border-dashed border-slate-200">
+                    <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                    <p className="text-sm text-slate-400 font-bold font-heading">No matching members discovered</p>
+                    <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filters.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto -mx-8 px-8">
-                    <table className="w-full text-left border-collapse">
+                  <div className="overflow-x-auto -mx-10 px-10">
+                    <table className="w-full text-left border-separate border-spacing-y-4">
                       <thead>
-                        <tr className="border-b border-slate-100">
-                          <th className="pb-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-4">Member ID</th>
-                          <th className="pb-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Space Name</th>
-                          <th className="pb-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Joined</th>
-                          <th className="pb-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest pr-4 text-right">Status</th>
+                        <tr>
+                          <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-6">ID Profile</th>
+                          <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Verified Hub</th>
+                          <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Key Acquisition</th>
+                          <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Value</th>
+                          <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pr-6 text-right">Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
-                        {spaces.flatMap(space => 
-                          // Mocking members based on subscriber count for visual until real members bridge
-                          Array.from({ length: Math.min(space.subscribers, 5) }).map((_, i) => ({
-                            id: `USER_${Math.floor(1000000 + Math.random() * 9000000)}`,
-                            spaceName: space.name,
-                            date: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7).toLocaleDateString(),
-                            status: 'Active'
-                          }))
-                        ).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((member, idx) => (
-                          <tr key={idx} className="group hover:bg-slate-50/50 transition-colors">
-                            <td className="py-5 text-sm font-semibold text-slate-900 pl-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] text-primary font-bold">
-                                  {member.id.substring(5, 7)}
+                      <tbody>
+                        {filteredMembers.map((member, idx) => (
+                          <motion.tr 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            key={member.id} 
+                            className="group hover:scale-[1.01] transition-all duration-300"
+                          >
+                            <td className="py-6 bg-slate-50/50 group-hover:bg-primary/[0.04] rounded-l-[32px] pl-6 border-y border-l border-slate-100 transition-colors">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden">
+                                  <img 
+                                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.telegram_user_id || member.id}`} 
+                                    alt="Avatar" 
+                                    className="w-full h-full object-cover"
+                                  />
                                 </div>
-                                {member.id}
+                                <div className="space-y-0.5">
+                                   <p className="text-sm font-black text-slate-950 uppercase tracking-tight">ID-{member.telegram_user_id || 'UNKNOWN'}</p>
+                                   <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Verified Holder</p>
+                                </div>
                               </div>
                             </td>
-                            <td className="py-5 text-sm text-slate-500 font-medium">{member.spaceName}</td>
-                            <td className="py-5 text-sm text-slate-500 font-medium">{member.date}</td>
-                            <td className="py-5 text-right pr-4">
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest border border-emerald-100">
-                                <div className="w-1 h-1 rounded-full bg-emerald-600 animate-pulse" />
-                                {member.status}
-                              </span>
+                            <td className="py-6 bg-slate-50/50 group-hover:bg-primary/[0.04] border-y border-slate-100 transition-colors">
+                               <div className="flex items-center gap-2">
+                                  <MapPin className="w-3.5 h-3.5 text-primary opacity-60" />
+                                  <span className="text-sm font-bold text-slate-900 tracking-tight">{member.spaceName}</span>
+                               </div>
                             </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </main>
-  )
-}
+                            <td className="py-6 bg-slate-50/50 group-hover:bg-primary/[0.04] border-y border-slate-100 transition-colors">
+                               <

@@ -1,5 +1,5 @@
 import { DiscoverPage } from '@/components/DiscoverPage'
-import { getDiscoverSpaces } from '@/lib/mockApi'
+import { getDiscoverSpaces } from '@/lib/database'
 
 export const dynamic = 'force-dynamic';
 
