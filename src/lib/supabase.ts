@@ -15,6 +15,7 @@ export type SubscriptionTier = {
   name: string;
   price: number;
   duration: string;
+  currency?: string;
 };
 
 export type RevenuePoint = {

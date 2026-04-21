@@ -60,89 +60,124 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
     setCheckoutState('processing')
 
     try {
+      if (currentTier.currency === 'Stars') {
+        const res = await fetch('/api/purchase/invoice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            spaceId: space.id,
+            tierName: currentTier.name,
+            amount: currentTier.price,
+            currency: 'Stars'
+          })
+        });
+        const data = await res.json();
+        if (data.invoiceLink) {
+          const WebApp = (await import('@twa-dev/sdk')).default;
+          WebApp.openInvoice(data.invoiceLink, (status) => {
+            if (status === 'paid') {
+              console.log('Stars payment successful');
+              // Proceed with backend recording
+              handleBackendVerification(null, 'Stars');
+            } else {
+              setCheckoutState('idle');
+            }
+          });
+        }
+        return;
+      }
+
       const messages = [];
       const spaceCreatedAt = new Date(space.created_at).getTime();
       const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
       const isFirstMonth = (Date.now() - spaceCreatedAt) < thirtyDaysInMs;
 
-      if (space.referrer_payment_address && isFirstMonth) {
-        // 7% to the creator-referrer, 93% to the creator
-        // Rule: Only applies to the referred creator's first month
-        console.log('[Referral] 7% referral split active (First Month rule)');
-        const referrerCut = currentTier.price * 0.07;
-        const creatorCut = currentTier.price * 0.93;
+      // USDT (Jetton) logic
+      if (currentTier.currency === 'USDT') {
+        const usdtMaster = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs'; // TON USDT Master
+        const decimals = 6;
+        const amountUnits = BigInt(Math.floor(currentTier.price * (10 ** decimals)));
         
+        // Basic Jetton transfer message (op: 0xf8a7ea5)
+        // We'll simulate the cell construction if using real tonConnect, 
+        // but for the mock/v1 we'll define the target.
         messages.push({
-          address: paymentAddress,
-          amount: String(Math.floor(creatorCut * 1_000_000_000)),
-        });
-        messages.push({
-          address: space.referrer_payment_address,
-          amount: String(Math.floor(referrerCut * 1_000_000_000)),
+          address: usdtMaster, 
+          amount: '50000000', // 0.05 TON for gas
+          payload: '' // In real app, this would be encoded cell for transfer
         });
       } else {
-        // 100% to creator
-        if (space.referrer_payment_address && !isFirstMonth) {
-          console.log('[Referral] Referral address found but bypassed (First Month ended)');
+        // TON logic
+        if (space.referrer_payment_address && isFirstMonth) {
+          const referrerCut = currentTier.price * 0.07;
+          const creatorCut = currentTier.price * 0.93;
+          messages.push({
+            address: paymentAddress,
+            amount: String(Math.floor(creatorCut * 1_000_000_000)),
+          });
+          messages.push({
+            address: space.referrer_payment_address,
+            amount: String(Math.floor(referrerCut * 1_000_000_000)),
+          });
+        } else {
+          messages.push({
+            address: paymentAddress,
+            amount: String(Math.floor(currentTier.price * 1_000_000_000)),
+          });
         }
-        messages.push({
-          address: paymentAddress,
-          amount: String(currentTier.price * 1_000_000_000),
-        });
-      }
-
-      const tx = {
-        validUntil: Math.floor(Date.now() / 1000) + 300,
-        network: '-239',
-        messages,
       }
 
       console.log('--- SIMULATING BLOCKCHAIN TRANSACTION ---')
-      console.log('Sending from mock wallet:', walletAddress)
-      console.log('Payload data:', JSON.stringify(tx, null, 2))
+      console.log('Currency:', currentTier.currency)
+      console.log('Payload:', JSON.stringify(messages, null, 2))
       console.log('-----------------------------------------')
       
-      // Simulate real-world contract signing block time
       await new Promise(res => setTimeout(res, 2500));
+      await handleBackendVerification('mock_hash', currentTier.currency || 'TON');
 
-      let telegramUserId: number | undefined
-      try {
-        const WebApp = (await import('@twa-dev/sdk')).default
-        telegramUserId = WebApp.initDataUnsafe.user?.id
-      } catch (error) {
-        console.warn('Telegram WebApp user id unavailable', error)
-      }
-
-      try {
-        const res = await fetch('/api/purchase', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            spaceId: space.id,
-            walletAddress,
-            telegramUserId,
-            amount: String(currentTier.price * 1_000_000_000),
-            referralSource,
-          })
-        })
-        const data = await res.json()
-        if (data.accessUrl) {
-          setAccessUrl(data.accessUrl)
-        } else {
-          setAccessUrl(space.channel_link)
-        }
-      } catch (e) {
-        console.error('Failed to verify purchase', e)
-        setAccessUrl(space.channel_link)
-      }
-
-      setCheckoutState('complete')
     } catch (error) {
       console.warn('Payment failed', error)
       alert('Payment failed. Try again.')
       setCheckoutState('idle')
     }
-  }, [currentTier.price, paymentAddress, space, walletAddress, connectWallet])
+  }, [currentTier, paymentAddress, space, walletAddress, connectWallet])
+
+  const handleBackendVerification = async (txHash: string | null, currency: string) => {
+    let telegramUserId: number | undefined
+    try {
+      const WebApp = (await import('@twa-dev/sdk')).default
+      telegramUserId = WebApp.initDataUnsafe.user?.id
+    } catch (error) {
+      console.warn('Telegram WebApp user id unavailable', error)
+    }
+
+    try {
+      const res = await fetch('/api/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spaceId: space.id,
+          walletAddress,
+          telegramUserId,
+          amount: currentTier.price,
+          currency: currency,
+          txHash,
+          referralSource,
+        })
+      })
+      const data = await res.json()
+      if (data.accessUrl) {
+        setAccessUrl(data.accessUrl)
+      } else {
+        setAccessUrl(space.channel_link)
+      }
+    } catch (e) {
+      console.error('Failed to verify purchase', e)
+      setAccessUrl(space.channel_link)
+    }
+
+    setCheckoutState('complete')
+  }
 
   useEffect(() => {
     if (!space || space.is_closed) {
@@ -187,7 +222,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
             <span className="text-8xl font-heading font-bold tracking-tighter text-slate-950">
               {currentTier.price}
             </span>
-            <span className="text-lg font-bold text-slate-500 uppercase tracking-widest">Stars</span>
+            <span className="text-lg font-bold text-slate-500 uppercase tracking-widest">{currentTier.currency || 'TON'}</span>
           </div>
           <span className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-400">per {currentTier.duration}</span>
         </div>
@@ -229,7 +264,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
                 </div>
                 <div className="text-right">
                   <p className="text-3xl font-mono font-bold text-slate-950">{tier.price}</p>
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">per {tier.duration}</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{tier.currency || 'TON'} / {tier.duration}</p>
                 </div>
               </div>
               {isSelected && (
@@ -280,7 +315,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
             ? 'Processing payment...'
             : checkoutState === 'complete'
             ? 'Success!'
-            : `Pay ${currentTier.price} Stars`}
+            : `Pay ${currentTier.price} ${currentTier.currency || 'TON'}`}
         </button>
 
         {checkoutState === 'complete' && (
@@ -347,11 +382,11 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
 
       <footer className="text-center space-y-6 px-4 pt-6 border-t border-zinc-100/50">
         <div className="text-[11px] font-bold uppercase tracking-widest text-slate-950 opacity-80">
-          Powered by Telegram Stars
+          Powered by TON & Telegram
         </div>
         <div className="space-y-1 text-[10px] text-slate-500 font-semibold uppercase tracking-[0.18em]">
           <p>Instant access after payment</p>
-          <p>No hidden fees · Secure purchase</p>
+          <p>Multi-Currency Support Enabled</p>
         </div>
       </footer>
     </div>

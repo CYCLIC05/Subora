@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { Header } from '@/components/Header'
 import { SpaceCard } from '@/components/SpaceCard'
 import { Space } from '@/lib/supabase'
@@ -240,8 +241,49 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
           </motion.div>
 
           {filteredSpaces.length === 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
-              <p className="text-zinc-400 font-medium">No communities found matching your configuration.</p>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="space-y-12 py-10"
+            >
+              <div className="text-center space-y-4 max-w-sm mx-auto">
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto">
+                  <Search className="w-8 h-8 text-slate-300" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-heading font-bold text-slate-950 tracking-tight">Zero signals found.</h3>
+                  <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                    This niche is currently underserved. This is your chance to lead the community.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 opacity-50 pointer-events-none grayscale">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="border-2 border-dashed border-slate-200 rounded-[32px] p-6 space-y-5 h-[400px] flex flex-col justify-end bg-slate-50/50">
+                    <div className="w-full aspect-[16/10] bg-slate-100 rounded-2xl" />
+                    <div className="space-y-3">
+                      <div className="h-4 w-2/3 bg-slate-200 rounded-full" />
+                      <div className="h-3 w-full bg-slate-100 rounded-full" />
+                      <div className="h-10 w-full bg-slate-200 rounded-2xl mt-4" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-center pt-4">
+                <div className="bg-white border border-slate-200 p-8 rounded-[40px] shadow-2xl shadow-slate-900/5 text-center space-y-6 max-w-sm relative overflow-hidden group">
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-16 translate-x-16" />
+                   <h4 className="text-lg font-bold text-slate-950 tracking-tight">Be the first to dominate {selectedCategory !== 'All' ? `the ${selectedCategory} niche` : 'this search'}.</h4>
+                   <p className="text-xs text-slate-500 font-medium">Capture the attention of users searching for these signals.</p>
+                   <Link 
+                     href="/create"
+                     className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-3xl bg-slate-950 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-900 transition-all active:scale-95 shadow-xl shadow-slate-950/10 group-hover:bg-primary group-hover:shadow-primary/20"
+                   >
+                     🚀 Launch Space
+                   </Link>
+                </div>
+              </div>
             </motion.div>
           )}
         </section>

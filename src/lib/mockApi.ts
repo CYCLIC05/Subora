@@ -183,28 +183,31 @@ export const createSpace = async (payload: CreateSpacePayload): Promise<Space> =
 
   return newSpace
 }
-export const getUserSubscriptions = async (telegramUserId: number | string): Promise<Space[]> => {
+export type SubscriptionWithSpace = Space & {
+  invite_link?: string;
+  amount_paid?: number;
+  currency_paid?: string;
+}
+
+export const getUserSubscriptions = async (telegramUserId: number | string): Promise<SubscriptionWithSpace[]> => {
   if (isSupabaseReady) {
     try {
-      // 1. Find all space IDs the user is subscribed to
+      // 1. Find all subscriptions for the user
       const { data: subs, error: subError } = await (supabase! as any)
         .from('space_subscriptions')
-        .select('space_id')
+        .select(`*, space:spaces(${spaceSelect})`)
         .eq('telegram_user_id', telegramUserId)
+        .order('join_time', { ascending: false })
 
       if (subError || !subs) return []
 
-      const spaceIds = subs.map((s: { space_id: string }) => s.space_id)
-      if (spaceIds.length === 0) return []
-
-      // 2. Fetch the corresponding spaces
-      const { data: spaces, error: spaceError } = await (supabase! as any)
-        .from('spaces')
-        .select(spaceSelect)
-        .in('id', spaceIds)
-
-      if (spaceError) return []
-      return (spaces as Space[]) || []
+      // 2. Flatten the join results
+      return subs.map((s: any) => ({
+        ...s.space,
+        invite_link: s.invite_link,
+        amount_paid: s.amount_paid,
+        currency_paid: s.currency
+      })) as SubscriptionWithSpace[]
     } catch (error) {
       console.error('Error fetching user subscriptions:', error)
       return []

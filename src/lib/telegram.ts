@@ -110,7 +110,7 @@ export async function handleTelegramWebhookUpdate(update: any) {
               { text: 'view Space', url: `https://t.me/SuboraBot/app?startapp=space_${spaceId}` }
             ]]
           }
-        } as any
+        }
       )
     }
 
@@ -126,7 +126,7 @@ export async function handleTelegramWebhookUpdate(update: any) {
             { text: '🌐 Open Discovery', url: `https://t.me/SuboraBot/app` }
           ]]
         }
-      } as any
+      }
     )
   }
 
@@ -140,7 +140,7 @@ export async function handleTelegramWebhookUpdate(update: any) {
 export async function sendTelegramAccessLink(chatId: string, accessUrl: string, spaceName: string) {
   try {
     const bot = createBot()
-    const options: any = {
+    const options: SendMessageOptions = {
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [[
@@ -177,7 +177,7 @@ export async function generateSingleUseInviteLink(channelLink: string): Promise<
     const bot = createBot()
     // expires_date: 10 minutes from now, member_limit: 1 — truly single-use
     const expiresAt = Math.floor(Date.now() / 1000) + 10 * 60
-    const result = await (bot as any).createChatInviteLink(chatId, {
+    const result = await bot.createChatInviteLink(chatId, {
       member_limit: 1,
       expire_date: expiresAt,
     })

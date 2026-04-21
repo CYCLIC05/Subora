@@ -21,11 +21,26 @@ create table public.spaces (
 
 create table public.space_subscriptions (
   id uuid primary key default gen_random_uuid(),
-  space_id uuid references public.spaces(id),
+  space_id uuid references public.spaces(id) on delete cascade,
   telegram_user_id bigint,
   wallet_address text,
   referral_source text,
+  currency text not null default 'TON',
+  amount_paid numeric not null default 0,
+  invite_link text,
   join_time timestamptz not null default now()
+);
+
+create table public.transactions (
+  id uuid primary key default gen_random_uuid(),
+  space_id uuid references public.spaces(id) on delete set null,
+  telegram_user_id bigint,
+  wallet_address text,
+  amount numeric not null,
+  currency text not null,
+  tx_hash text,
+  status text not null default 'success',
+  created_at timestamptz not null default now()
 );
 
 create table public.revenue_points (

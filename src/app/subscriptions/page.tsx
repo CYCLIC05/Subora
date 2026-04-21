@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { Space, supabase } from '@/lib/supabase';
-import { getUserSubscriptions } from '@/lib/mockApi';
+import { SubscriptionWithSpace, getUserSubscriptions } from '@/lib/mockApi';
 import { Header } from '@/components/Header';
 import { SpaceCard } from '@/components/SpaceCard';
-import { Compass, Ghost, Loader2, Lock } from 'lucide-react';
+import { Compass, ExternalLink, Ghost, Loader2, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SubscriptionsPage() {
-  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionWithSpace[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<number | null>(null);
 
@@ -21,7 +21,7 @@ export default function SubscriptionsPage() {
         if (id) {
           setUserId(id);
           const data = await getUserSubscriptions(id);
-          setSpaces(data);
+          setSubscriptions(data);
         }
       } catch (err) {
         console.error('Failed to init subscriptions page', err);
@@ -42,7 +42,7 @@ export default function SubscriptionsPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-4xl font-heading font-semibold text-slate-950 tracking-tight">My Subscriptions</h1>
             <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-primary/20">
-              {spaces.length} Access Keys
+              {subscriptions.length} Access Keys
             </div>
           </div>
           <p className="text-sm text-slate-500 max-w-xl leading-relaxed font-medium">
@@ -55,15 +55,26 @@ export default function SubscriptionsPage() {
             <Loader2 className="w-10 h-10 text-primary animate-spin" />
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Verifying Access...</p>
           </div>
-        ) : spaces.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {spaces.map((space) => (
-              <div key={space.id} className="relative group">
-                <SpaceCard space={space} />
-                <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="bg-emerald-500 text-white p-2 rounded-full shadow-xl">
-                    <Lock className="w-4 h-4" />
-                  </div>
+        ) : subscriptions.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {subscriptions.map((sub) => (
+              <div key={sub.id} className="relative group space-y-4">
+                <SpaceCard space={sub} />
+                <div className="flex flex-col gap-3">
+                   {sub.invite_link && (
+                     <a
+                       href={sub.invite_link.startsWith('http') ? sub.invite_link : `https://t.me/${sub.invite_link.replace(/^@/, '')}`}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="flex items-center justify-center gap-2 w-full bg-slate-950 text-white py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-900 transition-all active:scale-95 shadow-xl shadow-slate-900/15"
+                     >
+                       <ExternalLink className="w-4 h-4" />
+                       Enter Channel
+                     </a>
+                   )}
+                   <p className="text-[9px] text-center font-bold text-slate-400 uppercase tracking-widest">
+                     Unlocked via {sub.currency_paid || 'TON'}
+                   </p>
                 </div>
               </div>
             ))}

@@ -35,12 +35,6 @@ export function SpaceCard({ space }: { space: Space }) {
           <span className="text-[10px] font-bold text-slate-900 uppercase tracking-[0.1em]">Verified</span>
         </div>
 
-        {space.is_closed && (
-          <div className="absolute top-4 left-4 bg-slate-900 shadow-sm px-3 py-1.5 rounded-full flex items-center transition-transform group-hover:scale-105 z-10">
-            <span className="text-[10px] font-bold text-white uppercase tracking-[0.1em]">Sold Out</span>
-          </div>
-        )}
-
         {space.is_trending && !space.is_closed && (
           <div className="absolute top-4 left-4 bg-primary shadow-sm px-3 py-1.5 rounded-full flex items-center transition-transform group-hover:scale-105 z-10">
             <span className="text-[10px] font-bold text-white uppercase tracking-[0.1em]">Trending</span>

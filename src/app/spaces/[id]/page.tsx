@@ -13,20 +13,27 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   
   if (!space) return { title: 'Space Not Found | Subora' }
 
+  const ogUrl = new URL('/api/og', 'https://subora-spaces.vercel.app') // Fallback base
+  ogUrl.searchParams.set('name', space.name)
+  ogUrl.searchParams.set('subscribers', String(space.subscribers))
+  if (space.cover_image) ogUrl.searchParams.set('image', space.cover_image)
+
+  const finalOgImage = ogUrl.toString()
+
   return {
     title: `${space.name} | Subora`,
     description: space.description,
     openGraph: {
       title: `Join ${space.name} on Subora`,
       description: space.description,
-      images: [space.cover_image || '/og-image.png'],
+      images: [finalOgImage],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: `Join ${space.name} on Subora`,
       description: space.description,
-      images: [space.cover_image || '/og-image.png'],
+      images: [finalOgImage],
     },
   }
 }

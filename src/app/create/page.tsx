@@ -5,6 +5,9 @@ import { Header } from "@/components/Header";
 import { useCallback, useEffect, useState } from "react";
 import confetti from 'canvas-confetti';
 import { Input } from "@/components/ui/input";
+import { CelebrationModal } from "@/components/CelebrationModal";
+import { Space } from "@/lib/supabase";
+import { X } from "lucide-react";
 
 export default function CreateSpace() {
   const [loading, setLoading] = useState(false);
@@ -20,9 +23,17 @@ export default function CreateSpace() {
     payment_address: '',
   });
 
+  const [createdSpace, setCreatedSpace] = useState<Partial<Space> | null>(null);
+  const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
+
+  const [isVerified, setIsVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [verifySuccess, setVerifySuccess] = useState<string | null>(null);
+
   const [tiers, setTiers] = useState([
-    { name: 'Standard Access', price: 99, duration: 'week' },
-    { name: 'Premium Access', price: 299, duration: 'month' },
+    { name: 'Standard Access', price: 99, duration: 'week', currency: 'TON' },
+    { name: 'Premium Access', price: 299, duration: 'month', currency: 'TON' },
   ]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -70,7 +81,7 @@ export default function CreateSpace() {
     }
   };
 
-  const handleTierChange = (index: number, field: 'name' | 'price' | 'duration', value: string) => {
+  const handleTierChange = (index: number, field: 'name' | 'price' | 'duration' | 'currency', value: string) => {
     setTiers((current) =>
       current.map((tier, tierIndex) =>
         tierIndex === index
@@ -81,7 +92,36 @@ export default function CreateSpace() {
   };
 
   const handleAddTier = () => {
-    setTiers((current) => [...current, { name: 'New Tier', price: 149, duration: 'month' }]);
+    setTiers((current) => [...current, { name: 'New Tier', price: 149, duration: 'month', currency: 'TON' }]);
+  };
+
+  const handleVerifyConnection = async () => {
+    if (!formData.channel_link) {
+      setVerifyError('Please enter a channel link first.');
+      return;
+    }
+    setVerifying(true);
+    setVerifyError(null);
+    setVerifySuccess(null);
+    try {
+      const res = await fetch('/api/telegram/verify-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channelLink: formData.channel_link })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsVerified(true);
+        setVerifySuccess(data.message);
+      } else {
+        setIsVerified(false);
+        setVerifyError(data.error);
+      }
+    } catch (err) {
+      setVerifyError('Failed to verify connection. Please try again.');
+    } finally {
+      setVerifying(false);
+    }
   };
 
   const handleRemoveTier = (index: number) => {
@@ -97,13 +137,7 @@ export default function CreateSpace() {
     setLoading(true);
     setTimeout(async () => {
       try {
-        const telegramId = (window as unknown as {
-          Telegram?: {
-            WebApp?: {
-              initDataUnsafe?: { user?: { id?: number } }
-            }
-          }
-        }).Telegram?.WebApp?.initDataUnsafe?.user?.id ?? 0
+        const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id ?? 0
 
         const creatorReferrer = localStorage.getItem('creator_referrer') || undefined;
 
@@ -144,6 +178,12 @@ export default function CreateSpace() {
             origin: { y: 0.6 },
             colors: ['#000000', '#71717a', '#a1a1aa'],
           })
+          
+          setCreatedSpace({
+            id: 'pending', // Will be updated if we get the ID back from API
+            ...formData
+          })
+          setIsCelebrationOpen(true)
         }
       } catch (error) {
         console.error('Error saving space:', error)
@@ -228,6 +268,12 @@ export default function CreateSpace() {
     <main className="min-h-screen bg-background pb-32">
       <Header />
       
+      <CelebrationModal 
+        isOpen={isCelebrationOpen} 
+        onClose={() => setIsCelebrationOpen(false)} 
+        space={createdSpace || { name: formData.name }} 
+      />
+
       <div className="container mx-auto px-4 py-10 max-w-3xl">
         {step === 1 && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -321,20 +367,44 @@ export default function CreateSpace() {
                         />
                       </div>
                       <div className="space-y-1.5 flex flex-col justify-end">
-                        <label className="text-xs font-semibold text-slate-900 ml-1">Telegram Channel Link or ID</label>
+                        <label className="text-xs font-semibold text-slate-900 ml-1">Channel Link</label>
                         <Input
                           required
+                          type="text"
                           name="channel_link"
                           value={formData.channel_link}
                           onChange={handleChange}
-                          placeholder="https://t.me/yourchannel or -100123456789"
-                          className="h-11 rounded-2xl border-slate-200 bg-slate-50/80"
+                          placeholder="@channelname or t.me/... or -100..."
+                          className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 text-sm focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
                         />
                         <p className="text-[10px] text-slate-500 font-medium ml-1 mt-1 leading-relaxed">
                           Enter your <span className="text-primary font-bold">@username</span>, <span className="text-primary font-bold">t.me/link</span>, or <span className="text-primary font-bold">Numeric ID</span> (-100...).
                           <br />
                           <span className="text-slate-900">Note:</span> Use the <span className="font-bold underline">Numeric ID</span> for private channels to enable single-use invite link security.
                         </p>
+                        
+                        <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                               <p className="text-xs font-bold text-slate-950 uppercase tracking-tight">Channel Connection</p>
+                               <p className="text-[10px] text-slate-500 font-medium">Verify Subora bot is admin.</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleVerifyConnection}
+                              disabled={verifying}
+                              className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                                isVerified 
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+                                : 'bg-slate-950 text-white hover:bg-slate-900'
+                              }`}
+                            >
+                              {verifying ? 'Checking...' : isVerified ? 'Verified ✓' : 'Verify Connection'}
+                            </button>
+                          </div>
+                          {verifyError && <p className="text-[10px] font-bold text-rose-500">{verifyError}</p>}
+                          {verifySuccess && <p className="text-[10px] font-bold text-emerald-500">{verifySuccess}</p>}
+                        </div>
                       </div>
                     </div>
 
@@ -387,16 +457,28 @@ export default function CreateSpace() {
                               className="h-9 rounded-2xl bg-white border-slate-200 text-xs font-bold"
                               placeholder="149"
                             />
-                            <select
-                              name={`tier-${index}-duration`}
-                              value={tier.duration}
-                              onChange={(e) => handleTierChange(index, 'duration', e.target.value)}
-                              className="h-9 rounded-2xl bg-white border border-slate-200 text-[10px] font-bold uppercase"
-                            >
-                              <option value="week">Weekly</option>
-                              <option value="month">Monthly</option>
-                              <option value="year">Yearly</option>
-                            </select>
+                            <div className="flex gap-2">
+                              <select
+                                name={`tier-${index}-currency`}
+                                value={tier.currency}
+                                onChange={(e) => handleTierChange(index, 'currency', e.target.value)}
+                                className="h-9 rounded-2xl bg-white border border-slate-200 text-[10px] font-bold uppercase px-2"
+                              >
+                                <option value="TON">TON</option>
+                                <option value="USDT">USDT</option>
+                                <option value="Stars">Stars</option>
+                              </select>
+                              <select
+                                name={`tier-${index}-duration`}
+                                value={tier.duration}
+                                onChange={(e) => handleTierChange(index, 'duration', e.target.value)}
+                                className="h-9 rounded-2xl bg-white border border-slate-200 text-[10px] font-bold uppercase px-2"
+                              >
+                                <option value="week">Weekly</option>
+                                <option value="month">Monthly</option>
+                                <option value="year">Yearly</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
 
@@ -406,9 +488,9 @@ export default function CreateSpace() {
                             type="button"
                             onClick={() => handleRemoveTier(index)}
                             disabled={tiers.length === 1}
-                            className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-full border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            Remove
+                            <X className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -428,9 +510,10 @@ export default function CreateSpace() {
               <footer className="pt-6 text-center space-y-4">
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-3xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                  disabled={!isVerified}
+                  className="inline-flex items-center justify-center gap-2 rounded-3xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Review space
+                  {isVerified ? 'Review space' : 'Verify Bot to Continue'}
                 </button>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
                   If you are inside Telegram, use the native main button above.

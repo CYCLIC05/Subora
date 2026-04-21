@@ -15,6 +15,9 @@ export async function POST(request: Request) {
 
     const cleanQuery = query.trim().toLowerCase()
 
+    // TODO: Implement search_queries table in Supabase for analytics
+    // Tracking disabled in V1 - will be re-enabled after database schema update
+    /*
     // Upsert the search query
     // This will increment the count if it exists, but Supabase JS doesn't have a direct "increment" upsert
     // so we use a RPC or a manual check. For simplicity and to avoid creating too many RPCs,
@@ -48,6 +51,7 @@ export async function POST(request: Request) {
           .insert({ query: cleanQuery, count: 1 })
       }
     }
+    */
 
     return NextResponse.json({ success: true })
   } catch (err) {
