@@ -1,31 +1,22 @@
 'use client';
 
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-const TonConnectAvailabilityContext = createContext(false);
-
-export function useTonConnectAvailable() {
-  return useContext(TonConnectAvailabilityContext);
-}
+import { WalletProvider } from './WalletProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [isTonConnectAvailable, setIsTonConnectAvailable] = useState(false);
-  const [hasTonConnectError, setHasTonConnectError] = useState(false);
-
   const router = useRouter();
 
   useEffect(() => {
     const initTWA = async () => {
       try {
         const WebApp = (await import('@twa-dev/sdk')).default;
-        WebApp.ready();
-        WebApp.expand();
-        WebApp.enableClosingConfirmation();
+        if (WebApp.ready) WebApp.ready();
+        if (WebApp.expand) WebApp.expand();
+        if (WebApp.enableClosingConfirmation) WebApp.enableClosingConfirmation();
 
         // Handle Deep Linking & Referrals
-        const startParam = WebApp.initDataUnsafe.start_param;
+        const startParam = WebApp.initDataUnsafe?.start_param;
         if (startParam) {
           console.log('Detected start_param:', startParam);
           
@@ -39,6 +30,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
               spaceId = parts[i + 1];
             } else if (parts[i] === 'ref' && parts[i + 1]) {
               referrerId = parts[i + 1];
+            } else if (parts[i] === 'creator' && parts[i + 1] === 'ref' && parts[i + 2]) {
+              const walletAddress = parts.slice(i + 2).join('_');
+              localStorage.setItem('creator_referrer', walletAddress);
+              console.log('Creator Referrer stored:', walletAddress);
+              break;
             }
           }
 
@@ -57,63 +53,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }
     };
 
-    const handleOnlineStatus = () => {
-      setIsTonConnectAvailable(navigator.onLine);
-      if (!navigator.onLine) {
-        setHasTonConnectError(true);
-      }
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      const reason = event.reason;
-      const message = reason instanceof Error ? reason.message : String(reason);
-
-      if (message.includes('Failed to fetch')) {
-        if (message.toLowerCase().includes('analytics') || String(reason).toLowerCase().includes('analytics')) {
-          return; // Ignore harmless analytics blockings via ad-blockers
-        }
-        console.warn('TonConnect wallet list fetch failed, disabling wallet UI for this session.', reason);
-        event.preventDefault();
-        setIsTonConnectAvailable(false);
-        setHasTonConnectError(true);
-      }
-    };
-
-    const handleErrorEvent = (event: ErrorEvent) => {
-      const message = event.error?.message ?? event.message;
-      if (typeof message === 'string' && message.includes('Failed to fetch')) {
-        if (message.toLowerCase().includes('analytics')) {
-          return; // Ignore harmless analytics blockings via ad-blockers
-        }
-        console.warn('TonConnect wallet list fetch failed, disabling wallet UI for this session.', event.error || message);
-        event.preventDefault();
-        setIsTonConnectAvailable(false);
-        setHasTonConnectError(true);
-      }
-    };
-
     initTWA();
-    handleOnlineStatus();
-    window.addEventListener('online', handleOnlineStatus);
-    window.addEventListener('offline', handleOnlineStatus);
-    window.addEventListener('unhandledrejection', handleUnhandledRejection as EventListener);
-    window.addEventListener('error', handleErrorEvent);
-
-    return () => {
-      window.removeEventListener('online', handleOnlineStatus);
-      window.removeEventListener('offline', handleOnlineStatus);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection as EventListener);
-      window.removeEventListener('error', handleErrorEvent);
-    };
-  }, []);
-
-  const manifestUrl = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ?? (typeof window !== 'undefined' ? `${window.location.origin}/tonconnect-manifest.json` : 'https://subora-spaces.vercel.app/tonconnect-manifest.json');
+  }, [router]);
 
   return (
-    <TonConnectAvailabilityContext.Provider value={isTonConnectAvailable && !hasTonConnectError}>
-      <TonConnectUIProvider manifestUrl={manifestUrl}>
-        {children}
-      </TonConnectUIProvider>
-    </TonConnectAvailabilityContext.Provider>
+    <WalletProvider>
+      {children}
+    </WalletProvider>
   );
 }

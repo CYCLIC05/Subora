@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from "react"
-import { TrendingUp } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import {
   Card,
@@ -164,9 +163,6 @@ export function RevenueAnalytics({ chartData = [] }: { chartData?: RevenuePoint[
           </ChartContainer>
         ) : (
           <div className="flex flex-col items-center justify-center h-[280px] text-center px-6">
-            <div className="w-12 h-12 bg-zinc-50 rounded-2xl flex items-center justify-center mb-4 border border-zinc-100">
-               <TrendingUp className="w-6 h-6 text-zinc-300" />
-            </div>
             <p className="text-sm font-semibold text-zinc-950">No growth data yet</p>
             <p className="text-xs text-zinc-500 max-w-[200px] mt-1 leading-relaxed">
               Your community growth will appear here as soon as you record your first membership.

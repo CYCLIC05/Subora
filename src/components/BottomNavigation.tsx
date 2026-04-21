@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Compass, PencilLine } from 'lucide-react';
+import { LayoutDashboard, Compass, PencilLine, Library } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -11,6 +11,7 @@ export function BottomNavigation() {
 
   const navItems = [
     { name: 'Discover', href: '/', icon: Compass },
+    { name: 'My Channels', href: '/subscriptions', icon: Library },
     { name: 'Create', href: '/create', icon: PencilLine },
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   ];

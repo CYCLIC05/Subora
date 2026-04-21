@@ -1,8 +1,16 @@
 import { supabase } from '@/lib/supabase'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic';
 
-export default async function DebugPage() {
+export default async function DebugPage({ searchParams }: { searchParams: Promise<{ key?: string }> }) {
+  const { key } = await searchParams
+
+  // Gate behind admin secret — prevent raw DB exposure in production
+  if (!key || key !== process.env.ADMIN_SECRET) {
+    redirect('/')
+  }
+
   const { data: spaces, error } = await (supabase! as any).from('spaces').select('*')
   
   return (
@@ -16,7 +24,7 @@ export default async function DebugPage() {
       )}
 
       <div className="space-y-4">
-        <p className="text-sm text-slate-500 uppercase tracking-widest">Live Rows in "spaces" table: {spaces?.length || 0}</p>
+        <p className="text-sm text-slate-500 uppercase tracking-widest">Live Rows in &quot;spaces&quot; table: {spaces?.length || 0}</p>
         
         {spaces && spaces.length > 0 ? (
           <pre className="bg-slate-50 p-6 rounded-3xl border border-slate-200 overflow-auto max-h-[600px] text-xs">
@@ -31,7 +39,7 @@ export default async function DebugPage() {
 
       <div className="mt-10 p-6 bg-slate-100 rounded-3xl text-xs space-y-2">
         <p className="font-bold">Instructions:</p>
-        <p>1. If you see data above, visit /api/cleanup to wipe it.</p>
+        <p>1. If you see data above, visit /api/cleanup?key=YOUR_SECRET to wipe it.</p>
         <p>2. If you see NO data above but your app still shows spaces, close the Telegram bot and restart it to clear the mobile cache.</p>
       </div>
     </div>

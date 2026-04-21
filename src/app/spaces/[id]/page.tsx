@@ -1,10 +1,35 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Check, ChevronLeft, Users, ShieldCheck, Lock, BadgeCheck, Share2 } from 'lucide-react'
+import { Check, ChevronLeft, Users, Lock, Share2 } from 'lucide-react'
+import { Metadata } from 'next'
 import { Header } from '@/components/Header'
 import { SpacePurchasePanel } from '@/components/SpacePurchasePanel'
 import { getSpaceById } from '@/lib/mockApi'
 import { ShareButton } from '@/components/ShareButton'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const space = await getSpaceById(id)
+  
+  if (!space) return { title: 'Space Not Found | Subora' }
+
+  return {
+    title: `${space.name} | Subora`,
+    description: space.description,
+    openGraph: {
+      title: `Join ${space.name} on Subora`,
+      description: space.description,
+      images: [space.cover_image || '/og-image.png'],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Join ${space.name} on Subora`,
+      description: space.description,
+      images: [space.cover_image || '/og-image.png'],
+    },
+  }
+}
 
 export default async function SpaceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -63,9 +88,8 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
 
         <div className="absolute bottom-12 left-0 right-0 px-6">
           <div className="container mx-auto max-w-5xl">
-            <div className="inline-flex items-center gap-2 bg-white/90 text-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 border border-white/90 shadow-sm shadow-slate-900/10">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Verified Community
+            <div className="inline-flex items-center gap-2 bg-white/90 text-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.1em] mb-4 border border-white/90 shadow-sm shadow-slate-900/10">
+              Verified Marketplace
             </div>
             <h1 className="text-4xl md:text-6xl font-heading font-semibold text-white mb-4 tracking-tighter leading-[0.95]">
               {space.name}
@@ -78,14 +102,13 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
             </p>
             <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm font-medium">
               <span className="flex items-center gap-2.5 bg-white/10 px-3 py-1.5 rounded-xl backdrop-blur-sm">
-                <Users className="w-4 h-4 opacity-100 text-primary" /> 
-                <span>by <span className="text-white font-bold">{space.channel_link}</span></span>
+                <span>by <span className="text-white font-bold">{space.creator_name || 'Verified Creator'}</span></span>
               </span>
               <span className="flex items-center gap-2.5">
-                <BadgeCheck className="w-4 h-4 text-emerald-300" /> {space.subscribers.toLocaleString()} members already inside
+                <span className="text-emerald-300 font-bold">{space.subscribers.toLocaleString()} members</span> already inside
               </span>
-              <span className="flex items-center gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-primary" /> Powered by Telegram Stars
+              <span className="flex items-center gap-2.5 opacity-60">
+                Official Ecosystem
               </span>
             </div>
 

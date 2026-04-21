@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Space } from '@/lib/supabase';
-import { ShieldCheck, ArrowRight, TrendingUp } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export function SpaceCard({ space }: { space: Space }) {
   const primaryTier = space.tiers[0] ?? { name: 'Entry', price: 0, duration: 'month' };
@@ -31,15 +31,19 @@ export function SpaceCard({ space }: { space: Space }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 to-transparent" />
         
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-slate-200 transition-transform group-hover:scale-105">
-          <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-          <span className="text-[10px] font-semibold text-slate-900 uppercase tracking-tight">Verified</span>
+        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur shadow-sm px-3 py-1.5 rounded-full flex items-center border border-slate-200 transition-transform group-hover:scale-105">
+          <span className="text-[10px] font-bold text-slate-900 uppercase tracking-[0.1em]">Verified</span>
         </div>
 
-        {space.is_trending && (
-          <div className="absolute top-4 left-4 bg-primary/95 backdrop-blur shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-primary/20 transition-transform group-hover:scale-105 z-10">
-            <TrendingUp className="w-3.5 h-3.5 text-white" />
-            <span className="text-[10px] font-bold text-white uppercase tracking-tight">Trending</span>
+        {space.is_closed && (
+          <div className="absolute top-4 left-4 bg-slate-900 shadow-sm px-3 py-1.5 rounded-full flex items-center transition-transform group-hover:scale-105 z-10">
+            <span className="text-[10px] font-bold text-white uppercase tracking-[0.1em]">Sold Out</span>
+          </div>
+        )}
+
+        {space.is_trending && !space.is_closed && (
+          <div className="absolute top-4 left-4 bg-primary shadow-sm px-3 py-1.5 rounded-full flex items-center transition-transform group-hover:scale-105 z-10">
+            <span className="text-[10px] font-bold text-white uppercase tracking-[0.1em]">Trending</span>
           </div>
         )}
 
@@ -60,7 +64,7 @@ export function SpaceCard({ space }: { space: Space }) {
           </div>
           <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
             <span className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl">
-              by <span className="text-slate-950 tracking-tight">{space.channel_link}</span>
+              by <span className="text-slate-950 tracking-tight">{space.creator_name || 'Verified Space'}</span>
             </span>
             <span className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-100/50">
               {space.subscribers.toLocaleString()} members
@@ -75,7 +79,7 @@ export function SpaceCard({ space }: { space: Space }) {
           </div>
           
           <Link
-            href={`/spaces/${space.id}`}
+            href={`/spaces/${space.id}?source=discovery`}
             prefetch={false}
             onClick={handleHaptic}
             className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-3xl bg-primary text-white text-sm font-semibold shadow-lg shadow-primary/15 hover:bg-primary/90 transition-all active:scale-95"

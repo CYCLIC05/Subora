@@ -1,7 +1,15 @@
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Gate behind admin secret to prevent unauthorized database wipes
+  const { searchParams } = new URL(request.url)
+  const key = searchParams.get('key')
+
+  if (!key || key !== process.env.ADMIN_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     // 1. Wipe the spaces table - DELETE ALL ENTRIES
     const { error: spacesError } = await (supabase! as any)

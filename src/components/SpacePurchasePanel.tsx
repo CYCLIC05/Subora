@@ -1,10 +1,10 @@
-  'use client'
+'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { SendTransactionRequest } from '@tonconnect/ui'
-import { TonConnectButton, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react'
+import { useSearchParams } from 'next/navigation'
 import { Space } from '@/lib/supabase'
 import { motion } from 'framer-motion'
+import { useMockWallet } from './WalletProvider'
 
 const trustLines = [
   'Instant access via Telegram',
@@ -12,57 +12,98 @@ const trustLines = [
 ]
 
 export function SpacePurchasePanel({ space }: { space: Space }) {
+  const searchParams = useSearchParams()
+  const referralSource = searchParams.get('source') || 'direct'
   const [selectedTierIndex, setSelectedTierIndex] = useState(0)
-  const [tonConnectUI] = useTonConnectUI()
-  const walletAddress = useTonAddress()
+  const { walletAddress, isConnecting, connectWallet } = useMockWallet()
   const paymentAddress = space.payment_address ?? process.env.NEXT_PUBLIC_TON_PAYMENT_ADDRESS ?? ''
-  const network = process.env.NEXT_PUBLIC_TON_NETWORK ?? '-239'
-
+  
   const isWalletConnected = Boolean(walletAddress)
+
+  // Check if we are inside Telegram
+  const [isInsideTelegram, setIsInsideTelegram] = useState(false)
+
+  useEffect(() => {
+    import('@twa-dev/sdk').then(m => {
+      if (m.default?.initDataUnsafe?.user?.id) setIsInsideTelegram(true)
+    }).catch(() => {})
+  }, [])
 
   const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'complete'>('idle')
   const [accessUrl, setAccessUrl] = useState<string | null>(null)
-  const [testAmount, setTestAmount] = useState<string>('1')
-  const tiers = space.tiers.length ? space.tiers : [{ name: 'Standard Access', price: 0, duration: 'month' }]
+  const tiers = space.tiers?.length ? space.tiers : [{ name: 'Standard Access', price: 0, duration: 'month' }]
   const currentTier = tiers[selectedTierIndex] ?? tiers[0]
 
   const handleTonCheckout = useCallback(async () => {
+    console.log('[SpacePurchasePanel] Payment triggered', { walletConnected: !!walletAddress, paymentAddress })
+    
     if (!paymentAddress) {
       alert('Payment address is not configured for this space. Please contact the creator.')
       return
     }
 
-    if (!tonConnectUI) {
-      alert('Wallet integration is not available in this browser session.')
-      return
-    }
-
-    if (!walletAddress) {
-      alert('Please connect your TON wallet before paying.')
-      return
+    // NEW: If not connected, trigger connection first for smoother UX
+    let currentWallet = walletAddress;
+    if (!currentWallet) {
+      try {
+        await connectWallet();
+        // Since connectWallet updates state, we might need a small delay or use the updated value.
+        // However, the simple UX is to let the user click again or await the state change.
+        // For the mock wallet, we can just assume it worked or check the return format.
+        return; // Return so the user sees the "connected" state and then clicks Pay again (or we could recursive call)
+      } catch (err) {
+        alert('Failed to connect wallet.');
+        return;
+      }
     }
 
     setCheckoutState('processing')
 
     try {
-      const requestedAmount = Number(testAmount) > 0 ? Number(testAmount) : currentTier.price
-      const amountNano = String(requestedAmount * 1_000_000_000)
-      const tx: SendTransactionRequest = {
-        validUntil: Math.floor(Date.now() / 1000) + 300,
-        network,
-        messages: [
-          {
-            address: paymentAddress,
-            amount: amountNano,
-          },
-        ],
+      const messages = [];
+      const spaceCreatedAt = new Date(space.created_at).getTime();
+      const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+      const isFirstMonth = (Date.now() - spaceCreatedAt) < thirtyDaysInMs;
+
+      if (space.referrer_payment_address && isFirstMonth) {
+        // 7% to the creator-referrer, 93% to the creator
+        // Rule: Only applies to the referred creator's first month
+        console.log('[Referral] 7% referral split active (First Month rule)');
+        const referrerCut = currentTier.price * 0.07;
+        const creatorCut = currentTier.price * 0.93;
+        
+        messages.push({
+          address: paymentAddress,
+          amount: String(Math.floor(creatorCut * 1_000_000_000)),
+        });
+        messages.push({
+          address: space.referrer_payment_address,
+          amount: String(Math.floor(referrerCut * 1_000_000_000)),
+        });
+      } else {
+        // 100% to creator
+        if (space.referrer_payment_address && !isFirstMonth) {
+          console.log('[Referral] Referral address found but bypassed (First Month ended)');
+        }
+        messages.push({
+          address: paymentAddress,
+          amount: String(currentTier.price * 1_000_000_000),
+        });
       }
 
-      await tonConnectUI.sendTransaction(tx, {
-        onRequestSent: () => {
-          console.log('TON payment request sent')
-        },
-      })
+      const tx = {
+        validUntil: Math.floor(Date.now() / 1000) + 300,
+        network: '-239',
+        messages,
+      }
+
+      console.log('--- SIMULATING BLOCKCHAIN TRANSACTION ---')
+      console.log('Sending from mock wallet:', walletAddress)
+      console.log('Payload data:', JSON.stringify(tx, null, 2))
+      console.log('-----------------------------------------')
+      
+      // Simulate real-world contract signing block time
+      await new Promise(res => setTimeout(res, 2500));
 
       let telegramUserId: number | undefined
       try {
@@ -76,7 +117,13 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
         const res = await fetch('/api/purchase', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ spaceId: space.id, walletAddress, telegramUserId })
+          body: JSON.stringify({
+            spaceId: space.id,
+            walletAddress,
+            telegramUserId,
+            amount: String(currentTier.price * 1_000_000_000),
+            referralSource,
+          })
         })
         const data = await res.json()
         if (data.accessUrl) {
@@ -92,13 +139,13 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
       setCheckoutState('complete')
     } catch (error) {
       console.warn('Payment failed', error)
-      alert('Payment failed. Make sure your wallet is connected and try again.')
+      alert('Payment failed. Try again.')
       setCheckoutState('idle')
     }
-  }, [currentTier.price, network, paymentAddress, tonConnectUI, walletAddress])
+  }, [currentTier.price, paymentAddress, space, walletAddress, connectWallet])
 
   useEffect(() => {
-    if (!space) {
+    if (!space || space.is_closed) {
       return
     }
 
@@ -145,19 +192,6 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           <span className="text-sm font-semibold uppercase tracking-[0.32em] text-slate-400">per {currentTier.duration}</span>
         </div>
         <p className="mt-3 text-sm text-slate-600">Includes 24/7 premium alerts, gated discussions, and exclusive creator drops.</p>
-        <div className="mt-4 space-y-3 rounded-3xl border border-slate-100 bg-slate-50 p-4">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Test payment amount</label>
-          <input
-            type="number"
-            min="0"
-            step="0.001"
-            value={testAmount}
-            onChange={(e) => setTestAmount(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
-            placeholder="Enter TON amount for test payment"
-          />
-          <p className="text-[10px] text-slate-400">For testing, any TON amount is accepted regardless of the tier price. Leave blank to use the tier price.</p>
-        </div>
         <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2">
           <div className="flex -space-x-2">
             {[1, 2, 3].map((i) => (
@@ -210,15 +244,24 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
         <div className="rounded-[32px] border border-slate-200 bg-slate-50 p-5">
           <p className="text-sm font-semibold text-slate-950">Wallet connection needed</p>
           <p className="mt-2 text-xs text-slate-500">
-            Connect a TON wallet to authorize payment and unlock automated access for this space.
+            {space.is_closed 
+              ? 'This community is currently at capacity or closed by the creator. New enrollments are paused.' 
+              : 'Connect a TON wallet to authorize payment and unlock automated access for this space.'}
           </p>
           {isWalletConnected ? (
             <p className="mt-3 text-xs font-semibold text-emerald-700">Connected wallet: {walletAddress}</p>
           ) : (
             <div className="mt-4">
-              <TonConnectButton className="w-full rounded-3xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-900 transition" />
+              <button
+                onClick={connectWallet}
+                disabled={isConnecting}
+                className="w-full rounded-3xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-900 transition disabled:opacity-70"
+              >
+                {isConnecting ? 'Connecting Mock Wallet...' : 'Connect Wallet'}
+              </button>
             </div>
           )}
+
           {!paymentAddress && (
             <p className="mt-4 text-xs text-rose-500">No payment address configured for this community.</p>
           )}
@@ -226,16 +269,18 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
 
         <button
           onClick={handleTonCheckout}
-          disabled={checkoutState !== 'idle' || !paymentAddress || !isWalletConnected}
-          className="w-full rounded-[30px] bg-slate-950 px-6 py-5 text-xl font-bold text-white shadow-2xl shadow-slate-950/20 hover:bg-slate-900 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+          disabled={checkoutState !== 'idle' || !paymentAddress || space.is_closed}
+          className={`w-full rounded-[30px] px-6 py-5 text-xl font-bold text-white shadow-2xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 ${
+            space.is_closed ? 'bg-slate-500' : 'bg-slate-950 shadow-slate-950/20 hover:bg-slate-900'
+          }`}
         >
-          {checkoutState === 'processing'
+          {space.is_closed
+            ? 'Sold Out'
+            : checkoutState === 'processing'
             ? 'Processing payment...'
             : checkoutState === 'complete'
             ? 'Success!'
-            : isWalletConnected
-            ? `Pay ${currentTier.price} Stars`
-            : 'Connect wallet to pay'}
+            : `Pay ${currentTier.price} Stars`}
         </button>
 
         {checkoutState === 'complete' && (
@@ -265,7 +310,22 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
                 const username = WebApp.initDataUnsafe.user?.username || 'user'
                 const inviteLink = `https://t.me/SuboraBot/app?startapp=space_${space.id}_ref_${username}`
                 const shareText = `I just joined ${space.name} on Subora. The alpha inside is insane. Join me here: ${inviteLink}`
-                WebApp.switchInlineQuery(shareText, ['users', 'groups', 'channels'])
+                
+                if (WebApp.isVersionAtLeast('6.7')) {
+                  WebApp.switchInlineQuery(shareText, ['users', 'groups', 'channels'])
+                } else {
+                  // Fallback for older Telegram versions
+                  navigator.clipboard.writeText(shareText)
+                  if (WebApp.showPopup && WebApp.isVersionAtLeast('6.1')) {
+                    WebApp.showPopup({
+                      title: 'Link copied!',
+                      message: 'Your custom invite link was copied to your clipboard. Share it with your friends!',
+                      buttons: [{ type: 'ok' }]
+                    })
+                  } else {
+                    alert('Invite link copied to clipboard!')
+                  }
+                }
               }}
               className="w-full bg-primary text-white py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all font-heading shadow-lg shadow-primary/20 relative z-10"
             >

@@ -15,6 +15,9 @@ export default function CreateSpace() {
     description: '',
     cover_image: '',
     channel_link: '',
+    creator_name: '',
+    category: 'Crypto Alpha',
+    payment_address: '',
   });
 
   const [tiers, setTiers] = useState([
@@ -102,13 +105,19 @@ export default function CreateSpace() {
           }
         }).Telegram?.WebApp?.initDataUnsafe?.user?.id ?? 0
 
+        const creatorReferrer = localStorage.getItem('creator_referrer') || undefined;
+
         const payload = {
           name: formData.name,
           description: formData.description,
           cover_image: formData.cover_image,
           channel_link: formData.channel_link,
+          creator_name: formData.creator_name,
+          category: formData.category,
+          payment_address: formData.payment_address,
           tiers,
           creator_telegram_id: telegramId,
+          referrer_payment_address: creatorReferrer,
         }
 
         const response = await fetch('/api/spaces', {
@@ -250,6 +259,43 @@ export default function CreateSpace() {
                       />
                     </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-900 ml-1">Creator Display Name</label>
+                        <Input
+                          required
+                          name="creator_name"
+                          value={formData.creator_name}
+                          onChange={handleChange}
+                          placeholder="e.g. by The Quantum Team"
+                          className="h-11 rounded-2xl border-slate-200 bg-slate-50/80 focus-visible:ring-primary/10"
+                        />
+                        <p className="text-[10px] text-slate-400 ml-1 leading-relaxed">
+                          This name will be shown publicly as the provider of the space.
+                        </p>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-900 ml-1">Niche Category</label>
+                        <select
+                          required
+                          name="category"
+                          value={formData.category}
+                          onChange={handleChange as any}
+                          className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 text-sm focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all font-medium"
+                        >
+                          <option>Crypto Alpha</option>
+                          <option>Trading</option>
+                          <option>Lifestyle</option>
+                          <option>Education</option>
+                          <option>Technical</option>
+                        </select>
+                        <p className="text-[10px] text-slate-400 ml-1 leading-relaxed">
+                          Helps users find you in the Discovery Mall.
+                        </p>
+                      </div>
+                    </div>
+
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-900 ml-1">Abstract</label>
                       <textarea
@@ -275,17 +321,34 @@ export default function CreateSpace() {
                         />
                       </div>
                       <div className="space-y-1.5 flex flex-col justify-end">
-                        <label className="text-xs font-semibold text-slate-900 ml-1">Telegram Channel username or ID</label>
+                        <label className="text-xs font-semibold text-slate-900 ml-1">Telegram Channel Link or ID</label>
                         <Input
                           required
                           name="channel_link"
                           value={formData.channel_link}
                           onChange={handleChange}
-                          placeholder="@yourchannel or -100123456789"
+                          placeholder="https://t.me/yourchannel or -100123456789"
                           className="h-11 rounded-2xl border-slate-200 bg-slate-50/80"
                         />
-                        <p className="text-[10px] text-slate-400 ml-1">Add our bot as admin to your channel, then paste the channel username or ID here.</p>
+                        <p className="text-[10px] text-slate-500 font-medium ml-1 mt-1 leading-relaxed">
+                          Enter your <span className="text-primary font-bold">@username</span>, <span className="text-primary font-bold">t.me/link</span>, or <span className="text-primary font-bold">Numeric ID</span> (-100...).
+                          <br />
+                          <span className="text-slate-900">Note:</span> Use the <span className="font-bold underline">Numeric ID</span> for private channels to enable single-use invite link security.
+                        </p>
                       </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-900 ml-1">TON Wallet Address (for receiving payments)</label>
+                      <Input
+                        required
+                        name="payment_address"
+                        value={formData.payment_address}
+                        onChange={handleChange}
+                        placeholder="UQ... or EQ..."
+                        className="h-11 rounded-2xl border-slate-200 bg-slate-50/80 font-mono text-xs"
+                      />
+                      <p className="text-[10px] text-slate-400 ml-1">Your TON wallet where subscriber payments will be sent.</p>
                     </div>
                   </div>
                 </div>

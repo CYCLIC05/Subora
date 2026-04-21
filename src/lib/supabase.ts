@@ -30,9 +30,13 @@ export type Space = {
   description: string;
   cover_image: string;
   channel_link: string;
+  creator_name?: string;
+  category?: string;
+  is_closed?: boolean;
   tiers: SubscriptionTier[];
   subscribers: number;
   payment_address?: string;
+  referrer_payment_address?: string;
   is_trending?: boolean;
   is_active_today?: boolean;
   created_at: string;
@@ -43,6 +47,7 @@ export type SpaceSubscription = {
   space_id: string;
   telegram_user_id?: number | null;
   wallet_address?: string | null;
+  referral_source?: string | null;
   join_time: string;
 };
 

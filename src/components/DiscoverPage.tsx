@@ -1,23 +1,49 @@
 'use client';
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Header } from '@/components/Header'
 import { SpaceCard } from '@/components/SpaceCard'
 import { Space } from '@/lib/supabase'
-import { Search, ShieldCheck, TrendingUp } from 'lucide-react'
+import { Search, Users, ExternalLink } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 export function DiscoverPage({ spaces }: { spaces: Space[] }) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('All')
+
+  const categories = ['All', 'Crypto Alpha', 'Trading', 'Lifestyle', 'Education', 'Technical']
+
+  // Handle debouncing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery)
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Track the search query for SEO metrics
+  useEffect(() => {
+    if (debouncedQuery.trim().length >= 2) {
+      fetch('/api/search/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: debouncedQuery.trim() })
+      }).catch(err => console.error('Failed to track search:', err))
+    }
+  }, [debouncedQuery])
 
   const filteredSpaces = useMemo(
     () =>
       spaces.filter(
-        (space) =>
-          space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          space.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (space) => {
+          const matchesSearch = space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                               space.description.toLowerCase().includes(searchQuery.toLowerCase())
+          const matchesCategory = selectedCategory === 'All' || space.category === selectedCategory
+          return matchesSearch && matchesCategory
+        }
       ),
-    [searchQuery, spaces]
+    [searchQuery, spaces, selectedCategory]
   )
 
   const trendingSpaces = useMemo(
@@ -41,9 +67,8 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="text-center space-y-6 max-w-2xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
-            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            Verified Creator Hub
+          <div className="inline-flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] shadow-sm">
+            Verified Community Hub
           </div>
           <h1 className="text-5xl md:text-7xl font-heading font-semibold text-slate-950 tracking-tight leading-[0.95]">
             Premium Spaces <br />
@@ -53,13 +78,11 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
             Find high-value Telegram communities faster. Subora is the discovery layer for serious alpha and private discussions.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
-               <ShieldCheck className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-900 uppercase tracking-[0.1em] bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm">
                Subscribe with Stars
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10">
-               <TrendingUp className="w-3.5 h-3.5" />
-               Instant Access
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-900 uppercase tracking-[0.1em] bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm">
+               Instant Onboarding
             </div>
           </div>
         </motion.section>
@@ -95,22 +118,16 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
 
         <section className="max-w-3xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="bg-primary/[0.03] border border-primary/10 rounded-[32px] p-6 flex items-start gap-4">
-              <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-950">Discover premium Spaces</p>
-                <p className="text-xs text-slate-500 font-medium mt-1">Exclusive alpha and high-signal communities only.</p>
+            <div className="bg-slate-50 border border-slate-200 rounded-[32px] p-8 flex flex-col items-center text-center gap-4">
+              <div className="space-y-2">
+                <p className="text-sm font-bold text-slate-950 uppercase tracking-tight">Curation Focus</p>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Exclusive alpha and high-signal communities only.</p>
               </div>
             </div>
-            <div className="bg-primary/[0.03] border border-primary/10 rounded-[32px] p-6 flex items-start gap-4">
-              <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <ShieldCheck className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-950">Subscribe with Stars</p>
-                <p className="text-xs text-slate-500 font-medium mt-1">Instant Telegram access after secure payment.</p>
+            <div className="bg-slate-50 border border-slate-200 rounded-[32px] p-8 flex flex-col items-center text-center gap-4">
+              <div className="space-y-2">
+                <p className="text-sm font-bold text-slate-950 uppercase tracking-tight">Verified Payments</p>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Instant Telegram access after secure Stars payment.</p>
               </div>
             </div>
           </div>
@@ -125,6 +142,22 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
               className="w-full bg-white border border-slate-200 rounded-[32px] py-4 pl-14 pr-6 text-sm font-medium shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/30 transition-all placeholder:text-slate-400"
             />
           </div>
+
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 pt-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`flex-shrink-0 px-6 py-2.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                  selectedCategory === cat 
+                  ? 'bg-slate-950 text-white border-slate-950 shadow-md' 
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </section>
 
         {trendingSpaces.length > 0 && !searchQuery && (
@@ -132,7 +165,6 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
             <div className="flex items-center justify-between gap-4 border-b border-primary/10 pb-4">
               <h2 className="text-[10px] font-bold text-slate-950 uppercase tracking-widest">Trending Now</h2>
               <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest bg-white px-2 py-1 rounded-lg shadow-sm">
-                <TrendingUp className="w-3.5 h-3.5" />
                 High Momentum
               </div>
             </div>
@@ -186,8 +218,7 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
             <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Featured Ecosystems</h2>
             <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Verified Escrow
+              Verified Marketplace
             </div>
           </div>
 

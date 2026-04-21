@@ -1,11 +1,14 @@
 'use client';
 
-import { TonConnectButton } from '@tonconnect/ui-react';
 import Link from 'next/link';
-import { useTonConnectAvailable } from './Providers';
+import { useMockWallet } from './WalletProvider';
 
 export function Header() {
-  const isTonConnectAvailable = useTonConnectAvailable();
+  const { walletAddress, isConnecting, connectWallet, disconnectWallet } = useMockWallet();
+
+  const formattedAddress = walletAddress 
+    ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}` 
+    : '';
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/70 shadow-sm">
@@ -22,15 +25,22 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {isTonConnectAvailable ? (
-            <TonConnectButton />
+          {walletAddress ? (
+            <button
+              type="button"
+              onClick={disconnectWallet}
+              className="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/20 transition-colors"
+            >
+              {formattedAddress}
+            </button>
           ) : (
             <button
               type="button"
-              disabled
-              className="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-500 disabled:cursor-not-allowed disabled:opacity-70"
+              onClick={connectWallet}
+              disabled={isConnecting}
+              className="rounded-full border border-transparent bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-70 transition-colors shadow-md"
             >
-              Connect wallet
+              {isConnecting ? 'Connecting...' : 'Connect Wallet'}
             </button>
           )}
         </div>

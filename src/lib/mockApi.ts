@@ -25,7 +25,7 @@ const FALLBACK_REVENUE: RevenuePoint[] = []
 
 const isSupabaseReady = Boolean(supabase)
 
-const spaceSelect = `id, creator_telegram_id, name, description, cover_image, channel_link, tiers, subscribers, is_trending, is_active_today, created_at`
+const spaceSelect = `id, creator_telegram_id, name, description, cover_image, channel_link, creator_name, category, is_closed, tiers, subscribers, is_trending, is_active_today, created_at, payment_address, referrer_payment_address`
 
 export const getDiscoverSpaces = async (): Promise<Space[]> => {
   if (isSupabaseReady) {
@@ -152,7 +152,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
   }
 }
 
-export type CreateSpacePayload = Omit<Space, 'id' | 'created_at' | 'subscribers' | 'is_trending'> & Partial<Pick<Space, 'subscribers' | 'is_trending'>>
+export type CreateSpacePayload = Omit<Space, 'id' | 'created_at' | 'subscribers' | 'is_trending'> & Partial<Pick<Space, 'subscribers' | 'is_trending' | 'category'>>
 
 export const createSpace = async (payload: CreateSpacePayload): Promise<Space> => {
   const newSpace: Space = {
@@ -182,4 +182,77 @@ export const createSpace = async (payload: CreateSpacePayload): Promise<Space> =
   }
 
   return newSpace
+}
+export const getUserSubscriptions = async (telegramUserId: number | string): Promise<Space[]> => {
+  if (isSupabaseReady) {
+    try {
+      // 1. Find all space IDs the user is subscribed to
+      const { data: subs, error: subError } = await (supabase! as any)
+        .from('space_subscriptions')
+        .select('space_id')
+        .eq('telegram_user_id', telegramUserId)
+
+      if (subError || !subs) return []
+
+      const spaceIds = subs.map((s: { space_id: string }) => s.space_id)
+      if (spaceIds.length === 0) return []
+
+      // 2. Fetch the corresponding spaces
+      const { data: spaces, error: spaceError } = await (supabase! as any)
+        .from('spaces')
+        .select(spaceSelect)
+        .in('id', spaceIds)
+
+      if (spaceError) return []
+      return (spaces as Space[]) || []
+    } catch (error) {
+      console.error('Error fetching user subscriptions:', error)
+      return []
+    }
+  }
+  return []
+}
+
+export type SpaceMember = {
+  telegram_user_id: string;
+  join_time: string;
+  wallet_address?: string;
+}
+
+export const getSpaceMembers = async (spaceId: string): Promise<SpaceMember[]> => {
+  if (isSupabaseReady) {
+    try {
+      const { data, error } = await (supabase! as any)
+        .from('space_subscriptions')
+        .select('telegram_user_id, join_time, wallet_address')
+        .eq('space_id', spaceId)
+        .order('join_time', { ascending: false })
+
+      if (error) return []
+      return data as SpaceMember[]
+    } catch (error) {
+      console.error('Error fetching space members:', error)
+      return []
+    }
+  }
+  return []
+}
+
+export const getBatchSpaceMembers = async (spaceIds: string[]): Promise<(SpaceMember & { space_id: string })[]> => {
+  if (isSupabaseReady && spaceIds.length > 0) {
+    try {
+      const { data, error } = await (supabase! as any)
+        .from('space_subscriptions')
+        .select('space_id, telegram_user_id, join_time, wallet_address')
+        .in('space_id', spaceIds)
+        .order('join_time', { ascending: false })
+
+      if (error) return []
+      return data as (SpaceMember & { space_id: string })[]
+    } catch (error) {
+      console.error('Error fetching batch space members:', error)
+      return []
+    }
+  }
+  return []
 }
