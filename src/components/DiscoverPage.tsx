@@ -128,7 +128,7 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
             <div className="bg-slate-50 border border-slate-200 rounded-[32px] p-8 flex flex-col items-center text-center gap-4">
               <div className="space-y-2">
                 <p className="text-sm font-bold text-slate-950 uppercase tracking-tight">Verified Payments</p>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">Instant Telegram access after secure Stars payment.</p>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Instant Telegram access after secured payment.</p>
               </div>
             </div>
           </div>

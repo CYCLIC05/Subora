@@ -15,7 +15,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
   const searchParams = useSearchParams()
   const referralSource = searchParams.get('source') || 'direct'
   const [selectedTierIndex, setSelectedTierIndex] = useState(0)
-  const { walletAddress, isConnecting, connectWallet } = useWallet()
+  const { walletAddress, isConnecting, connectWallet, tonConnectUI } = useWallet()
   const paymentAddress = space.payment_address ?? process.env.NEXT_PUBLIC_TON_PAYMENT_ADDRESS ?? ''
   
   const isWalletConnected = Boolean(walletAddress)
@@ -42,15 +42,10 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
       return
     }
 
-    // NEW: If not connected, trigger connection first for smoother UX
-    let currentWallet = walletAddress;
-    if (!currentWallet) {
+    if (!walletAddress && currentTier.currency !== 'Stars') {
       try {
         await connectWallet();
-        // Since connectWallet updates state, we might need a small delay or use the updated value.
-        // However, the simple UX is to let the user click again or await the state change.
-        // For the mock wallet, we can just assume it worked or check the return format.
-        return; // Return so the user sees the "connected" state and then clicks Pay again (or we could recursive call)
+        return; 
       } catch (err) {
         alert('Failed to connect wallet.');
         return;
@@ -77,7 +72,6 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           WebApp.openInvoice(data.invoiceLink, (status) => {
             if (status === 'paid') {
               console.log('Stars payment successful');
-              // Proceed with backend recording
               handleBackendVerification(null, 'Stars');
             } else {
               setCheckoutState('idle');
@@ -92,55 +86,51 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
       const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
       const isFirstMonth = (Date.now() - spaceCreatedAt) < thirtyDaysInMs;
 
-      // USDT (Jetton) logic
-      if (currentTier.currency === 'USDT') {
-        const usdtMaster = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs'; // TON USDT Master
-        const decimals = 6;
-        const amountUnits = BigInt(Math.floor(currentTier.price * (10 ** decimals)));
-        
-        // Basic Jetton transfer message (op: 0xf8a7ea5)
-        // We'll simulate the cell construction if using real tonConnect, 
-        // but for the mock/v1 we'll define the target.
+      // TON logic for real transaction
+      if (space.referrer_payment_address && isFirstMonth) {
+        const referrerCut = currentTier.price * 0.07;
+        const creatorCut = currentTier.price * 0.93;
         messages.push({
-          address: usdtMaster, 
-          amount: '50000000', // 0.05 TON for gas
-          payload: '' // In real app, this would be encoded cell for transfer
+          address: paymentAddress,
+          amount: String(Math.floor(creatorCut * 1_000_000_000)), // NanoTON
+        });
+        messages.push({
+          address: space.referrer_payment_address,
+          amount: String(Math.floor(referrerCut * 1_000_000_000)), // NanoTON
         });
       } else {
-        // TON logic
-        if (space.referrer_payment_address && isFirstMonth) {
-          const referrerCut = currentTier.price * 0.07;
-          const creatorCut = currentTier.price * 0.93;
-          messages.push({
-            address: paymentAddress,
-            amount: String(Math.floor(creatorCut * 1_000_000_000)),
-          });
-          messages.push({
-            address: space.referrer_payment_address,
-            amount: String(Math.floor(referrerCut * 1_000_000_000)),
-          });
-        } else {
-          messages.push({
-            address: paymentAddress,
-            amount: String(Math.floor(currentTier.price * 1_000_000_000)),
-          });
-        }
+        messages.push({
+          address: paymentAddress,
+          amount: String(Math.floor(currentTier.price * 1_000_000_000)), // NanoTON
+        });
       }
 
-      console.log('--- SIMULATING BLOCKCHAIN TRANSACTION ---')
-      console.log('Currency:', currentTier.currency)
-      console.log('Payload:', JSON.stringify(messages, null, 2))
-      console.log('-----------------------------------------')
+      console.log('--- TRIGGERING ON-CHAIN TRANSACTION ---')
       
-      await new Promise(res => setTimeout(res, 2500));
-      await handleBackendVerification('mock_hash', currentTier.currency || 'TON');
+      const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 60, // 60 seconds
+        messages: messages,
+      };
+
+      const result = await tonConnectUI.sendTransaction(transaction);
+      
+      if (result) {
+        // Success! result.boc contains the signed transaction
+        console.log('Transaction sent successfully', result);
+        await handleBackendVerification(result.boc, currentTier.currency || 'TON');
+      } else {
+        throw new Error('Transaction rejected or failed');
+      }
 
     } catch (error) {
       console.warn('Payment failed', error)
-      alert('Payment failed. Try again.')
+      // Only alert if it's not a user rejection (cancel)
+      if (error instanceof Error && !error.message.includes('User rejected')) {
+        alert(`Payment failed: ${error.message}`)
+      }
       setCheckoutState('idle')
     }
-  }, [currentTier, paymentAddress, space, walletAddress, connectWallet])
+  }, [currentTier, paymentAddress, space, walletAddress, connectWallet, tonConnectUI])
 
   const handleBackendVerification = async (txHash: string | null, currency: string) => {
     let telegramUserId: number | undefined

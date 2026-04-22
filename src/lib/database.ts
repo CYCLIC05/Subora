@@ -20,6 +20,7 @@ export type DashboardMember = {
   joinDate: string
   amountPaid: number
   currency: string
+  referral_source: string | null
   status: 'Active' | 'Paused'
 }
 
@@ -152,6 +153,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
           joinDate: s.join_time,
           amountPaid: s.amount_paid || 0,
           currency: s.currency || 'TON',
+          referral_source: s.referral_source || null,
           status: 'Active'
         }))
       }
