@@ -8,6 +8,8 @@ import { Space } from '@/lib/supabase'
 import { Search, Users, ExternalLink } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 
+import { rankSpaces } from '@/lib/searchRanking';
+
 export function DiscoverPage({ spaces }: { spaces: Space[] }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -35,10 +37,7 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
   }, [debouncedQuery])
 
   const filteredSpaces = useMemo(
-    () => {
-      const { rankSpaces } = require('@/lib/searchRanking');
-      return rankSpaces(spaces, searchQuery, selectedCategory);
-    },
+    () => rankSpaces(spaces, searchQuery, selectedCategory),
     [searchQuery, spaces, selectedCategory]
   )
 

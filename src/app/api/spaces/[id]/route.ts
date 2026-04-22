@@ -35,6 +35,9 @@ export async function PATCH(
   if (!isValid) return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 })
 
   const requesterId = getTelegramUserFromInitData(authHeader)
+  if (requesterId === null) {
+    return NextResponse.json({ error: 'Invalid user data' }, { status: 401 })
+  }
 
   try {
     const { is_closed } = await request.json()
@@ -73,6 +76,9 @@ export async function DELETE(
   if (!isValid) return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 })
 
   const requesterId = getTelegramUserFromInitData(authHeader)
+  if (requesterId === null) {
+    return NextResponse.json({ error: 'Invalid user data' }, { status: 401 })
+  }
 
   try {
     const { error } = await supabase
