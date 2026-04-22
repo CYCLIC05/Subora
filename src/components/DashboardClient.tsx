@@ -231,7 +231,12 @@ export function DashboardClient({
         )}
       </AnimatePresence>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="container mx-auto px-4 py-8 max-w-6xl"
+      >
         <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-10">
           <div className="space-y-2">
             <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Management</p>
@@ -642,7 +647,7 @@ export function DashboardClient({
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </motion.div>
     </main>
   )
 }

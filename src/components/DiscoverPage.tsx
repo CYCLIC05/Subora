@@ -55,7 +55,12 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
     <main className="min-h-screen bg-background">
       <Header />
 
-      <div className="container mx-auto px-6 py-12 space-y-16">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="container mx-auto px-6 py-12 space-y-16"
+      >
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -289,7 +294,7 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
             </motion.div>
           )}
         </section>
-      </div>
+      </motion.div>
     </main>
   )
 }

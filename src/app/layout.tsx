@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   description: "Monetize your Telegram communities with ease.",
 };
 
+import { Onboarding } from "@/components/Onboarding";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,6 +26,7 @@ export default function RootLayout({
     <html lang="en" className={cn("font-sans", geist.variable, geistMono.variable)} suppressHydrationWarning>
       <body suppressHydrationWarning className="antialiased min-h-screen bg-white text-zinc-900 overflow-x-hidden">
         <Providers>
+          <Onboarding />
           <div className="pb-32">
             {children}
           </div>
