@@ -49,6 +49,9 @@ export type SpaceSubscription = {
   telegram_user_id?: number | null;
   wallet_address?: string | null;
   referral_source?: string | null;
+  currency?: string | null;
+  amount_paid?: number | null;
+  invite_link?: string | null;
   join_time: string;
 };
 
