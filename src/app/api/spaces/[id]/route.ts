@@ -27,17 +27,30 @@ export async function PATCH(
   const { id } = await params
   if (!supabase) return NextResponse.json({ error: 'DB not ready' }, { status: 500 })
 
+  const authHeader = request.headers.get('x-telegram-init-data')
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { verifyTelegramWebAppData, getTelegramUserFromInitData } = await import('@/lib/auth')
+  const isValid = verifyTelegramWebAppData(authHeader, process.env.BOT_TOKEN || '')
+  if (!isValid) return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 })
+
+  const requesterId = getTelegramUserFromInitData(authHeader)
+
   try {
     const { is_closed } = await request.json()
     
+    // Ensure the requester owns the space
     const { data: space, error } = await supabase
       .from('spaces')
       .update({ is_closed })
       .eq('id', id)
+      .eq('creator_telegram_id', requesterId) // Security check: must own the space
       .select()
       .single()
 
-    if (error) throw error
+    if (error || !space) {
+      return NextResponse.json({ error: 'Unauthorized or Space not found' }, { status: 403 })
+    }
     return NextResponse.json(space)
   } catch (err) {
     console.error('Update space error:', err)
@@ -46,18 +59,27 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
   if (!supabase) return NextResponse.json({ error: 'DB not ready' }, { status: 500 })
 
+  const authHeader = request.headers.get('x-telegram-init-data')
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { verifyTelegramWebAppData, getTelegramUserFromInitData } = await import('@/lib/auth')
+  const isValid = verifyTelegramWebAppData(authHeader, process.env.BOT_TOKEN || '')
+  if (!isValid) return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 })
+
+  const requesterId = getTelegramUserFromInitData(authHeader)
+
   try {
-    // Note: In a real app we'd verify the creator_telegram_id from session/headers
     const { error } = await supabase
       .from('spaces')
       .delete()
       .eq('id', id)
+      .eq('creator_telegram_id', requesterId) // Security check: must own the space
 
     if (error) throw error
     return NextResponse.json({ success: true })

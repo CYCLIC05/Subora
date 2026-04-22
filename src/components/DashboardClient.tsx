@@ -95,13 +95,20 @@ export function DashboardClient({
   const toggleSpaceStatus = async (id: string, currentStatus: boolean) => {
     setIsLoading(true)
     try {
+      const WebApp = (await import('@twa-dev/sdk')).default
       const res = await fetch(`/api/spaces/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-telegram-init-data': WebApp.initData
+        },
         body: JSON.stringify({ is_closed: !currentStatus })
       })
       if (res.ok) {
         window.location.reload()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to update space status')
       }
     } catch (err) {
       console.error('Failed to toggle status', err)
@@ -115,9 +122,18 @@ export function DashboardClient({
     
     setIsLoading(true)
     try {
-      const res = await fetch(`/api/spaces/${id}`, { method: 'DELETE' })
+      const WebApp = (await import('@twa-dev/sdk')).default
+      const res = await fetch(`/api/spaces/${id}`, { 
+        method: 'DELETE',
+        headers: {
+          'x-telegram-init-data': WebApp.initData
+        }
+      })
       if (res.ok) {
         window.location.reload()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to delete space')
       }
     } catch (err) {
       console.error('Failed to delete space', err)

@@ -278,11 +278,14 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           ) : (
             <div className="mt-4">
               <button
-                onClick={connectWallet}
+                onClick={() => {
+                  import('@twa-dev/sdk').then(m => m.default.HapticFeedback.impactOccurred('medium'))
+                  connectWallet()
+                }}
                 disabled={isConnecting}
                 className="w-full rounded-3xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-900 transition disabled:opacity-70"
               >
-                {isConnecting ? 'Connecting Mock Wallet...' : 'Connect Wallet'}
+                {isConnecting ? 'Establishing Link...' : 'Link TON Wallet'}
               </button>
             </div>
           )}

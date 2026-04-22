@@ -5,14 +5,26 @@ import { TonConnectButton } from '@tonconnect/ui-react';
 import { useWallet } from './WalletProvider';
 
 export function Header() {
-  // We still keep useWallet to potentially use other context values if needed
   const { walletAddress } = useWallet();
+
+  const handleHaptic = async (style: 'light' | 'medium' | 'heavy' = 'light') => {
+    try {
+      const WebApp = (await import('@twa-dev/sdk')).default
+      WebApp.HapticFeedback.impactOccurred(style)
+    } catch (error) {
+      // Ignore if not in Telegram
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/70 shadow-sm">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link 
+            href="/" 
+            className="flex items-center gap-2 group"
+            onClick={() => handleHaptic('light')}
+          >
             <span className="font-heading text-2xl font-semibold tracking-tight text-slate-950 group-active:scale-95 transition-transform">
               Subora
             </span>

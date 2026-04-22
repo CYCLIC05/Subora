@@ -35,15 +35,10 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
   }, [debouncedQuery])
 
   const filteredSpaces = useMemo(
-    () =>
-      spaces.filter(
-        (space) => {
-          const matchesSearch = space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                               space.description.toLowerCase().includes(searchQuery.toLowerCase())
-          const matchesCategory = selectedCategory === 'All' || space.category === selectedCategory
-          return matchesSearch && matchesCategory
-        }
-      ),
+    () => {
+      const { rankSpaces } = require('@/lib/searchRanking');
+      return rankSpaces(spaces, searchQuery, selectedCategory);
+    },
     [searchQuery, spaces, selectedCategory]
   )
 
@@ -225,7 +220,7 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
 
           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             <AnimatePresence mode="popLayout">
-              {filteredSpaces.map((space, index) => (
+              {filteredSpaces.map((space: Space, index: number) => (
                 <motion.div
                   key={space.id}
                   layout
@@ -274,13 +269,21 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
               <div className="flex justify-center pt-4">
                 <div className="bg-white border border-slate-200 p-8 rounded-[40px] shadow-2xl shadow-slate-900/5 text-center space-y-6 max-w-sm relative overflow-hidden group">
                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-16 translate-x-16" />
-                   <h4 className="text-lg font-bold text-slate-950 tracking-tight">Be the first to dominate {selectedCategory !== 'All' ? `the ${selectedCategory} niche` : 'this search'}.</h4>
-                   <p className="text-xs text-slate-500 font-medium">Capture the attention of users searching for these signals.</p>
+                   <h4 className="text-lg font-bold text-slate-950 tracking-tight italic">
+                     "Be the first to dominate the {searchQuery || selectedCategory !== 'All' ? `${searchQuery || selectedCategory} niche` : 'this segment'}."
+                   </h4>
+                   <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                     Users are currently searching for <span className="text-slate-950 font-bold underline">"{searchQuery}"</span>. 
+                     Capture this traffic by launching your space today.
+                   </p>
                    <Link 
                      href="/create"
+                     onClick={() => {
+                        import('@twa-dev/sdk').then(m => m.default.HapticFeedback.impactOccurred('heavy'))
+                     }}
                      className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-3xl bg-slate-950 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-900 transition-all active:scale-95 shadow-xl shadow-slate-950/10 group-hover:bg-primary group-hover:shadow-primary/20"
                    >
-                     🚀 Launch Space
+                     🚀 Launch Space & Dominate
                    </Link>
                 </div>
               </div>
