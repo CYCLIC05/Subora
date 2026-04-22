@@ -140,8 +140,8 @@ export async function handleTelegramWebhookUpdate(update: any) {
 export async function sendTelegramAccessLink(chatId: string, accessUrl: string, spaceName: string) {
   try {
     const bot = createBot()
-    const options: SendMessageOptions = {
-      parse_mode: 'Markdown',
+    const options = {
+      parse_mode: 'Markdown' as 'Markdown',
       reply_markup: {
         inline_keyboard: [[
           { text: `🔓 Enter ${spaceName}`, url: accessUrl },
