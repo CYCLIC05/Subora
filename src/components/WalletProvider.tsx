@@ -16,7 +16,7 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
   const [tonConnectUI] = useTonConnectUI();
   const wallet = useTonWallet();
   const address = useTonAddress();
-  const isConnecting = tonConnectUI?.connecting || false;
+  const isConnecting = false; // tonConnectUI doesn't have a 'connecting' property in this version
 
   const connectWallet = async () => {
     try {
