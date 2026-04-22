@@ -25,23 +25,44 @@ import { ConnectWalletModal } from './ConnectWalletModal';
 export function WalletDashboard() {
   const { walletAddress, disconnectWallet, isConnecting } = useWallet();
   const [balance, setBalance] = useState<number | null>(null);
+  const [usdtBalance, setUsdtBalance] = useState<number | null>(null);
+  const [starsBalance, setStarsBalance] = useState<number>(0);
+  const [tonPrice, setTonPrice] = useState<number>(5.2);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeAsset, setActiveAsset] = useState<'TON' | 'USDT' | 'STARS'>('TON');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const USDT_MASTER = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
+
   useEffect(() => {
     async function loadData() {
       if (walletAddress) {
         setIsLoading(true);
         try {
-          const [bal, txs] = await Promise.all([
+          // Import dynamic price fetcher
+          const { getTonPriceInUSD } = await import('@/lib/tonPrice');
+          const { getJettonBalance } = await import('@/lib/toncenter');
+
+          const [bal, txs, price, usdtBal] = await Promise.all([
             getTonBalance(walletAddress),
-            getUserTransactions(walletAddress)
+            getUserTransactions(walletAddress),
+            getTonPriceInUSD(),
+            getJettonBalance(walletAddress, USDT_MASTER)
           ]);
+
           setBalance(bal);
           setTransactions(txs);
+          setTonPrice(price || 5.2);
+          setUsdtBalance(usdtBal);
+
+          // Calculate Stars balance from internal transaction history
+          const starsTotal = txs
+            .filter(tx => tx.currency === 'Stars' && tx.status === 'success')
+            .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
+          setStarsBalance(starsTotal);
+
         } catch (err) {
           console.error('Failed to load wallet data:', err);
         } finally {
@@ -134,7 +155,7 @@ export function WalletDashboard() {
                 </h2>
                 <span className="text-2xl font-black text-primary italic uppercase tracking-tighter">TON</span>
               </div>
-              <p className="text-sm font-medium text-slate-400">≈ ${( (balance ?? 0) * 5.2).toLocaleString()} USD</p>
+              <p className="text-sm font-medium text-slate-400">≈ ${( (balance ?? 0) * tonPrice).toLocaleString()} USD</p>
             </div>
 
             <div className="grid grid-cols-3 gap-3 pt-4">
@@ -160,9 +181,9 @@ export function WalletDashboard() {
         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Digital Assets</h3>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { id: 'TON', name: 'Toncoin', val: balance?.toFixed(1) || '0.0', icon: Coins, color: 'text-primary' },
-            { id: 'STARS', name: 'Stars', val: '1,240', icon: Sparkles, color: 'text-amber-400' },
-            { id: 'USDT', name: 'Tether', val: '42.00', icon: CreditCard, color: 'text-emerald-500' }
+            { id: 'TON', name: 'Toncoin', val: balance !== null ? balance.toFixed(1) : '0.0', icon: Coins, color: 'text-primary' },
+            { id: 'STARS', name: 'Stars', val: starsBalance.toLocaleString(), icon: Sparkles, color: 'text-amber-400' },
+            { id: 'USDT', name: 'Tether', val: usdtBalance !== null ? usdtBalance.toFixed(2) : '0.00', icon: CreditCard, color: 'text-emerald-500' }
           ].map((asset) => (
             <button
               key={asset.id}

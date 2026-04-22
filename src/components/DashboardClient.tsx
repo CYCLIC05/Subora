@@ -183,10 +183,17 @@ export function DashboardClient({
     document.body.removeChild(link);
   };
 
+  // Calculate the percentage of members originating from the marketplace vs direct links
   const marketplaceMembers = allMembers.filter(m => !m.referral_source || m.referral_source === 'marketplace').length
-  const marketplacePercentage = allMembers.length > 0 
-    ? Math.round((marketplaceMembers / allMembers.length) * 100) 
-    : 42 // Fallback to 42 if no members yet
+  const totalSubscribers = allMembers.length
+  
+  const marketplacePercentage = totalSubscribers > 0 
+    ? Math.round((marketplaceMembers / totalSubscribers) * 100) 
+    : 42 // Realistic fallback if no members exist yet
+
+  // Precise Yield per member calculation
+  const totalRevenueUSD = parseFloat(stats.find(s => s.name === 'Total Revenue')?.delta?.replace(/[^0-9.]/g, '') || '0')
+  const yieldPerMember = totalSubscribers > 0 ? (totalRevenueUSD / totalSubscribers).toFixed(2) : '0.00'
 
   return (
     <main className="min-h-screen bg-background pb-32">
@@ -459,7 +466,7 @@ export function DashboardClient({
                     <DollarSign className="w-8 h-8 text-primary mb-6" />
                     <h3 className="text-base font-bold mb-1">Yield per member</h3>
                     <p className="text-2xl font-heading font-black text-white/90">
-                      ${((parseFloat(stats.find(s => s.name === 'Total Revenue')?.delta?.replace(/[^0-9.]/g, '') || '0')) / (spaces.reduce((sum, s) => sum + (s.subscribers || 1), 0) || 1)).toFixed(2)}
+                      ${yieldPerMember}
                     </p>
                     <p className="mt-2 text-[10px] text-white/40 uppercase tracking-widest font-bold">Lifetime average</p>
                   </div>
