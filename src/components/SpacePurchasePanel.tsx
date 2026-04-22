@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Space } from '@/lib/supabase'
 import { motion } from 'framer-motion'
-import { useMockWallet } from './WalletProvider'
+import { useWallet } from './WalletProvider'
 
 const trustLines = [
   'Instant access via Telegram',
@@ -15,7 +15,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
   const searchParams = useSearchParams()
   const referralSource = searchParams.get('source') || 'direct'
   const [selectedTierIndex, setSelectedTierIndex] = useState(0)
-  const { walletAddress, isConnecting, connectWallet } = useMockWallet()
+  const { walletAddress, isConnecting, connectWallet } = useWallet()
   const paymentAddress = space.payment_address ?? process.env.NEXT_PUBLIC_TON_PAYMENT_ADDRESS ?? ''
   
   const isWalletConnected = Boolean(walletAddress)

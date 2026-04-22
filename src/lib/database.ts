@@ -181,7 +181,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
         const cutoff = new Date(d.setHours(23, 59, 59, 999)).getTime()
 
         // Calculate cumulative revenue up to this day's end
-        rollingUSD = 0
+        let rollingUSD = 0
         allTx?.forEach(tx => {
           if (new Date(tx.created_at!).getTime() <= cutoff) {
             let val = 0
@@ -193,7 +193,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
         })
 
         // Calculate cumulative members up to this day's end
-        rollingMembersCount = allSubs?.filter(s => new Date(s.join_time).getTime() <= cutoff).length || 0
+        let rollingMembersCount = allSubs?.filter(s => new Date(s.join_time).getTime() <= cutoff).length || 0
 
         points.push({
           date: dateStr,
@@ -303,6 +303,27 @@ export const getSpaceMembers = async (spaceId: string): Promise<SpaceMember[]> =
     return data as SpaceMember[]
   } catch (error) {
     console.error('Error fetching space members:', error)
+    return []
+  }
+}
+
+/**
+ * Fetch all Subora-internal transactions for a specific wallet address.
+ */
+export const getUserTransactions = async (walletAddress: string): Promise<Transaction[]> => {
+  if (!isSupabaseReady || !walletAddress) return []
+
+  try {
+    const { data, error } = await supabase!
+      .from('transactions')
+      .select('*')
+      .eq('wallet_address', walletAddress)
+      .order('created_at', { ascending: false })
+
+    if (error) return []
+    return data as Transaction[]
+  } catch (error) {
+    console.error('Error fetching user transactions:', error)
     return []
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { TonConnectUIProvider, useTonConnectUI, useTonWallet, useTonAddress } from '@tonconnect/ui-react';
 
 type WalletContextType = {
   walletAddress: string | null;
@@ -11,32 +12,25 @@ type WalletContextType = {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
-
-  // Load from local storage if available
-  useEffect(() => {
-    const saved = localStorage.getItem('mock_wallet_address');
-    if (saved) setWalletAddress(saved);
-  }, []);
+function WalletProviderInner({ children }: { children: React.ReactNode }) {
+  const [tonConnectUI] = useTonConnectUI();
+  const wallet = useTonWallet();
+  const address = useTonAddress();
+  const isConnecting = tonConnectUI?.connecting || false;
 
   const connectWallet = async () => {
-    setIsConnecting(true);
-    // Simulate real-world connection delay
-    await new Promise(res => setTimeout(res, 1200));
-    
-    // Using a realistic mock address format
-    const mockAddress = 'UQB2-dKJkNjL3I4M79-dKJkNjL3I4M79_8Mv7A-Dk1234F';
-    setWalletAddress(mockAddress);
-    localStorage.setItem('mock_wallet_address', mockAddress);
-    setIsConnecting(false);
+    try {
+      await tonConnectUI.connectWallet();
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
+    }
   };
 
   const disconnectWallet = () => {
-    setWalletAddress(null);
-    localStorage.removeItem('mock_wallet_address');
+    tonConnectUI.disconnect();
   };
+
+  const walletAddress = address || null;
 
   return (
     <WalletContext.Provider value={{ walletAddress, isConnecting, connectWallet, disconnectWallet }}>
@@ -45,10 +39,26 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useMockWallet() {
+export function WalletProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TonConnectUIProvider
+      manifestUrl="/tonconnect-manifest.json"
+      uiPreferences={{ theme: 'SYSTEM' }}
+    >
+      <WalletProviderInner>
+        {children}
+      </WalletProviderInner>
+    </TonConnectUIProvider>
+  );
+}
+
+export function useWallet() {
   const context = useContext(WalletContext);
   if (context === undefined) {
-    throw new Error('useMockWallet must be used within a WalletProvider');
+    throw new Error('useWallet must be used within a WalletProvider');
   }
   return context;
 }
+
+// Legacy export for backward compatibility
+export const useMockWallet = useWallet;

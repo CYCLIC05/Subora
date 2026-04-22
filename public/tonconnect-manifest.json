@@ -1,7 +1,5 @@
 {
-  "url": "https://subora-spaces.vercel.app",
+  "url": "https://subora.app",
   "name": "Subora",
-  "iconUrl": "https://subora-spaces.vercel.app/icon.png",
-  "termsOfUseUrl": "https://subora-spaces.vercel.app/terms",
-  "privacyPolicyUrl": "https://subora-spaces.vercel.app/privacy"
+  "iconUrl": "https://subora.app/icon.png"
 }

@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useMockWallet } from './WalletProvider';
+import { useWallet } from './WalletProvider';
 
 export function Header() {
-  const { walletAddress, isConnecting, connectWallet, disconnectWallet } = useMockWallet();
+  const { walletAddress, isConnecting, connectWallet, disconnectWallet } = useWallet();
 
   const formattedAddress = walletAddress 
     ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}` 

@@ -11,26 +11,24 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Space } from '@/lib/supabase'
 import { DashboardStat, DashboardMember, SpaceRevenue } from '@/lib/database'
 import { RevenuePoint } from '@/lib/supabase'
-import { Search, MapPin, TrendingUp, DollarSign, Send, History, Sparkles, Radio, MessageSquare } from 'lucide-react'
+import { Search, MapPin, TrendingUp, DollarSign } from 'lucide-react'
 
-import { useMockWallet } from './WalletProvider'
+import { useWallet } from './WalletProvider'
 
 function CreatorReferralLink() {
-  const { walletAddress, isConnecting, connectWallet } = useMockWallet()
+  const { walletAddress } = useWallet()
   const [copied, setCopied] = useState(false)
-
 
   if (!walletAddress) {
     return (
       <div className="space-y-3">
-        <p className="text-xs text-slate-500">Connect your wallet first to generate your unique creator invite link.</p>
-        <button
-          onClick={connectWallet}
-          disabled={isConnecting}
-          className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 disabled:opacity-70 transition-colors"
+        <p className="text-xs text-slate-500 italic">Connect your payout wallet first to generate your unique creator invite link.</p>
+        <Link
+          href="/wallet"
+          className="block w-full py-2.5 bg-slate-950 text-white text-center rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-900 transition-colors shadow-lg shadow-slate-950/10"
         >
-          {isConnecting ? 'Connecting...' : 'Connect Mock Wallet'}
-        </button>
+          Set Payout Wallet
+        </Link>
       </div>
     )
   }
@@ -83,12 +81,6 @@ export function DashboardClient({
   const [activeTab, setActiveTab] = useState('overview')
   const [memberSearch, setMemberSearch] = useState('')
   const [spaceFilter, setSpaceFilter] = useState('all')
-  
-  // Broadcast State
-  const [broadcastMessage, setBroadcastMessage] = useState('')
-  const [selectedSpacesForBroadcast, setSelectedSpacesForBroadcast] = useState<string[]>([])
-  const [isBroadcasting, setIsBroadcasting] = useState(false)
-  const [broadcastHistory, setBroadcastHistory] = useState<any[]>([])
 
   const filteredMembers = allMembers.filter(m => {
     const matchesSearch = m.telegram_user_id?.toString().includes(memberSearch) || 
@@ -140,48 +132,6 @@ export function DashboardClient({
       WebApp.HapticFeedback.impactOccurred('light')
     } catch (error) {
       console.warn('Haptic feedback unavailable', error)
-    }
-  }
-
-  const handleBroadcast = async () => {
-    if (!broadcastMessage.trim() || selectedSpacesForBroadcast.length === 0) return
-    
-    setIsBroadcasting(true)
-    handleHaptic()
-    
-    try {
-      const res = await fetch('/api/broadcast', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          spaceIds: selectedSpacesForBroadcast,
-          message: broadcastMessage
-        })
-      })
-      
-      const result = await res.json()
-      
-      if (result.success) {
-        setBroadcastHistory(prev => [{
-          id: Date.now(),
-          message: broadcastMessage,
-          sent: result.sent,
-          total: result.total,
-          date: new Date().toLocaleTimeString(),
-          spaces: selectedSpacesForBroadcast.map(id => spaces.find(s => s.id === id)?.name).join(', ')
-        }, ...prev])
-        
-        setBroadcastMessage('')
-        setSelectedSpacesForBroadcast([])
-        setNotification({
-          title: 'Broadcast Delivered',
-          message: `Successfully reached ${result.sent} members.`
-        })
-      }
-    } catch (err) {
-      console.error('Broadcast failed', err)
-    } finally {
-      setIsBroadcasting(false)
     }
   }
 
@@ -338,10 +288,6 @@ export function DashboardClient({
             <TabsTrigger value="overview" className="rounded-full px-6 data-[state=active]:bg-white data-[state=active]:shadow-lg">Overview</TabsTrigger>
             <TabsTrigger value="analytics" className="rounded-full px-6 data-[state=active]:bg-white data-[state=active]:shadow-lg">Analytics</TabsTrigger>
             <TabsTrigger value="members" className="rounded-full px-6 data-[state=active]:bg-white data-[state=active]:shadow-lg">Members</TabsTrigger>
-            <TabsTrigger value="broadcast" className="rounded-full px-6 data-[state=active]:bg-white data-[state=active]:shadow-lg flex items-center gap-2">
-              <Radio className="w-4 h-4 text-primary" />
-              Broadcast
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 mt-0 focus-visible:outline-none">
@@ -606,4 +552,32 @@ export function DashboardClient({
                                </div>
                             </td>
                             <td className="py-6 bg-slate-50/50 group-hover:bg-primary/[0.04] border-y border-slate-100 transition-colors">
-                               <
+                               <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-tight">
+                                 {new Date(member.joinDate).toLocaleDateString()}
+                               </span>
+                            </td>
+                            <td className="py-6 bg-slate-50/50 group-hover:bg-primary/[0.04] border-y border-slate-100 transition-colors">
+                               <span className="text-xs font-black text-slate-950">
+                                 {member.amountPaid} {member.currency}
+                               </span>
+                            </td>
+                            <td className="py-6 bg-slate-50/50 group-hover:bg-primary/[0.04] rounded-r-[32px] pr-6 border-y border-r border-slate-100 transition-colors text-right">
+                              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-100 shadow-sm">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                {member.status}
+                              </span>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </main>
+  )
+}
