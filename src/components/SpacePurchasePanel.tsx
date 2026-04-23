@@ -29,10 +29,45 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
     }).catch(() => {})
   }, [])
 
-  const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'complete'>('idle')
+  const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'complete' | 'pending_request'>('idle')
   const [accessUrl, setAccessUrl] = useState<string | null>(null)
   const tiers = space.tiers?.length ? space.tiers : [{ name: 'Standard Access', price: 0, duration: 'month' }]
   const currentTier = tiers[selectedTierIndex] ?? tiers[0]
+  const isFree = currentTier.price === 0
+
+  const handleRequestJoin = useCallback(async () => {
+    setCheckoutState('processing')
+    let telegramUserId: number | undefined
+    try {
+      const WebApp = (await import('@twa-dev/sdk')).default
+      telegramUserId = WebApp.initDataUnsafe.user?.id
+    } catch (error) {
+      console.warn('Telegram WebApp user id unavailable', error)
+    }
+
+    try {
+      const res = await fetch('/api/request-join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spaceId: space.id,
+          telegramUserId,
+          referralSource,
+        })
+      })
+      if (res.ok) {
+        setCheckoutState('pending_request')
+      } else {
+        const errData = await res.json()
+        alert(`Failed to request join: ${errData.error || 'Unknown error'}`)
+        setCheckoutState('idle')
+      }
+    } catch (e) {
+      console.error('Failed to request join', e)
+      alert('Failed to request join due to a network error.')
+      setCheckoutState('idle')
+    }
+  }, [space.id, referralSource])
 
   const handleTonCheckout = useCallback(async () => {
     console.log('[SpacePurchasePanel] Payment triggered', { walletConnected: !!walletAddress, paymentAddress })
@@ -180,13 +215,18 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
       try {
         const WebApp = (await import('@twa-dev/sdk')).default
         const currentTier = space.tiers[selectedTierIndex] ?? space.tiers[0]
+        const isFree = currentTier.price === 0
 
-        WebApp.MainButton.setText(`Join Space • ${currentTier.price}`)
+        WebApp.MainButton.setText(isFree ? 'Request to Join' : `Join Space • ${currentTier.price}`)
         WebApp.MainButton.show()
 
         const handleMainButtonClick = async () => {
           WebApp.HapticFeedback.notificationOccurred('success')
-          await handleTonCheckout()
+          if (isFree) {
+            await handleRequestJoin()
+          } else {
+            await handleTonCheckout()
+          }
         }
 
         WebApp.MainButton.onClick(handleMainButtonClick)
@@ -201,7 +241,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
 
     initMainButton()
     return () => cleanup()
-  }, [space, selectedTierIndex, handleTonCheckout])
+  }, [space, selectedTierIndex, handleTonCheckout, handleRequestJoin])
 
   return (
     <div className="sticky top-28 space-y-8">
@@ -266,38 +306,40 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-[32px] border border-slate-200 bg-slate-50 p-5">
-          <p className="text-sm font-semibold text-slate-950">Wallet connection needed</p>
-          <p className="mt-2 text-xs text-slate-500">
-            {space.is_closed 
-              ? 'This community is currently at capacity or closed by the creator. New enrollments are paused.' 
-              : 'Connect a TON wallet to authorize payment and unlock automated access for this space.'}
-          </p>
-          {isWalletConnected ? (
-            <p className="mt-3 text-xs font-semibold text-emerald-700">Connected wallet: {walletAddress}</p>
-          ) : (
-            <div className="mt-4">
-              <button
-                onClick={() => {
-                  import('@twa-dev/sdk').then(m => m.default.HapticFeedback.impactOccurred('medium'))
-                  connectWallet()
-                }}
-                disabled={isConnecting}
-                className="w-full rounded-3xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-900 transition disabled:opacity-70"
-              >
-                {isConnecting ? 'Establishing Link...' : 'Link TON Wallet'}
-              </button>
-            </div>
-          )}
+        {!isFree && (
+          <div className="rounded-[32px] border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-slate-950">Wallet connection needed</p>
+            <p className="mt-2 text-xs text-slate-500">
+              {space.is_closed 
+                ? 'This community is currently at capacity or closed by the creator. New enrollments are paused.' 
+                : 'Connect a TON wallet to authorize payment and unlock automated access for this space.'}
+            </p>
+            {isWalletConnected ? (
+              <p className="mt-3 text-xs font-semibold text-emerald-700">Connected wallet: {walletAddress}</p>
+            ) : (
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    import('@twa-dev/sdk').then(m => m.default.HapticFeedback.impactOccurred('medium'))
+                    connectWallet()
+                  }}
+                  disabled={isConnecting}
+                  className="w-full rounded-3xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-900 transition disabled:opacity-70"
+                >
+                  {isConnecting ? 'Establishing Link...' : 'Link TON Wallet'}
+                </button>
+              </div>
+            )}
 
-          {!paymentAddress && (
-            <p className="mt-4 text-xs text-rose-500">No payment address configured for this community.</p>
-          )}
-        </div>
+            {!paymentAddress && (
+              <p className="mt-4 text-xs text-rose-500">No payment address configured for this community.</p>
+            )}
+          </div>
+        )}
 
         <button
-          onClick={handleTonCheckout}
-          disabled={checkoutState !== 'idle' || !paymentAddress || space.is_closed}
+          onClick={isFree ? handleRequestJoin : handleTonCheckout}
+          disabled={checkoutState !== 'idle' || (!isFree && !paymentAddress) || space.is_closed}
           className={`w-full rounded-[30px] px-6 py-5 text-xl font-bold text-white shadow-2xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 ${
             space.is_closed ? 'bg-slate-500' : 'bg-slate-950 shadow-slate-950/20 hover:bg-slate-900'
           }`}
@@ -305,11 +347,28 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           {space.is_closed
             ? 'Sold Out'
             : checkoutState === 'processing'
-            ? 'Processing payment...'
+            ? 'Processing...'
             : checkoutState === 'complete'
             ? 'Success!'
+            : checkoutState === 'pending_request'
+            ? 'Request Sent'
+            : isFree 
+            ? 'Request to Join'
             : `Pay ${currentTier.price} ${currentTier.currency || 'TON'}`}
         </button>
+
+        {checkoutState === 'pending_request' && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-amber-50 border border-amber-200 rounded-[30px] p-6 text-center space-y-4 relative overflow-hidden"
+          >
+            <p className="text-sm font-bold text-amber-700 italic relative z-10">Request Pending</p>
+            <p className="text-sm text-amber-900 font-semibold leading-relaxed relative z-10">
+              Your request to join has been sent to the creator. You will receive an invite link via the Subora Bot once approved!
+            </p>
+          </motion.div>
+        )}
 
         {checkoutState === 'complete' && (
           <motion.div 

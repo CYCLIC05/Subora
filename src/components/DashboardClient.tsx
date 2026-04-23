@@ -142,6 +142,56 @@ export function DashboardClient({
     }
   }
 
+  const handleApproveRequest = async (spaceId: string, subscriptionId: string) => {
+    setIsLoading(true)
+    try {
+      const WebApp = (await import('@twa-dev/sdk')).default
+      const res = await fetch(`/api/spaces/${spaceId}/approve-join`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-telegram-init-data': WebApp.initData
+        },
+        body: JSON.stringify({ subscriptionId })
+      })
+      if (res.ok) {
+        window.location.reload()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to approve request')
+      }
+    } catch (err) {
+      console.error('Failed to approve request', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleRejectRequest = async (spaceId: string, subscriptionId: string) => {
+    setIsLoading(true)
+    try {
+      const WebApp = (await import('@twa-dev/sdk')).default
+      const res = await fetch(`/api/spaces/${spaceId}/reject-join`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-telegram-init-data': WebApp.initData
+        },
+        body: JSON.stringify({ subscriptionId })
+      })
+      if (res.ok) {
+        window.location.reload()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to reject request')
+      }
+    } catch (err) {
+      console.error('Failed to reject request', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleHaptic = async () => {
     try {
       const WebApp = (await import('@twa-dev/sdk')).default
@@ -200,7 +250,7 @@ export function DashboardClient({
   };
 
   // Calculate the percentage of members originating from the marketplace vs direct links
-  const marketplaceMembers = allMembers.filter(m => !m.referral_source || m.referral_source === 'marketplace').length
+  const marketplaceMembers = allMembers.filter(m => m.referral_source === 'discovery' || m.referral_source === 'marketplace').length
   const totalSubscribers = allMembers.length
   
   const marketplacePercentage = totalSubscribers > 0 
@@ -632,10 +682,39 @@ export function DashboardClient({
                                </span>
                             </td>
                             <td className="py-6 bg-slate-50/50 group-hover:bg-primary/[0.04] rounded-r-[32px] pr-6 border-y border-r border-slate-100 transition-colors text-right">
-                              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-100 shadow-sm">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                {member.status}
-                              </span>
+                              {member.status === 'pending' ? (
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    onClick={() => handleApproveRequest(spaces.find(s => s.name === member.spaceName)?.id || '', member.id)}
+                                    disabled={isLoading}
+                                    className="p-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition disabled:opacity-50"
+                                    title="Approve Request"
+                                  >
+                                    <Check className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleRejectRequest(spaces.find(s => s.name === member.spaceName)?.id || '', member.id)}
+                                    disabled={isLoading}
+                                    className="p-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition disabled:opacity-50"
+                                    title="Reject Request"
+                                  >
+                                    <AlertCircle className="w-4 h-4" />
+                                  </button>
+                                  <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-[0.2em] border border-amber-100 shadow-sm ml-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                    Pending
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm ${
+                                  member.status === 'active' 
+                                    ? 'bg-white text-emerald-600 border-emerald-100' 
+                                    : 'bg-slate-50 text-slate-500 border-slate-200'
+                                }`}>
+                                  <div className={`w-1.5 h-1.5 rounded-full ${member.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                                  {member.status}
+                                </span>
+                              )}
                             </td>
                           </motion.tr>
                         ))}
