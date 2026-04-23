@@ -4,10 +4,10 @@ import { generateSingleUseInviteLink, sendTelegramAccessLink } from '@/lib/teleg
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const spaceId = params.id
+    const { id: spaceId } = await params
     const body = await request.json()
     const { subscriptionId } = body
 
