@@ -20,17 +20,47 @@ export async function GET(request: Request) {
   try {
     const bot = createBot()
     const webhookUrl = `${url}/api/telegram`
+    const botToken = process.env.TELEGRAM_BOT_TOKEN
     
-    console.log(`Attempting to set Telegram webhook to: ${webhookUrl}`)
-    const result = await (bot as any).setWebHook(webhookUrl)
+    // 1. Set Webhook
+    console.log(`Setting Webhook: ${webhookUrl}`)
+    await (bot as any).setWebHook(webhookUrl)
+
+    // 2. Set Menu Button (The "Open App" button)
+    // We use raw fetch to ensure we hit the latest Telegram API features
+    console.log(`Setting Menu Button to: ${url}`)
+    const menuRes = await fetch(`https://api.telegram.org/bot${botToken}/setChatMenuButton`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        menu_button: {
+          type: 'web_app',
+          text: 'Open Subora',
+          web_app: { url: `${url}/` }
+        }
+      })
+    })
+    const menuData = await menuRes.json()
+
+    // 3. Set Commands
+    console.log(`Setting Bot Commands`)
+    await (bot as any).setMyCommands([
+      { command: 'start', description: 'Launch Subora Mini App' },
+      { command: 'discover', description: 'Explore premium spaces' },
+      { command: 'help', description: 'Get support' }
+    ])
 
     return NextResponse.json({ 
       success: true, 
-      message: `Webhook successfully set to ${webhookUrl}`,
-      telegram_response: result 
+      message: `Bot activated successfully!`,
+      details: {
+        webhook: webhookUrl,
+        menuButton: menuData.ok ? 'Configured' : 'Failed',
+        commands: 'Registered'
+      }
     })
   } catch (error: any) {
-    console.error('Failed to set Telegram webhook:', error)
+    console.error('Bot activation failed:', error)
     return NextResponse.json({ 
       success: false, 
       error: error.message || 'Unknown error' 
