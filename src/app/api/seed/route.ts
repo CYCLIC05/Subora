@@ -42,6 +42,9 @@ export async function GET() {
   if (!supabase) return NextResponse.json({ error: 'Supabase not ready' }, { status: 500 })
 
   try {
+    // 1. Wipe existing spaces for a clean start
+    await supabase.from('spaces').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
     const spacesToInsert = []
 
     for (let i = 0; i < 80; i++) {

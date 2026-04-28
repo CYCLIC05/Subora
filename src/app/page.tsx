@@ -1,10 +1,14 @@
 import { DiscoverPage } from '@/components/DiscoverPage'
 import { getDiscoverSpaces } from '@/lib/database'
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const spaces = await getDiscoverSpaces()
-
-  return <DiscoverPage spaces={spaces} />
+  try {
+    const spaces = await getDiscoverSpaces()
+    return <DiscoverPage spaces={spaces || []} />
+  } catch (error) {
+    console.error('Home Page Crash:', error)
+    return <DiscoverPage spaces={[]} />
+  }
 }
