@@ -11,7 +11,8 @@ export function BottomNavigation() {
 
   const navItems = [
     { name: 'Discover', href: '/', icon: Compass },
-    { name: 'Create', href: '/create', icon: PencilLine },
+    { name: 'Keys', href: '/subscriptions', icon: Library },
+    { name: 'Launch', href: '/create', icon: PencilLine },
     { name: 'Admin', href: '/dashboard', icon: LayoutDashboard },
   ];
 

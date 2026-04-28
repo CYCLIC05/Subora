@@ -41,6 +41,13 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center gap-4">
+          <Link 
+            href="/subscriptions"
+            onClick={() => handleHaptic('light')}
+            className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            My Memberships
+          </Link>
           {mounted && <TonConnectButton />}
         </div>
       </div>

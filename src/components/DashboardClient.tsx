@@ -151,9 +151,9 @@ export function DashboardClient({
           </div>
         </section>
 
-        <section className="space-y-8">
+        <section className="space-y-8 max-w-3xl mx-auto">
           {localSpaces.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex flex-col rounded-[24px] bg-white border border-slate-100 overflow-hidden shadow-sm">
               {localSpaces.map((space) => (
                 <div key={space.id} className="group relative">
                   <SpaceCard space={space} />
