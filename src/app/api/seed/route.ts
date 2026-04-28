@@ -39,7 +39,16 @@ const ADJECTIVES = ['Elite', 'Verified', 'Global', 'Advanced', 'Secure', 'Pro', 
 const SUFFIXES = ['Engine', 'Terminal', 'Portal', 'Nexus', 'Protocol', 'Vault', 'Core', 'Link']
 
 export async function GET() {
-  if (!supabase) return NextResponse.json({ error: 'Supabase not ready' }, { status: 500 })
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabase || !supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.json({ 
+      error: 'Supabase not ready',
+      details: `Missing: ${!supabaseUrl ? 'URL ' : ''}${!supabaseAnonKey ? 'AnonKey' : ''}`,
+      hint: 'Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in Vercel settings and then REDEPLOY.'
+    }, { status: 500 })
+  }
 
   try {
     // 1. Wipe existing spaces for a clean start
