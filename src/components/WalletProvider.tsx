@@ -44,9 +44,15 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
 }
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  // Use environment variable or default to the relative path
-  // relative paths work fine in modern TonConnect SDK
-  const manifestUrl = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL || '/tonconnect-manifest.json';
+  const [manifestUrl, setManifestUrl] = useState<string>(process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL || '');
+
+  useEffect(() => {
+    if (!manifestUrl && typeof window !== 'undefined') {
+      // Create an absolute URL if not provided in env
+      const absoluteUrl = `${window.location.origin}/tonconnect-manifest.json`;
+      setManifestUrl(absoluteUrl);
+    }
+  }, [manifestUrl]);
 
   return (
     <TonConnectUIProvider
