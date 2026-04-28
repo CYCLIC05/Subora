@@ -7,7 +7,8 @@ import confetti from 'canvas-confetti';
 import { Input } from "@/components/ui/input";
 import { CelebrationModal } from "@/components/CelebrationModal";
 import { Space } from "@/lib/supabase";
-import { X, ChevronRight, Wallet, ShieldCheck, Rocket, Globe, Zap, Plus } from "lucide-react";
+import { X, ChevronRight, Wallet, ShieldCheck, Rocket, Globe, Zap, Plus, Wand2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CreateSpace() {
   const [loading, setLoading] = useState(false);
@@ -72,6 +73,19 @@ export default function CreateSpace() {
   const [tiers, setTiers] = useState([
     { name: 'Standard Access', price: 99, duration: 'week', currency: 'TON' },
   ]);
+
+  const spaceTemplates = [
+    { id: 'alpha', label: 'Crypto Alpha', category: 'Crypto Alpha', price: 50, currency: 'TON', duration: 'month' },
+    { id: 'trading', label: 'Pro Trading', category: 'Trading', price: 150, currency: 'TON', duration: 'month' },
+    { id: 'free', label: 'Free Community', category: 'Technical', price: 0, currency: 'TON', duration: 'forever' }
+  ];
+
+  const applyTemplate = (t: typeof spaceTemplates[0]) => {
+    setFormData(prev => ({ ...prev, category: t.category }));
+    setTiers([{ name: 'Standard Access', price: t.price, duration: t.duration, currency: t.currency }]);
+    toast.success(`Applied ${t.label} template!`);
+    handleHaptic();
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -309,6 +323,21 @@ export default function CreateSpace() {
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">2</div>
                   <span>Economics</span>
+                </div>
+
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0 mr-2 flex items-center gap-1">
+                    <Wand2 className="w-3 h-3" /> Templates:
+                  </span>
+                  {spaceTemplates.map(t => (
+                    <button
+                      key={t.id}
+                      onClick={() => applyTemplate(t)}
+                      className="shrink-0 px-4 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95"
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">

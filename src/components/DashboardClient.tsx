@@ -20,6 +20,7 @@ export function DashboardClient({
   revenueData?: any
   allMembers?: any[]
 }) {
+  const [localSpaces, setLocalSpaces] = useState(spaces)
   const [isLoading, setIsLoading] = useState(false)
   const [editingSpace, setEditingSpace] = useState<Space | null>(null)
   const [editForm, setEditForm] = useState({ name: '', description: '', category: '' })
@@ -48,7 +49,12 @@ export function DashboardClient({
       })
       if (res.ok) {
         toast.success('Space updated successfully')
-        window.location.reload()
+        setLocalSpaces(prev => prev.map(s => 
+          s.id === editingSpace.id 
+            ? { ...s, ...editForm } 
+            : s
+        ))
+        setEditingSpace(null)
       } else {
         const data = await res.json()
         toast.error(data.error || 'Failed to update space')
@@ -77,7 +83,8 @@ export function DashboardClient({
         }
       })
       if (res.ok) {
-        window.location.reload()
+        toast.success('Space deleted')
+        setLocalSpaces(prev => prev.filter(s => s.id !== id))
       } else {
         const data = await res.json()
         toast.error(data.error || 'Failed to delete space')
@@ -108,14 +115,30 @@ export function DashboardClient({
           <div className="space-y-1">
             <h1 className="text-3xl font-heading font-semibold text-slate-950 tracking-tight">Your Spaces</h1>
           </div>
-          <Link
-            href="/create"
-            onClick={handleHaptic}
-            className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-slate-950/15 transition hover:bg-slate-900"
-          >
-            <Plus className="h-4 w-4" />
-            Create Space
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                toast.info('TON payments are instantly sent to your wallet. For Stars withdrawals, please use the Subora Bot.', {
+                  action: {
+                    label: 'Open Bot',
+                    onClick: () => window.open('https://t.me/SuboraBot', '_blank')
+                  },
+                  duration: 6000,
+                })
+              }}
+              className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
+            >
+              Withdraw
+            </button>
+            <Link
+              href="/create"
+              onClick={handleHaptic}
+              className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-slate-950/15 transition hover:bg-slate-900"
+            >
+              <Plus className="h-4 w-4" />
+              Create Space
+            </Link>
+          </div>
         </header>
 
         {/* Analytics Section */}
@@ -129,9 +152,9 @@ export function DashboardClient({
         </section>
 
         <section className="space-y-8">
-          {spaces.length > 0 ? (
+          {localSpaces.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {spaces.map((space) => (
+              {localSpaces.map((space) => (
                 <div key={space.id} className="group relative">
                   <SpaceCard space={space} />
                   
