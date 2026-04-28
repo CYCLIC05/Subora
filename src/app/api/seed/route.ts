@@ -57,6 +57,7 @@ export async function GET() {
         cover_image: `https://images.unsplash.com/photo-${template.img}?auto=format&fit=crop&q=80&w=800`,
         channel_link: template.cat === 'AI Bots' ? 'https://t.me/SuboraBot' : '@suborabot',
         creator_name: `Subora ${template.cat.split(' ')[0]}`,
+        creator_telegram_id: 0, // Dummy ID for discovery spaces
         category: template.cat,
         is_closed: false,
         subscribers: Math.floor(Math.random() * 1500) + 50,
