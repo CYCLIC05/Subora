@@ -6,6 +6,11 @@ import { useWallet } from './WalletProvider';
 
 export function Header() {
   const { walletAddress } = useWallet();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleHaptic = async (style: 'light' | 'medium' | 'heavy' = 'light') => {
     try {
@@ -35,7 +40,7 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {typeof window !== 'undefined' && <TonConnectButton />}
+          {mounted && <TonConnectButton />}
         </div>
       </div>
     </header>
