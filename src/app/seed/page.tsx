@@ -16,7 +16,7 @@ export default function SeedPage() {
         if (data.success) {
           setStatus(`✅ Success! ${data.inserted} spaces added. Total in DB: ${data.total_in_db}`)
         } else {
-          setError(data.error || 'Unknown error occurred')
+          setError(`${data.error}${data.details ? ' - ' + data.details : ''}`)
           setStatus('❌ Failed')
         }
       } catch (err: any) {
