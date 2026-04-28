@@ -7,10 +7,16 @@ export default function DebugEnvPage() {
 
   useEffect(() => {
     const vars: Record<string, string> = {}
-    // We can only see NEXT_PUBLIC_ vars on the client
-    Object.keys(process.env).forEach(key => {
-      if (key.startsWith('NEXT_PUBLIC_')) {
-        const val = process.env[key] || ''
+    const keys = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_TONCONNECT_MANIFEST_URL']
+    
+    keys.forEach(key => {
+      // In Next.js, we MUST access them by name for them to be inlined
+      let val = ''
+      if (key === 'NEXT_PUBLIC_SUPABASE_URL') val = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      if (key === 'NEXT_PUBLIC_SUPABASE_ANON_KEY') val = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+      if (key === 'NEXT_PUBLIC_TONCONNECT_MANIFEST_URL') val = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL || ''
+      
+      if (val) {
         vars[key] = val.length > 5 ? `${val.substring(0, 5)}...${val.substring(val.length - 3)}` : 'SET BUT SHORT'
       }
     })
