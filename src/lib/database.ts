@@ -46,6 +46,7 @@ export const getDiscoverSpaces = async (): Promise<Space[]> => {
   }
 
   try {
+    if (!supabase) return []
     const { data, error } = await supabase
       .from('spaces')
       .select(spaceSelect)
@@ -72,6 +73,7 @@ export const getSpaceById = async (id: string): Promise<Space | null> => {
   if (!isSupabaseReady) return null
 
   try {
+    if (!supabase) return null
     const { data, error } = await supabase
       .from('spaces')
       .select(spaceSelect)
@@ -101,6 +103,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
   let totalUSD = 0
   if (isSupabaseReady) {
     try {
+      if (!supabase) return { stats: [], spaces: [], revenueData: [], revenueBySpace: [], allMembers: [], tonPrice }
       // 1. Fetch current spaces
       const { data: spacesData } = await supabase
         .from('spaces')
@@ -238,11 +241,11 @@ export const getDashboardData = async (): Promise<DashboardData> => {
 export type CreateSpacePayload = Omit<Space, 'id' | 'created_at' | 'subscribers' | 'is_trending'> & Partial<Pick<Space, 'subscribers' | 'is_trending' | 'category'>>
 
 export const createSpace = async (payload: CreateSpacePayload): Promise<Space> => {
-  if (!isSupabaseReady) {
+  if (!isSupabaseReady || !supabase) {
     throw new Error('Database not configured')
   }
 
-  const { data, error } = await supabase!
+  const { data, error } = await supabase
     .from('spaces')
     .insert({
       ...payload,
@@ -270,7 +273,8 @@ export const getUserSubscriptions = async (telegramUserId: number | string): Pro
   if (!isSupabaseReady) return []
 
   try {
-    const { data: subs, error: subError } = await supabase!
+    if (!supabase) return []
+    const { data: subs, error: subError } = await supabase
       .from('space_subscriptions')
       .select(`*, space:spaces(${spaceSelect})`)
       .eq('telegram_user_id', typeof telegramUserId === 'string' ? parseInt(telegramUserId, 10) : telegramUserId)
@@ -300,7 +304,8 @@ export const getSpaceMembers = async (spaceId: string): Promise<SpaceMember[]> =
   if (!isSupabaseReady) return []
 
   try {
-    const { data, error } = await supabase!
+    if (!supabase) return []
+    const { data, error } = await supabase
       .from('space_subscriptions')
       .select('telegram_user_id, join_time, wallet_address')
       .eq('space_id', spaceId)
@@ -321,7 +326,8 @@ export const getUserTransactions = async (walletAddress: string): Promise<Transa
   if (!isSupabaseReady || !walletAddress) return []
 
   try {
-    const { data, error } = await supabase!
+    if (!supabase) return []
+    const { data, error } = await supabase
       .from('transactions')
       .select('*')
       .eq('wallet_address', walletAddress)
