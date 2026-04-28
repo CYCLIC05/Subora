@@ -15,7 +15,7 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
 
-  const categories = ['All', 'Crypto Alpha', 'Trading', 'Lifestyle', 'Education', 'Technical']
+  const categories = ['All', 'Free', 'Premium', 'Crypto Alpha', 'Trading', 'Lifestyle', 'Technical']
 
   // Handle debouncing
   useEffect(() => {

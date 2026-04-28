@@ -40,9 +40,14 @@ export function rankSpaces(spaces: Space[], query: string, category: string): Sp
     const desc = (space.description || '').toLowerCase();
     const cat = (space.category || '').toLowerCase();
 
-    // 1. Exact Category Filter (Hard requirement if selected)
-    // Make case-insensitive and trim to ensure matching
-    if (category !== 'All' && space.category?.toLowerCase().trim() !== category.toLowerCase().trim()) {
+    // 1. Category & Price Filters
+    const lowestPrice = space.tiers?.reduce((min, t) => Math.min(min, t.price), Infinity) || 0;
+
+    if (category === 'Free') {
+      if (lowestPrice > 0) return { space, score: -1 };
+    } else if (category === 'Premium') {
+      if (lowestPrice === 0) return { space, score: -1 };
+    } else if (category !== 'All' && space.category?.toLowerCase().trim() !== category.toLowerCase().trim()) {
       return { space, score: -1 };
     }
 
