@@ -114,6 +114,15 @@ export default function CreateSpace() {
     }
   };
 
+  const handleHaptic = async () => {
+    try {
+      const WebApp = (await import('@twa-dev/sdk')).default
+      WebApp.HapticFeedback.impactOccurred('light')
+    } catch (error) {
+      console.warn('Haptic feedback unavailable', error)
+    }
+  };
+
   const handleTierChange = (index: number, field: 'name' | 'price' | 'duration' | 'currency', value: string) => {
     setTiers((current) =>
       current.map((tier, tierIndex) =>
