@@ -86,16 +86,26 @@ export async function GET() {
 
     if (error) {
       console.error('Seeding error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ 
+        success: false, 
+        error: error.message,
+        hint: 'Check if RLS policies allow INSERT on "spaces" table.'
+      }, { status: 500 })
     }
+
+    // Double check count
+    const { count } = await supabase
+      .from('spaces')
+      .select('*', { count: 'exact', head: true })
 
     return NextResponse.json({ 
       success: true, 
-      count: data.length, 
-      message: 'Database populated with 60 mock spaces. Marketplace should now be full.' 
+      inserted: data.length, 
+      total_in_db: count,
+      message: 'Marketplace populated. If total_in_db is 0, check your Supabase RLS policies.' 
     })
-  } catch (err) {
+  } catch (err: any) {
     console.error('Seed catch error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
   }
 }
