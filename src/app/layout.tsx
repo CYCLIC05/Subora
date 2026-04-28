@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { cn } from "@/lib/utils";
+import { Toaster } from 'sonner';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const geistMono = Geist_Mono({subsets:['latin'],variable:'--font-mono'});
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body suppressHydrationWarning className="antialiased min-h-screen bg-white text-zinc-900 overflow-x-hidden">
         <Providers>
           <Onboarding />
+          <Toaster position="top-center" richColors />
           <div className="pb-32">
             {children}
           </div>

@@ -2,6 +2,7 @@
 
 import { Share2 } from 'lucide-react'
 import { Space } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 export function ShareButton({ space }: { space: Space }) {
   const handleShare = async () => {
@@ -27,7 +28,7 @@ export function ShareButton({ space }: { space: Space }) {
             buttons: [{ type: 'ok' }]
           })
         } else {
-          alert('Invite link copied to clipboard!')
+          toast.success('Invite link copied!')
         }
 
         WebApp.HapticFeedback.notificationOccurred('warning')
@@ -36,7 +37,7 @@ export function ShareButton({ space }: { space: Space }) {
       console.warn('Telegram sharing failed', error)
       const fallbackLink = `https://t.me/SuboraBot/app?startapp=space_${space.id}`
       navigator.clipboard.writeText(fallbackLink)
-      alert('Link copied to clipboard!')
+      toast.success('Link copied!')
     }
   }
 

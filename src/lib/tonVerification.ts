@@ -22,7 +22,8 @@ export function isVerificationRequired(): boolean {
 export async function verifyTonTransaction(
   userAddress: string,
   paymentAddress: string,
-  expectedAmount: string
+  expectedAmount: string,
+  referrerAddress?: string | null
 ): Promise<TransactionVerification> {
   try {
     if (!userAddress || !paymentAddress) {
@@ -58,17 +59,31 @@ export async function verifyTonTransaction(
       if (now - txTime > timeWindow) break
 
       if (tx.out_msgs && Array.isArray(tx.out_msgs)) {
+        let primaryMatched = false
+        let referrerMatched = !referrerAddress // true if no referrer needed
+        let totalAmount = BigInt(0)
+
         for (const outMsg of tx.out_msgs) {
           const msgDestination = outMsg.destination?.address
           const msgAmount = outMsg.value ? BigInt(outMsg.value) : BigInt(0)
 
-          if (
-            msgDestination &&
-            msgDestination.toLowerCase() === paymentAddress.toLowerCase() &&
-            msgAmount >= expectedAmountNano
-          ) {
-            return { verified: true, message: 'Payment verified', transactionHash: tx.hash }
+          if (!msgDestination) continue
+
+          if (msgDestination.toLowerCase() === paymentAddress.toLowerCase()) {
+            // Check for at least 93% if split, or 100% if not
+            const minPrimary = referrerAddress 
+              ? (expectedAmountNano * BigInt(93)) / BigInt(100)
+              : expectedAmountNano
+            if (msgAmount >= minPrimary) primaryMatched = true
+          } else if (referrerAddress && msgDestination.toLowerCase() === referrerAddress.toLowerCase()) {
+            referrerMatched = true
           }
+          
+          totalAmount += msgAmount
+        }
+
+        if (primaryMatched && referrerMatched && totalAmount >= expectedAmountNano) {
+          return { verified: true, message: 'Payment verified', transactionHash: tx.hash }
         }
       }
     }

@@ -17,8 +17,8 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/70 shadow-sm">
-      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+      <div className="container mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link 
             href="/" 
@@ -29,9 +29,9 @@ export function Header() {
               Subora
             </span>
           </Link>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Verified Network</span>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100">
+            <div className="w-1 h-1 rounded-full bg-emerald-500" />
+            <span className="hidden xs:inline text-[9px] font-bold text-slate-500 uppercase tracking-widest">Verified</span>
           </div>
         </div>
         <div className="flex items-center gap-4">

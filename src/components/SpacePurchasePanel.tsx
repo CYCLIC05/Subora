@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Space } from '@/lib/supabase'
 import { motion } from 'framer-motion'
 import { useWallet } from './WalletProvider'
+import { toast } from 'sonner'
 
 const trustLines = [
   'Instant access via Telegram',
@@ -59,12 +60,12 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
         setCheckoutState('pending_request')
       } else {
         const errData = await res.json()
-        alert(`Failed to request join: ${errData.error || 'Unknown error'}`)
+        toast.error(`Failed to request join: ${errData.error || 'Unknown error'}`)
         setCheckoutState('idle')
       }
     } catch (e) {
       console.error('Failed to request join', e)
-      alert('Failed to request join due to a network error.')
+      toast.error('Failed to request join due to a network error.')
       setCheckoutState('idle')
     }
   }, [space.id, referralSource])
@@ -73,7 +74,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
     console.log('[SpacePurchasePanel] Payment triggered', { walletConnected: !!walletAddress, paymentAddress })
     
     if (!paymentAddress) {
-      alert('Payment address is not configured for this space. Please contact the creator.')
+      toast.error('Payment address is not configured for this space.')
       return
     }
 
@@ -82,7 +83,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
         await connectWallet();
         return; 
       } catch (err) {
-        alert('Failed to connect wallet.');
+        toast.error('Failed to connect wallet.')
         return;
       }
     }
@@ -161,7 +162,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
       console.warn('Payment failed', error)
       // Only alert if it's not a user rejection (cancel)
       if (error instanceof Error && !error.message.includes('User rejected')) {
-        alert(`Payment failed: ${error.message}`)
+        toast.error(`Payment failed: ${error.message}`)
       }
       setCheckoutState('idle')
     }
@@ -410,7 +411,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
                       buttons: [{ type: 'ok' }]
                     })
                   } else {
-                    alert('Invite link copied to clipboard!')
+                    toast.success('Invite link copied!')
                   }
                 }
               }}

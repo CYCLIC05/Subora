@@ -1,16 +1,31 @@
-export default function CreateLoading() {
+export default function LoadingPage() {
   return (
-    <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-20 max-w-3xl space-y-8">
-        <div className="h-12 w-2/5 rounded-full bg-slate-200/80 animate-pulse" />
-        <div className="space-y-6 rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-          {[...Array(4)].map((_, index) => (
-            <div key={index} className="space-y-4">
-              <div className="h-4 w-3/4 rounded-full bg-slate-200/80 animate-pulse" />
-              <div className="h-12 rounded-[24px] bg-slate-200/80 animate-pulse" />
-            </div>
-          ))}
-          <div className="mt-4 h-14 w-full rounded-[28px] bg-slate-200/80 animate-pulse" />
+    <main className="min-h-screen bg-white pb-32">
+      <div className="max-w-xl mx-auto px-0 sm:px-4 py-6">
+        <div className="space-y-8">
+          <header className="px-4 sm:px-0">
+            <div className="h-8 w-2/5 rounded-full bg-slate-50 animate-pulse" />
+          </header>
+
+          <div className="space-y-8 pb-10">
+            {[...Array(2)].map((_, i) => (
+              <section key={i}>
+                <div className="bg-white sm:rounded-2xl sm:border border-slate-100 overflow-hidden border-y">
+                  <div className="p-4 bg-slate-50 border-b border-slate-100">
+                    <div className="h-3 w-1/4 rounded-full bg-slate-100 animate-pulse" />
+                  </div>
+                  <div className="p-4 space-y-6">
+                    {[...Array(3)].map((_, j) => (
+                      <div key={j} className="space-y-2">
+                        <div className="h-3 w-1/5 rounded-full bg-slate-50 animate-pulse" />
+                        <div className="h-11 w-full rounded-2xl bg-slate-50 animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
       </div>
     </main>

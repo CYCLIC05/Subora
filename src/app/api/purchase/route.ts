@@ -74,7 +74,8 @@ export async function POST(request: Request) {
         verification = await verifyTonTransaction(
           walletAddress!,
           spaceForVerification.data.payment_address,
-          amountNano
+          amountNano,
+          spaceForVerification.data.referrer_payment_address // Optional second recipient
         )
       } else if (currency === 'Stars') {
         // Stars are verified via the WebApp callback or webhook. 

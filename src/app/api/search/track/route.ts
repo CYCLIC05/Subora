@@ -3,7 +3,12 @@ import { supabase } from '@/lib/supabase'
 
 export async function POST(request: Request) {
   try {
-    const { query } = await request.json()
+    const bodyText = await request.text()
+    if (!bodyText) {
+      return NextResponse.json({ success: false, message: 'Empty request body' }, { status: 400 })
+    }
+    
+    const { query } = JSON.parse(bodyText)
 
     if (!query || query.trim().length < 2) {
       return NextResponse.json({ success: false, message: 'Query too short' })

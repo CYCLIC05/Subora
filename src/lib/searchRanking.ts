@@ -41,7 +41,8 @@ export function rankSpaces(spaces: Space[], query: string, category: string): Sp
     const cat = (space.category || '').toLowerCase();
 
     // 1. Exact Category Filter (Hard requirement if selected)
-    if (category !== 'All' && space.category !== category) {
+    // Make case-insensitive and trim to ensure matching
+    if (category !== 'All' && space.category?.toLowerCase().trim() !== category.toLowerCase().trim()) {
       return { space, score: -1 };
     }
 

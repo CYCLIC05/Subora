@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { WalletProvider } from './WalletProvider';
+import { ThemeProvider, useTheme } from 'next-themes';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -57,8 +58,39 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   return (
-    <WalletProvider>
-      {children}
-    </WalletProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <TelegramThemeSync />
+      <WalletProvider>
+        {children}
+      </WalletProvider>
+    </ThemeProvider>
   );
+}
+
+function TelegramThemeSync() {
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    const syncTheme = async () => {
+      try {
+        const WebApp = (await import('@twa-dev/sdk')).default;
+        if (WebApp.colorScheme) {
+          setTheme(WebApp.colorScheme);
+        }
+        
+        // Listen for theme changes in real-time
+        WebApp.onEvent('themeChanged', () => {
+          if (WebApp.colorScheme) {
+            setTheme(WebApp.colorScheme);
+          }
+        });
+      } catch (e) {
+        console.warn('Telegram SDK theme sync failed', e);
+      }
+    };
+
+    syncTheme();
+  }, [setTheme]);
+
+  return null;
 }

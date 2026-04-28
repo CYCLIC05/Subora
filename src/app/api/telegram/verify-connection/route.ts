@@ -51,10 +51,25 @@ export async function POST(request: Request) {
         })
       }
 
+      const chatDetails = await (bot as any).getChat(chatId)
+      
+      // Attempt to get profile photo URL
+      let photoUrl = ''
+      if (chatDetails.photo) {
+        try {
+          const file = await (bot as any).getFile(chatDetails.photo.big_file_id || chatDetails.photo.small_file_id)
+          photoUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`
+        } catch (photoErr) {
+          console.warn('Failed to fetch chat photo:', photoErr)
+        }
+      }
+
       return NextResponse.json({ 
         success: true, 
         message: 'Bot connected and authorized successfully!',
-        chatTitle: chatMember.chat?.title
+        chatTitle: chatDetails.title,
+        chatDescription: chatDetails.description || '',
+        chatPhoto: photoUrl
       })
 
     } catch (botError: any) {

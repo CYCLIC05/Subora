@@ -50,9 +50,9 @@ export function RevenueAnalytics({ chartData = [] }: { chartData?: RevenuePoint[
     <Card className="border-zinc-100 shadow-none bg-white/50 backdrop-blur-sm">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b border-zinc-100 p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle className="text-sm font-heading font-semibold text-zinc-900">Revenue Performance</CardTitle>
-          <CardDescription className="text-xs text-zinc-500 font-medium">
-            Projected earnings for the current billing cycle
+          <CardTitle className="text-sm font-heading font-semibold text-zinc-950">Performance</CardTitle>
+          <CardDescription className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+            Verified Analytics
           </CardDescription>
         </div>
         <div className="flex">
@@ -170,22 +170,7 @@ export function RevenueAnalytics({ chartData = [] }: { chartData?: RevenuePoint[
           </div>
         )}
 
-        {chartData.length > 0 && (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-[10px] uppercase tracking-[0.32em] text-slate-400">Peak value</p>
-              <p className="mt-3 text-lg font-semibold text-slate-950">
-                {activeChart === 'revenue' ? `$${Math.max(...chartData.map((point) => point.revenue)).toLocaleString()}` : Math.max(...chartData.map((point) => point.members)).toLocaleString()}
-              </p>
-            </div>
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-[10px] uppercase tracking-[0.32em] text-slate-400">Weekly pace</p>
-              <p className="mt-3 text-lg font-semibold text-slate-950">
-                {activeChart === 'revenue' ? `$${Math.round(total.revenue / chartData.length).toLocaleString()}` : Math.round(total.members / chartData.length).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        )}
+
       </CardContent>
     </Card>
   )

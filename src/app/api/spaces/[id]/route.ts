@@ -40,12 +40,24 @@ export async function PATCH(
   }
 
   try {
-    const { is_closed } = await request.json()
+    const body = await request.json()
+    const allowedFields = ['is_closed', 'name', 'description', 'category', 'cover_image']
+    const updates: any = {}
+    
+    allowedFields.forEach(field => {
+      if (body[field] !== undefined) {
+        updates[field] = body[field]
+      }
+    })
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
+    }
     
     // Ensure the requester owns the space
     const { data: space, error } = await supabase
       .from('spaces')
-      .update({ is_closed })
+      .update(updates)
       .eq('id', id)
       .eq('creator_telegram_id', requesterId) // Security check: must own the space
       .select()

@@ -86,33 +86,7 @@ export function WalletDashboard() {
     : 'Not Connected';
 
   if (!walletAddress) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 px-6">
-        <ConnectWalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-        
-        <div className="relative">
-          <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-          <div className="relative w-24 h-24 rounded-[32px] bg-slate-950 flex items-center justify-center shadow-2xl">
-            <Wallet className="w-10 h-10 text-white" />
-          </div>
-        </div>
-        
-        <div className="space-y-3">
-          <h2 className="text-3xl font-heading font-black text-slate-950 tracking-tight">Access Your Vault</h2>
-          <p className="text-sm font-medium text-slate-500 max-w-xs mx-auto leading-relaxed">
-            Directly connect your TON wallet to view your real-time balance, earnings, and transaction ledger.
-          </p>
-        </div>
-
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          disabled={isConnecting}
-          className="w-full max-w-xs py-4 bg-slate-950 text-white rounded-2xl text-sm font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-950/20 active:scale-95 transition-all disabled:opacity-50"
-        >
-          {isConnecting ? 'Establishing Link...' : 'Link TON Wallet'}
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (
