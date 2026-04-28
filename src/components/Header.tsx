@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { useWallet } from './WalletProvider';
