@@ -43,20 +43,16 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Compute a stable manifest URL — must never be empty when passed to TonConnectUIProvider.
+// NEXT_PUBLIC_ vars are inlined at build time, so this is safe on both server and client.
+const MANIFEST_URL =
+  process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL ||
+  'https://subora-two.vercel.app/tonconnect-manifest.json';
+
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [manifestUrl, setManifestUrl] = useState<string>(process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL || '');
-
-  useEffect(() => {
-    if (!manifestUrl && typeof window !== 'undefined') {
-      // Create an absolute URL if not provided in env
-      const absoluteUrl = `${window.location.origin}/tonconnect-manifest.json`;
-      setManifestUrl(absoluteUrl);
-    }
-  }, [manifestUrl]);
-
   return (
     <TonConnectUIProvider
-      manifestUrl={manifestUrl}
+      manifestUrl={MANIFEST_URL}
       uiPreferences={{ theme: 'SYSTEM' }}
       actionsConfiguration={{
         twaReturnUrl: 'https://t.me/SuboraBot'
