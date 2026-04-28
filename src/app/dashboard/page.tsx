@@ -9,11 +9,8 @@ export default async function DashboardPage() {
   return (
     <DashboardClient 
       spaces={data.spaces} 
-      stats={data.stats} 
       revenueData={data.revenueData} 
-      revenueBySpace={data.revenueBySpace} 
       allMembers={data.allMembers}
-      tonPrice={data.tonPrice} 
     />
   )
 }
