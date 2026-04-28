@@ -5,10 +5,10 @@ const CATEGORIES = ['Crypto Alpha', 'Trading', 'AI Bots', 'Infrastructure', 'Lif
 
 const MOCK_NAMES = [
   // Crypto Alpha
-  { name: 'The Whale Room', cat: 'Crypto Alpha', img: '1621416894569-0f39ed31d247' },
+  { name: 'The Whale Room', cat: 'Crypto Alpha', img: '1518546305927-5a555bb7020d' },
   { name: 'DeFi Degens', cat: 'Crypto Alpha', img: '1639762681485-074b7f938ba0' },
   { name: 'Solana Gems', cat: 'Crypto Alpha', img: '1639322537228-f710d846310a' },
-  { name: 'Alpha Signals HQ', cat: 'Crypto Alpha', img: '1518546305927-5a555bb7020d' },
+  { name: 'Alpha Signals HQ', cat: 'Crypto Alpha', img: '1621416894569-0f39ed31d247' },
   
   // Trading
   { name: 'Macro Insights', cat: 'Trading', img: '1611974717482-4828c3fc35c6' },

@@ -38,28 +38,39 @@ export function SpaceCard({ space }: { space: Space }) {
       </div>
       
       {/* Middle: Content */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <div className="flex items-center gap-2">
-          <h3 className="font-heading text-[15px] font-semibold text-slate-950 truncate">
+      <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+        <div className="flex items-center gap-1.5">
+          <h3 className="font-heading text-[15px] font-bold text-slate-950 truncate">
             {space.name}
           </h3>
-          <span className="shrink-0 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
-            <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+          <span className="shrink-0 w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center">
+            <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
           </span>
         </div>
-        <p className="text-[13px] font-medium text-slate-500 truncate">
-          {space.category || 'Premium Space'}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+            {space.category || 'Premium'}
+          </p>
+          <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-500">
+            <span className="w-1 h-1 rounded-full bg-emerald-500" />
+            {(space.subscribers || 0).toLocaleString()} MEMBERS
+          </div>
+        </div>
       </div>
 
       {/* Right: Price & CTA */}
-      <div className="flex flex-col items-end gap-1 shrink-0">
-        <span className="text-sm font-bold text-slate-950">
-          {lowestPriceTier.price} {lowestPriceTier.currency || 'TON'}
-        </span>
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-lg">
+      <div className="flex flex-col items-end gap-1.5 shrink-0">
+        <div className="flex flex-col items-end">
+          <span className="text-[13px] font-black text-slate-950">
+            {lowestPriceTier.price} {lowestPriceTier.currency || 'TON'}
+          </span>
+          <span className="text-[9px] font-bold text-emerald-500">
+            +{(Math.random() * 15).toFixed(1)}% growth
+          </span>
+        </div>
+        <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border border-primary/20">
           Join
-        </span>
+        </div>
       </div>
     </Link>
   );

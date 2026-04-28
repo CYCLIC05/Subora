@@ -106,6 +106,30 @@ export function DiscoverPage({ spaces }: { spaces: Space[] }) {
           </div>
         </div>
 
+        {!searchQuery && selectedCategory === 'All' && trendingSpaces.length > 0 && (
+          <div className="px-4 pb-6">
+            <Link 
+              href={`/spaces/${trendingSpaces[0].id}?source=featured`}
+              className="group block relative aspect-[16/8] w-full rounded-[32px] overflow-hidden border border-slate-200 shadow-xl shadow-slate-200/50 active:scale-[0.98] transition-transform"
+            >
+              <SpaceCoverImage 
+                src={trendingSpaces[0].cover_image} 
+                alt={trendingSpaces[0].name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 space-y-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2 py-0.5 rounded-full bg-primary text-[9px] font-black text-white uppercase tracking-tighter">Featured</span>
+                  <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">{trendingSpaces[0].category}</span>
+                </div>
+                <h2 className="text-xl font-black text-white leading-tight">{trendingSpaces[0].name}</h2>
+                <p className="text-[11px] font-medium text-white/60 line-clamp-1 max-w-[80%]">{trendingSpaces[0].description}</p>
+              </div>
+            </Link>
+          </div>
+        )}
+
         {!searchQuery && selectedCategory === 'All' && (
           <div className="space-y-10 pb-6">
             {trendingSpaces.length > 0 && (
