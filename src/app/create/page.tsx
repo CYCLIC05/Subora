@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti';
 import { Input } from "@/components/ui/input";
 import { CelebrationModal } from "@/components/CelebrationModal";
 import { Space } from "@/lib/supabase";
-import { X, ChevronRight, Wallet, ShieldCheck, Rocket, Globe, Zap } from "lucide-react";
+import { X, ChevronRight, Wallet, ShieldCheck, Rocket, Globe, Zap, Plus } from "lucide-react";
 
 export default function CreateSpace() {
   const [loading, setLoading] = useState(false);
