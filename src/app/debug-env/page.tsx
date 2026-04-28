@@ -42,9 +42,9 @@ export default function DebugEnvPage() {
                 <td className="p-4 font-bold">{name}</td>
                 <td className="p-4">
                   {envVars[name] ? (
-                    <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded text-[10px] font-bold">DETECTED</span>
+                    <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded text-[10px] font-bold">READY</span>
                   ) : (
-                    <span className="px-2 py-1 bg-rose-500/10 text-rose-500 rounded text-[10px] font-bold">NOT FOUND</span>
+                    <span className="px-2 py-1 bg-rose-500/10 text-rose-500 rounded text-[10px] font-bold">MISSING</span>
                   )}
                 </td>
                 <td className="p-4 text-slate-500">{envVars[name] || '---'}</td>

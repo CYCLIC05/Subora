@@ -14,14 +14,14 @@ export default function SeedPage() {
         const data = await res.json()
         
         if (data.success) {
-          setStatus(`✅ Success! ${data.inserted} spaces added. Total in DB: ${data.total_in_db}`)
+          setStatus(`Success: ${data.inserted} spaces added. Total in DB: ${data.total_in_db}`)
         } else {
           setError(`${data.error}${data.details ? ' - ' + data.details : ''}`)
-          setStatus('❌ Failed')
+          setStatus('Failed')
         }
       } catch (err: any) {
         setError(err.message)
-        setStatus('❌ Crash')
+        setStatus('Crash')
       }
     }
     runSeed()
