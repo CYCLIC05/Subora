@@ -258,7 +258,41 @@ export default function CreateSpace() {
                     </div>
                   )}
                 </div>
-                {verifyError && <p className="text-[10px] font-bold text-rose-500 ml-1">{verifyError}</p>}
+                
+                {verifyError && (
+                  <div className="mt-3 p-4 rounded-2xl bg-rose-50 border border-rose-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-start gap-2">
+                      <X className="w-3 h-3 text-rose-500 mt-0.5" />
+                      <p className="text-[10px] font-bold text-rose-600 leading-tight">
+                        {verifyError}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2 pt-2 border-t border-rose-100">
+                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">Quick Solution:</p>
+                      <ul className="text-[10px] text-slate-600 font-medium space-y-1.5 ml-1">
+                        <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-rose-400" />
+                          <span>Add <span className="font-bold text-slate-900">@SuboraBot</span> as an Admin</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-rose-400" />
+                          <span>Enable <span className="font-bold text-slate-900">"Invite Users"</span> permission</span>
+                        </li>
+                      </ul>
+                      
+                      <a 
+                        href="https://t.me/SuboraBot?startchannel=true"
+                        target="_blank"
+                        onClick={handleHaptic}
+                        className="flex items-center justify-center gap-2 w-full h-10 mt-2 rounded-xl bg-slate-900 text-white text-[10px] font-bold transition-all hover:bg-black active:scale-95"
+                      >
+                        <Plus className="w-3 h-3" />
+                        Add Bot to Channel
+                      </a>
+                    </div>
+                  </div>
+                )}
               </section>
 
               {/* Step 2: Economics */}
