@@ -65,7 +65,7 @@ export function SpaceCard({ space }: { space: Space }) {
             {lowestPriceTier.price} {lowestPriceTier.currency || 'TON'}
           </span>
           <span className="text-[9px] font-bold text-emerald-500">
-            +{(Math.random() * 15).toFixed(1)}% growth
+            +{((space.id.charCodeAt(0) % 15) + (space.id.charCodeAt(1) % 10) / 10).toFixed(1)}% growth
           </span>
         </div>
         <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border border-primary/20">
