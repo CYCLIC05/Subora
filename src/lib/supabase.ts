@@ -124,6 +124,6 @@ type SupabaseClientOrNull = SupabaseClient<Database, 'public', 'public'> | null;
 if (!supabaseUrl) console.error('MISSING: NEXT_PUBLIC_SUPABASE_URL')
 if (!supabaseAnonKey) console.error('MISSING: NEXT_PUBLIC_SUPABASE_ANON_KEY')
 
-export const supabase: SupabaseClientOrNull = isValidUrl(supabaseUrl) && supabaseAnonKey
+export const supabase: SupabaseClientOrNull = (isValidUrl(supabaseUrl) && supabaseAnonKey)
   ? createClient<Database>(supabaseUrl, supabaseAnonKey)
-  : (null as any);
+  : null;

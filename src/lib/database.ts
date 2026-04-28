@@ -46,7 +46,7 @@ export const getDiscoverSpaces = async (): Promise<Space[]> => {
   }
 
   try {
-    const { data, error } = await supabase!
+    const { data, error } = await supabase
       .from('spaces')
       .select(spaceSelect)
       .order('created_at', { ascending: false })
@@ -72,7 +72,7 @@ export const getSpaceById = async (id: string): Promise<Space | null> => {
   if (!isSupabaseReady) return null
 
   try {
-    const { data, error } = await supabase!
+    const { data, error } = await supabase
       .from('spaces')
       .select(spaceSelect)
       .eq('id', id)
@@ -102,7 +102,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
   if (isSupabaseReady) {
     try {
       // 1. Fetch current spaces
-      const { data: spacesData } = await supabase!
+      const { data: spacesData } = await supabase
         .from('spaces')
         .select(spaceSelect)
         .order('created_at', { ascending: false })
@@ -112,7 +112,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
       }
 
       // 2. Fetch all successful transactions for precise revenue
-      const { data: txData } = await supabase!
+      const { data: txData } = await supabase
         .from('transactions')
         .select('amount, currency, space_id')
         .eq('status', 'success')
