@@ -53,7 +53,8 @@ export type SpaceSubscription = {
   amount_paid?: number | null;
   invite_link?: string | null;
   join_time: string;
-  status?: 'pending' | 'active' | 'rejected';
+  expires_at?: string | null;
+  status?: 'pending' | 'active' | 'rejected' | 'expired';
 };
 
 export type Transaction = {
