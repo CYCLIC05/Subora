@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
       const spaceForVerification = await supabase
         .from('spaces')
-        .select('payment_address, name')
+        .select('payment_address, name, referrer_payment_address')
         .eq('id', spaceId)
         .single()
 
