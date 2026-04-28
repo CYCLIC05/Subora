@@ -38,40 +38,36 @@ export function SpaceCard({ space }: { space: Space }) {
       </div>
       
       {/* Middle: Content */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
         <div className="flex items-center gap-1.5">
-          <h3 className="font-heading text-[15px] font-bold text-slate-950 truncate">
+          <h3 className="font-heading text-base font-extrabold text-slate-950 tracking-tight truncate">
             {space.name}
           </h3>
           {space.is_trending && (
-            <span className="shrink-0 w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center">
+            <span className="shrink-0 w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center shadow-sm shadow-blue-500/20">
               <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+        <div className="flex items-center gap-2.5">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
             {space.category || 'Premium'}
           </p>
-          <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-500">
-            <span className="w-1 h-1 rounded-full bg-emerald-500" />
+          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500">
+            <span className="w-1 h-1 rounded-full bg-slate-300" />
             {(space.subscribers || 0).toLocaleString()} MEMBERS
           </div>
         </div>
       </div>
 
       {/* Right: Price & CTA */}
-      <div className="flex flex-col items-end gap-1.5 shrink-0">
-        <div className="flex flex-col items-end">
-          <span className="text-[13px] font-black text-slate-950">
-            {lowestPriceTier.price} {lowestPriceTier.currency || 'TON'}
-          </span>
-          <span className="text-[9px] font-bold text-emerald-500">
-            +{((space.id.charCodeAt(0) % 15) + (space.id.charCodeAt(1) % 10) / 10).toFixed(1)}% growth
-          </span>
-        </div>
-        <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border border-primary/20">
-          Join
+      <div className="flex flex-col items-end justify-center shrink-0 pl-2">
+        <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+          {((space.id.charCodeAt(0) % 15) + (space.id.charCodeAt(1) % 10) / 10).toFixed(1)}%
+        </span>
+        <div className="bg-slate-950 text-white px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-lg shadow-slate-950/10 group-hover:bg-slate-800 group-hover:scale-105 group-active:scale-95 transition-all">
+          {lowestPriceTier.price === 0 ? 'FREE' : `${lowestPriceTier.price} ${lowestPriceTier.currency || 'TON'}`}
         </div>
       </div>
     </Link>
