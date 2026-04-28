@@ -72,7 +72,6 @@ export async function GET() {
         creator_telegram_id: 0, // Dummy ID for discovery spaces
         category: template.cat,
         is_closed: false,
-        is_verified: true, // Mock spaces are verified by default
         subscribers: Math.floor(Math.random() * 1500) + 50,
         is_trending: Math.random() > 0.7,
         payment_address: 'UQDE7p5q0fS7u8...DISCOVERY',

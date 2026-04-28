@@ -43,7 +43,7 @@ export function SpaceCard({ space }: { space: Space }) {
           <h3 className="font-heading text-[15px] font-bold text-slate-950 truncate">
             {space.name}
           </h3>
-          {space.is_verified && (
+          {space.is_trending && (
             <span className="shrink-0 w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center">
               <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
             </span>
