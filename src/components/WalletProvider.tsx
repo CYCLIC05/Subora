@@ -44,37 +44,17 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
 }
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [manifestUrl, setManifestUrl] = useState<string>('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Add a timestamp to bypass any browser/SDK caching of the manifest file
-      const url = `${window.location.origin}/tonconnect-manifest.json?v=${Date.now()}`;
-      setManifestUrl(url);
-    }
-  }, []);
-
-  // If we don't have a manifest URL yet, provide a placeholder context 
-  // so useWallet doesn't throw. This happens during the very first 
-  // client-side render or during SSR.
-  if (!manifestUrl) {
-    return (
-      <WalletContext.Provider value={{ 
-        walletAddress: null, 
-        isConnecting: true, 
-        connectWallet: async () => {}, 
-        disconnectWallet: () => {}, 
-        tonConnectUI: null 
-      }}>
-        {children}
-      </WalletContext.Provider>
-    );
-  }
+  // Use environment variable or default to the relative path
+  // relative paths work fine in modern TonConnect SDK
+  const manifestUrl = process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL || '/tonconnect-manifest.json';
 
   return (
     <TonConnectUIProvider
       manifestUrl={manifestUrl}
       uiPreferences={{ theme: 'SYSTEM' }}
+      actionsConfiguration={{
+        twaReturnUrl: 'https://t.me/SuboraBot'
+      }}
     >
       <WalletProviderInner>
         {children}
