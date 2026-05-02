@@ -1,5 +1,8 @@
-import { Space, supabase, RevenuePoint, SubscriptionTier, Transaction } from '@/lib/supabase'
+import { Space, supabase, supabaseAdmin, RevenuePoint, SubscriptionTier, Transaction } from '@/lib/supabase'
 import { getTonPriceInUSD, STAR_TO_USD } from '@/lib/tonPrice'
+
+// Use admin client for server-side operations if available to bypass RLS
+const db = supabaseAdmin || supabase;
 
 export type DashboardStat = {
   name: string
@@ -31,6 +34,14 @@ export type DashboardData = {
   revenueBySpace: SpaceRevenue[]
   allMembers: DashboardMember[]
   tonPrice: number
+  transactions: Transaction[]
+  payoutData: {
+    connectedWallet: string | null
+    availableBalance: number
+    pendingBalance: number
+    lastPayout: string | null
+    currency: string
+  }
 }
 
 const FALLBACK_REVENUE: RevenuePoint[] = []
@@ -39,17 +50,46 @@ const isSupabaseReady = Boolean(supabase)
 
 const spaceSelect = `id, creator_telegram_id, name, description, cover_image, channel_link, creator_name, category, is_closed, tiers, subscribers, is_trending, is_active_today, created_at, payment_address, referrer_payment_address`
 
-export const getDiscoverSpaces = async (): Promise<Space[]> => {
+export type PaginatedSpaces = {
+  data: Space[]
+  total: number
+  page: number
+  limit: number
+  hasMore: boolean
+}
+
+export const getDiscoverSpaces = async (options?: {
+  page?: number
+  limit?: number
+  category?: string
+  search?: string
+}): Promise<PaginatedSpaces> => {
+  const page = options?.page || 1
+  const limit = Math.min(options?.limit || 20, 100) // Cap at 100
+  const offset = (page - 1) * limit
+
   if (!isSupabaseReady) {
     console.warn('Supabase not configured. Please check your .env.local')
-    return []
+    return { data: [], total: 0, page, limit, hasMore: false }
   }
 
   try {
-    const { data, error } = await supabase!
+    let query = db!
       .from('spaces')
-      .select(spaceSelect)
+      .select(spaceSelect, { count: 'exact' })
+
+    // Apply filters
+    if (options?.category && options.category !== 'All') {
+      query = query.eq('category', options.category)
+    }
+    if (options?.search) {
+      query = query.ilike('name', `%${options.search}%`)
+    }
+
+    // Fetch paginated data and count
+    const { data, error, count } = await query
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Supabase query error:', {
@@ -58,13 +98,22 @@ export const getDiscoverSpaces = async (): Promise<Space[]> => {
         hint: error.hint,
         code: error.code
       })
-      return []
+      return { data: [], total: 0, page, limit, hasMore: false }
     }
 
-    return data as Space[] || []
+    const spaces = data as Space[] || []
+    const total = count || 0
+
+    return {
+      data: spaces,
+      total,
+      page,
+      limit,
+      hasMore: offset + spaces.length < total
+    }
   } catch (error) {
     console.error('Failed to fetch spaces from Supabase:', error)
-    return []
+    return { data: [], total: 0, page, limit, hasMore: false }
   }
 }
 
@@ -72,7 +121,7 @@ export const getSpaceById = async (id: string): Promise<Space | null> => {
   if (!isSupabaseReady) return null
 
   try {
-    const { data, error } = await supabase!
+    const { data, error } = await db!
       .from('spaces')
       .select(spaceSelect)
       .eq('id', id)
@@ -90,7 +139,7 @@ export const getSpaceById = async (id: string): Promise<Space | null> => {
   }
 }
 
-export const getDashboardData = async (): Promise<DashboardData> => {
+export const getDashboardData = async (telegramUserId?: number | string): Promise<DashboardData> => {
   let spaces: Space[] = []
   let chartData: RevenuePoint[] = []
   let allMembers: DashboardMember[] = []
@@ -99,23 +148,45 @@ export const getDashboardData = async (): Promise<DashboardData> => {
   const today = new Date().toISOString().split('T')[0]
 
   let totalUSD = 0
+  let creatorWallet: string | null = null
+  let txData: any[] = []
+
   if (isSupabaseReady) {
     try {
-      // 1. Fetch current spaces
-      const { data: spacesData } = await supabase!
+      // 1. Fetch current spaces for this creator
+      let query = db!
         .from('spaces')
         .select(spaceSelect)
         .order('created_at', { ascending: false })
       
-      if (spacesData) {
-        spaces = spacesData as Space[]
+      if (telegramUserId) {
+        query = query.eq('creator_telegram_id', typeof telegramUserId === 'string' ? parseInt(telegramUserId, 10) : telegramUserId)
       }
 
-      // 2. Fetch all successful transactions for precise revenue
-      const { data: txData } = await supabase!
+      const { data: spacesData } = await query
+      
+      if (spacesData) {
+        spaces = spacesData as Space[]
+        // Get the first available payment address as the creator's payout wallet
+        creatorWallet = spaces.find(s => s.payment_address)?.payment_address || null
+      }
+
+      // 2. Fetch all successful transactions for these spaces
+      const spaceIds = spaces.map(s => s.id)
+      let txQuery = db!
         .from('transactions')
-        .select('amount, currency, space_id')
+        .select('id, amount, currency, space_id, telegram_user_id, wallet_address, status, created_at')
         .eq('status', 'success')
+      
+      if (spaceIds.length > 0) {
+        txQuery = txQuery.in('space_id', spaceIds)
+      } else if (telegramUserId) {
+        // If no spaces, no transactions
+        txQuery = txQuery.eq('space_id', '00000000-0000-0000-0000-000000000000') 
+      }
+
+      const { data: fetchedTxData } = await txQuery
+      if (fetchedTxData) txData = fetchedTxData
 
       const revenueMap = new Map<string, number>()
 
@@ -145,7 +216,7 @@ export const getDashboardData = async (): Promise<DashboardData> => {
       })).filter(r => r.revenue > 0)
 
       // 3. Fetch all members across all spaces
-      const { data: subsData } = await supabase!
+      const { data: subsData } = await db!
         .from('space_subscriptions')
         .select(`*, space:spaces(name)`)
         .order('join_time', { ascending: false })
@@ -170,13 +241,13 @@ export const getDashboardData = async (): Promise<DashboardData> => {
       const now = new Date()
       
       // Fetch data for trend reconstruction
-      const { data: allTx } = await supabase!
+      const { data: allTx } = await db!
         .from('transactions')
         .select('amount, currency, created_at')
         .eq('status', 'success')
         .order('created_at', { ascending: true })
 
-      const { data: allSubs } = await supabase!
+      const { data: allSubs } = await db!
         .from('space_subscriptions')
         .select('join_time')
         .order('join_time', { ascending: true })
@@ -225,13 +296,37 @@ export const getDashboardData = async (): Promise<DashboardData> => {
     { name: 'Total Revenue', value: `~${totalTON.toFixed(1)} TON`, delta: `$${totalUSD.toLocaleString()}` },
   ]
 
+  // Build transactions for payout section
+  const transactions: Transaction[] = txData?.map((tx: any) => ({
+    id: tx.id || '',
+    space_id: tx.space_id || '',
+    spaceName: revenueBySpace.find(r => r.spaceId === tx.space_id)?.name || 'Unknown',
+    telegram_user_id: tx.telegram_user_id || 0,
+    wallet_address: tx.wallet_address || '',
+    amount: tx.amount || 0,
+    currency: tx.currency || 'TON',
+    status: tx.status || 'success',
+    created_at: tx.created_at || new Date().toISOString()
+  })) || []
+
+  // Build payout data
+  const payoutData = {
+    connectedWallet: creatorWallet,
+    availableBalance: totalUSD,
+    pendingBalance: 0,
+    lastPayout: null,
+    currency: 'USD'
+  }
+
   return {
     stats,
     spaces,
     revenueData: chartData.length > 0 ? chartData : FALLBACK_REVENUE,
     revenueBySpace,
     allMembers,
-    tonPrice
+    tonPrice,
+    transactions,
+    payoutData
   }
 }
 
@@ -242,7 +337,7 @@ export const createSpace = async (payload: CreateSpacePayload): Promise<Space> =
     throw new Error('Database not configured')
   }
 
-  const { data, error } = await supabase!
+  const { data, error } = await db!
     .from('spaces')
     .insert({
       ...payload,
@@ -270,7 +365,7 @@ export const getUserSubscriptions = async (telegramUserId: number | string): Pro
   if (!isSupabaseReady) return []
 
   try {
-    const { data: subs, error: subError } = await supabase!
+    const { data: subs, error: subError } = await db!
       .from('space_subscriptions')
       .select(`*, space:spaces(${spaceSelect})`)
       .eq('telegram_user_id', typeof telegramUserId === 'string' ? parseInt(telegramUserId, 10) : telegramUserId)
@@ -300,7 +395,7 @@ export const getSpaceMembers = async (spaceId: string): Promise<SpaceMember[]> =
   if (!isSupabaseReady) return []
 
   try {
-    const { data, error } = await supabase!
+    const { data, error } = await db!
       .from('space_subscriptions')
       .select('telegram_user_id, join_time, wallet_address')
       .eq('space_id', spaceId)
@@ -321,7 +416,7 @@ export const getUserTransactions = async (walletAddress: string): Promise<Transa
   if (!isSupabaseReady || !walletAddress) return []
 
   try {
-    const { data, error } = await supabase!
+    const { data, error } = await db!
       .from('transactions')
       .select('*')
       .eq('wallet_address', walletAddress)

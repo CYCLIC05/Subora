@@ -78,8 +78,8 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
           alt={space.name}
           className="w-full h-full object-cover opacity-60 scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
+        <div className="absolute inset-0 bg-slate-950/40" />
+        <div className="absolute inset-0 bg-slate-950/60" />
 
         <Link
           href="/"
@@ -115,8 +115,46 @@ export default async function SpaceDetailPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-12 max-w-xl">
-        <SpacePurchasePanel space={space} />
+      <div className="container mx-auto px-6 py-12 max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Left Column: Benefits & Value */}
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-heading font-bold text-slate-950 uppercase tracking-tight">Community Benefits</h2>
+              <p className="text-slate-500 font-medium">What's included with your membership in {space.name}:</p>
+            </div>
+            
+            <ul className="space-y-6">
+              {benefits.map((benefit, i) => (
+                <li key={i} className="flex items-start gap-4 group">
+                  <div className="mt-1 w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <Check className="w-4 h-4" />
+                  </div>
+                  <span className="text-base font-semibold text-slate-900 group-hover:text-slate-950 transition-colors">
+                    {benefit}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 flex items-start gap-4">
+              <div className="mt-1 p-2 rounded-xl bg-white text-slate-950 shadow-sm">
+                <Lock className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-900">Encrypted Membership</p>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  Your access is cryptographically secured via TON. No manual approval required—instant entry upon verification.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Checkout */}
+          <div className="relative">
+            <SpacePurchasePanel space={space} />
+          </div>
+        </div>
       </div>
     </main>
   )

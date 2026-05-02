@@ -37,7 +37,9 @@ export async function verifyTonTransaction(
       return { verified: false, message: 'Verification service not configured' }
     }
 
-    const tonApiUrl = 'https://tonapi.io/v2'
+    const tonApiUrl = process.env.TON_NETWORK === 'testnet' 
+      ? 'https://testnet.tonapi.io/v2' 
+      : 'https://tonapi.io/v2'
     const expectedAmountNano = BigInt(expectedAmount)
     const now = Math.floor(Date.now() / 1000)
     const timeWindow = 600
@@ -115,7 +117,9 @@ export async function verifyJettonTransaction(
       return { verified: false, message: 'Verification service not configured' }
     }
 
-    const tonApiUrl = 'https://tonapi.io/v2'
+    const tonApiUrl = process.env.TON_NETWORK === 'testnet' 
+      ? 'https://testnet.tonapi.io/v2' 
+      : 'https://tonapi.io/v2'
     const expectedAmountUnits = BigInt(expectedAmount)
     const now = Math.floor(Date.now() / 1000)
     const timeWindow = 600

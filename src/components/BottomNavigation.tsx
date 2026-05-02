@@ -13,7 +13,7 @@ export function BottomNavigation() {
     { name: 'Discover', href: '/', icon: Compass },
     { name: 'Keys', href: '/subscriptions', icon: Library },
     { name: 'Launch', href: '/create', icon: PencilLine },
-    { name: 'Admin', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Creator', href: '/dashboard', icon: Wallet },
   ];
 
   const handleClick = async () => {

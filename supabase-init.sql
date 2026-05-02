@@ -72,3 +72,47 @@ begin
     last_searched = now();
 end;
 $$;
+
+-- =====================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- =====================================================
+
+-- Enable RLS on all tables
+ALTER TABLE public.spaces ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.space_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.revenue_points ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.search_queries ENABLE ROW LEVEL SECURITY;
+
+-- SPACES: Public read, Creator write
+CREATE POLICY "Anyone can read spaces" ON public.spaces FOR SELECT USING (true);
+CREATE POLICY "Anyone can read trending spaces" ON public.spaces FOR SELECT USING (is_trending = true);
+CREATE POLICY "Anyone can read closed spaces" ON public.spaces FOR SELECT USING (is_closed = true);
+CREATE POLICY "Creators can insert spaces" ON public.spaces FOR INSERT WITH CHECK (auth.uid()::text = creator_telegram_id::text);
+CREATE POLICY "Creators can update own spaces" ON public.spaces FOR UPDATE USING (auth.uid()::text = creator_telegram_id::text);
+CREATE POLICY "Creators can delete own spaces" ON public.spaces FOR DELETE USING (auth.uid()::text = creator_telegram_id::text);
+
+-- SPACE_SUBSCRIPTIONS: Users read own, Creators read their space's
+CREATE POLICY "Anyone can read subscriptions" ON public.space_subscriptions FOR SELECT USING (true);
+CREATE POLICY "Users can insert own subscription" ON public.space_subscriptions FOR INSERT WITH CHECK (auth.uid()::text = telegram_user_id::text);
+CREATE POLICY "Users can update own subscription" ON public.space_subscriptions FOR UPDATE USING (auth.uid()::text = telegram_user_id::text);
+CREATE POLICY "Creators can read their space subscriptions" ON public.space_subscriptions FOR SELECT USING (
+  exists (select 1 from public.spaces where id = space_id and creator_telegram_id::text = auth.uid()::text)
+);
+
+-- TRANSACTIONS: Public read, Users read own, Creators read their space's
+CREATE POLICY "Anyone can read transactions" ON public.transactions FOR SELECT USING (true);
+CREATE POLICY "Users can insert own transaction" ON public.transactions FOR INSERT WITH CHECK (auth.uid()::text = telegram_user_id::text);
+CREATE POLICY "Creators can read their space transactions" ON public.transactions FOR SELECT USING (
+  exists (select 1 from public.spaces where id = space_id and creator_telegram_id::text = auth.uid()::text)
+);
+
+-- REVENUE_POINTS: Public read, Authenticated write
+CREATE POLICY "Anyone can read revenue" ON public.revenue_points FOR SELECT USING (true);
+CREATE POLICY "Authenticated can insert revenue" ON public.revenue_points FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "Authenticated can update revenue" ON public.revenue_points FOR UPDATE USING (auth.uid() IS NOT NULL);
+
+-- SEARCH_QUERIES: Public read/write (analytics)
+CREATE POLICY "Anyone can read search queries" ON public.search_queries FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert search queries" ON public.search_queries FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can update search queries" ON public.search_queries FOR UPDATE USING (true);

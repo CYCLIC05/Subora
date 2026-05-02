@@ -35,10 +35,7 @@ export function Header() {
               Subora
             </span>
           </Link>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100">
-            <div className="w-1 h-1 rounded-full bg-emerald-500" />
-            <span className="hidden xs:inline text-[9px] font-bold text-slate-500 uppercase tracking-widest">Verified</span>
-          </div>
+          {/* Removed shield/verified badge for a cleaner, more premium look */}
         </div>
         <div className="flex items-center gap-4">
           <Link 

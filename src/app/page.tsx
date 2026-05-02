@@ -7,12 +7,12 @@ export default async function Home() {
   try {
     const spaces = await getDiscoverSpaces()
     
-    if (!spaces) {
-      console.warn('getDiscoverSpaces returned null/undefined')
+    if (!spaces || !spaces.data) {
+      console.warn('getDiscoverSpaces returned null/undefined or empty data')
       return <DiscoverPage spaces={[]} />
     }
 
-    return <DiscoverPage spaces={spaces} />
+    return <DiscoverPage spaces={spaces.data} />
   } catch (error) {
     console.error('CRITICAL: Home Page Crash:', error)
     return (

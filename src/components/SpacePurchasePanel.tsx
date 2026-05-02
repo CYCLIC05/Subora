@@ -262,7 +262,7 @@ export function SpacePurchasePanel({ space }: { space: Space }) {
           <div className="flex -space-x-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
-                <div className="w-full h-full bg-gradient-to-br from-slate-300 to-slate-400" />
+                <div className="w-full h-full bg-slate-300" />
               </div>
             ))}
           </div>

@@ -10,15 +10,22 @@ import { Space } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { RevenueAnalytics } from './RevenueAnalytics'
 import { LivePulse } from './LivePulse'
+import { PayoutSection } from './PayoutSection'
 
 export function DashboardClient({ 
   spaces, 
   revenueData,
-  allMembers = []
+  allMembers = [],
+  transactions = [],
+  payoutData,
+  tonPrice
 }: { 
   spaces: Space[]
   revenueData?: any
   allMembers?: any[]
+  transactions?: any[]
+  payoutData?: any
+  tonPrice?: number
 }) {
   const [localSpaces, setLocalSpaces] = useState(spaces)
   const [isLoading, setIsLoading] = useState(false)
@@ -113,7 +120,8 @@ export function DashboardClient({
         
         <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-slate-100 pb-8">
           <div className="space-y-1">
-            <h1 className="text-3xl font-heading font-semibold text-slate-950 tracking-tight">Your Spaces</h1>
+            <h1 className="text-3xl font-heading font-semibold text-slate-950 tracking-tight">Creator Dashboard</h1>
+            <p className="text-sm text-slate-500 font-medium">Manage your communities and track your TON monetization rails.</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -140,6 +148,14 @@ export function DashboardClient({
             </Link>
           </div>
         </header>
+
+        {/* Payout Section - Front and Center */}
+        <PayoutSection 
+          transactions={transactions} 
+          payoutData={payoutData}
+          tonPrice={tonPrice}
+          isLoading={isLoading}
+        />
 
         {/* Analytics Section */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">

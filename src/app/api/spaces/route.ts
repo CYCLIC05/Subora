@@ -3,9 +3,15 @@ import { createSpace, getDiscoverSpaces } from '@/lib/database'
 import { notifySpaceCreated } from '@/lib/telegram'
 import { revalidatePath } from 'next/cache'
 
-export async function GET() {
-  const spaces = await getDiscoverSpaces()
-  return NextResponse.json(spaces)
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const page = parseInt(searchParams.get('page') || '1')
+  const limit = parseInt(searchParams.get('limit') || '20')
+  const category = searchParams.get('category') || undefined
+  const search = searchParams.get('search') || undefined
+
+  const result = await getDiscoverSpaces({ page, limit, category, search })
+  return NextResponse.json(result)
 }
 
 export async function POST(request: Request) {

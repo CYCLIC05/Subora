@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { generateSingleUseInviteLink, sendTelegramAccessLink } from '@/lib/telegram'
 import { verifyTonTransaction, verifyJettonTransaction } from '@/lib/tonVerification'
+import { buildChannelUrl } from '@/lib/channels'
+import { errors } from '@/lib/errors'
 
 /**
  * Convert any channel_link / raw chatId string into a full https:// URL
@@ -13,13 +15,7 @@ import { verifyTonTransaction, verifyJettonTransaction } from '@/lib/tonVerifica
  *   return null — the caller should warn the creator to set a username.
  */
 function buildPublicChannelUrl(channelLink: string): string | null {
-  const s = channelLink.trim()
-  if (s.startsWith('https://')) return s
-  if (/^-?\d+$/.test(s)) {
-    // Private channel with only a numeric ID — no public link possible without an invite link
-    return null
-  }
-  return `https://t.me/${s.replace(/^@/, '')}`
+  return buildChannelUrl(channelLink)
 }
 
 export async function POST(request: Request) {
@@ -40,8 +36,18 @@ export async function POST(request: Request) {
     }
 
     // --- Blockchain verification ---
-    // Only enforced when TONAPI_KEY is configured. Without it (dev / mock-wallet
-    // mode) we trust the client and skip the check so mock payments work.
+    // In production (NODE_ENV=production), TONAPI_KEY MUST be set
+    // Without it, we cannot verify payments securely
+    const isProduction = process.env.NODE_ENV === 'production'
+    
+    if (isProduction && !process.env.TONAPI_KEY) {
+      console.error('[purchase] Production mode requires TONAPI_KEY to be set')
+      return NextResponse.json(
+        { error: 'Payment system not configured. Please contact support.' },
+        { status: 500 }
+      )
+    }
+
     if (process.env.TONAPI_KEY) {
       if (!amount) {
         return NextResponse.json({ error: 'Missing amount for verification' }, { status: 400 })
@@ -92,7 +98,8 @@ export async function POST(request: Request) {
         )
       }
     } else {
-      console.log(`[purchase] TONAPI_KEY not set — verification skipped (wallet: ${walletAddress}, currency: ${currency})`)
+      // Dev mode without TONAPI_KEY - log warning but allow (for testing)
+      console.warn(`[purchase] TONAPI_KEY not set — payment verification skipped (dev mode only)`)
     }
 
     // --- Fetch Space ---

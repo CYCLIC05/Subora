@@ -11,6 +11,9 @@ export default async function DashboardPage() {
       spaces={data.spaces} 
       revenueData={data.revenueData} 
       allMembers={data.allMembers}
+      transactions={data.transactions}
+      payoutData={data.payoutData}
+      tonPrice={data.tonPrice}
     />
   )
 }
