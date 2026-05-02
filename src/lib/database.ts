@@ -34,7 +34,7 @@ export type DashboardData = {
   revenueBySpace: SpaceRevenue[]
   allMembers: DashboardMember[]
   tonPrice: number
-  transactions: Transaction[]
+  transactions: (Transaction & { spaceName?: string })[]
   payoutData: {
     connectedWallet: string | null
     availableBalance: number
@@ -175,7 +175,7 @@ export const getDashboardData = async (telegramUserId?: number | string): Promis
       const spaceIds = spaces.map(s => s.id)
       let txQuery = db!
         .from('transactions')
-        .select('id, amount, currency, space_id, telegram_user_id, wallet_address, status, created_at')
+        .select('id, amount, currency, space_id, telegram_user_id, wallet_address, status, created_at, tx_hash')
         .eq('status', 'success')
       
       if (spaceIds.length > 0) {
@@ -296,8 +296,7 @@ export const getDashboardData = async (telegramUserId?: number | string): Promis
     { name: 'Total Revenue', value: `~${totalTON.toFixed(1)} TON`, delta: `$${totalUSD.toLocaleString()}` },
   ]
 
-  // Build transactions for payout section
-  const transactions: Transaction[] = txData?.map((tx: any) => ({
+  const transactions = (txData?.map((tx: any) => ({
     id: tx.id || '',
     space_id: tx.space_id || '',
     spaceName: revenueBySpace.find(r => r.spaceId === tx.space_id)?.name || 'Unknown',
@@ -305,9 +304,10 @@ export const getDashboardData = async (telegramUserId?: number | string): Promis
     wallet_address: tx.wallet_address || '',
     amount: tx.amount || 0,
     currency: tx.currency || 'TON',
+    tx_hash: tx.tx_hash || null,
     status: tx.status || 'success',
     created_at: tx.created_at || new Date().toISOString()
-  })) || []
+  })) || []) as (Transaction & { spaceName?: string })[]
 
   // Build payout data
   const payoutData = {

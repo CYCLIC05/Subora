@@ -63,7 +63,7 @@ export class SuboraError extends Error {
     return {
       error: this.code,
       message: this.message,
-      ...(this.details && { details: this.details }),
+      ...(this.details ? { details: this.details } : {}),
     };
   }
 }
