@@ -5,31 +5,40 @@ export default function DashboardLoading() {
     <main className="min-h-screen bg-background pb-32">
       <Header />
 
-      <div className="container mx-auto px-6 py-12 max-w-4xl space-y-12">
-        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-slate-100 pb-8">
+      <div className="container mx-auto px-6 py-12 max-w-5xl space-y-12">
+        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="space-y-1">
-            <div className="h-9 w-48 rounded-full bg-slate-200/80 animate-pulse" />
+            <div className="h-10 w-64 rounded-full bg-slate-100 animate-pulse" />
           </div>
-          <div className="h-12 w-40 rounded-2xl bg-slate-200/80 animate-pulse" />
+          <div className="h-12 w-48 rounded-2xl bg-slate-100 animate-pulse" />
         </header>
 
-        <section className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="flex items-center gap-4 p-4 border-b border-slate-100 bg-white rounded-2xl shadow-sm border">
-                {/* Left: Avatar Skeleton */}
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 animate-pulse shrink-0" />
-                
-                {/* Middle: Content Skeleton */}
-                <div className="flex-1 space-y-2">
-                  <div className="h-3.5 w-1/2 rounded-full bg-slate-50 animate-pulse" />
-                  <div className="h-2.5 w-1/3 rounded-full bg-slate-50 animate-pulse" />
-                </div>
+        {/* Stats Section Skeleton */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm">
+              <div className="h-3 w-24 rounded-full bg-slate-100 animate-pulse mb-4" />
+              <div className="h-10 w-32 rounded-full bg-slate-100 animate-pulse" />
+              <div className="h-3 w-16 rounded-full bg-slate-100 animate-pulse mt-4" />
+            </div>
+          ))}
+        </section>
 
-                {/* Right: Price & CTA Skeleton */}
-                <div className="shrink-0 flex flex-col items-end gap-1.5">
-                  <div className="h-3.5 w-12 rounded-full bg-slate-50 animate-pulse" />
-                  <div className="h-4 w-8 rounded-lg bg-slate-50 animate-pulse" />
+        <section className="space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="h-4 w-32 rounded-full bg-slate-100 animate-pulse" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="flex flex-col h-[180px] justify-between bg-white rounded-3xl border border-slate-100 p-5 shadow-sm">
+                <div className="flex justify-between items-start">
+                  <div className="w-12 h-12 rounded-xl bg-slate-100 animate-pulse" />
+                  <div className="w-16 h-7 rounded-full bg-slate-100 animate-pulse" />
+                </div>
+                <div className="space-y-3 mt-4">
+                  <div className="h-4 w-3/4 rounded-full bg-slate-100 animate-pulse" />
+                  <div className="h-2 w-1/2 rounded-full bg-slate-100 animate-pulse" />
+                  <div className="h-3 w-full rounded-full bg-slate-100 animate-pulse" />
                 </div>
               </div>
             ))}
