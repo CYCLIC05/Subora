@@ -168,6 +168,45 @@ export function DashboardClient({
         </section>
 
         <section className="space-y-8 max-w-3xl mx-auto">
+          {/* Referral Program Card */}
+          <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[32px] p-8 text-white shadow-2xl shadow-indigo-500/20 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:scale-110 transition-transform duration-700" />
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-xl font-heading font-black tracking-tight">Refer & Earn TON</h3>
+                  <p className="text-indigo-100 text-xs font-medium max-w-[240px]">
+                    Invite creators to Subora and earn a percentage of every subscription they generate.
+                  </p>
+                </div>
+                <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 text-center min-w-[100px]">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">Your Referrals</p>
+                  <p className="text-2xl font-black">{allMembers.filter(m => m.referral_source === (window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id))).length}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-4 py-3 flex items-center justify-between overflow-hidden">
+                  <span className="text-xs font-mono font-medium truncate opacity-80">
+                    t.me/SuboraBot?start=ref_{(typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.username) || (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) || 'user'}
+                  </span>
+                </div>
+                <button
+                  onClick={async () => {
+                    const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id)
+                    const link = `https://t.me/SuboraBot?start=ref_${username}`
+                    navigator.clipboard.writeText(link)
+                    toast.success('Referral link copied!')
+                    handleHaptic()
+                  }}
+                  className="bg-white text-indigo-600 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95 shadow-lg shadow-black/10"
+                >
+                  Copy Link
+                </button>
+              </div>
+            </div>
+          </div>
+
           {localSpaces.length > 0 ? (
             <div className="flex flex-col rounded-[24px] bg-white border border-slate-100 overflow-hidden shadow-sm">
               {localSpaces.map((space) => (

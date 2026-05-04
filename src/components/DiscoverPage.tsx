@@ -78,10 +78,20 @@ export function DiscoverPage({ spaces: initialSpaces }: { spaces: Space[] }) {
     return spaces.filter(s => !highlightedIds.has(s.id));
   }, [spaces, trendingSpaces, recentlyLaunched, searchQuery, selectedCategory, filteredSpaces]);
 
+  const handleHaptic = useCallback(async (style: 'light' | 'medium' | 'heavy' = 'light') => {
+    try {
+      const WebApp = (await import('@twa-dev/sdk')).default;
+      WebApp.HapticFeedback.impactOccurred(style);
+    } catch (error) {
+      // Ignore
+    }
+  }, []);
+
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return
     
     setIsLoading(true)
+    handleHaptic('light');
     try {
       const params = new URLSearchParams({
         page: String(page + 1),
@@ -109,7 +119,7 @@ export function DiscoverPage({ spaces: initialSpaces }: { spaces: Space[] }) {
     } finally {
       setIsLoading(false)
     }
-  }, [isLoading, hasMore, page, selectedCategory, debouncedQuery])
+  }, [isLoading, hasMore, page, selectedCategory, debouncedQuery, handleHaptic])
 
   return (
     <main className="min-h-screen bg-background">
@@ -128,7 +138,10 @@ export function DiscoverPage({ spaces: initialSpaces }: { spaces: Space[] }) {
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
+                onClick={() => {
+                  setSearchQuery('');
+                  handleHaptic('medium');
+                }}
                 className="absolute right-5 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -140,7 +153,10 @@ export function DiscoverPage({ spaces: initialSpaces }: { spaces: Space[] }) {
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  handleHaptic('light');
+                }}
                 className={`flex-shrink-0 px-7 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border ${
                   selectedCategory === cat 
                   ? 'bg-primary text-white border-primary shadow-lg' 

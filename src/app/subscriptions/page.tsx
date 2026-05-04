@@ -6,6 +6,7 @@ import { SpaceCard } from '@/components/SpaceCard'
 import { SubscriptionWithSpace, getUserSubscriptions } from '@/lib/database'
 import { useWallet } from '@/components/WalletProvider'
 import { Library, Zap, ArrowRight, ShieldCheck } from 'lucide-react'
+import { SpaceListSkeleton } from '@/components/SpaceCardSkeleton'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 
@@ -53,11 +54,7 @@ export default function SubscriptionsPage() {
         </header>
 
         {isLoading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-24 w-full rounded-[32px] bg-slate-100 animate-pulse" />
-            ))}
-          </div>
+          <SpaceListSkeleton />
         ) : subscriptions.length > 0 ? (
           <div className="flex flex-col rounded-[24px] bg-white border border-slate-100 overflow-hidden shadow-sm max-w-3xl mx-auto">
             {subscriptions.map((sub) => (
