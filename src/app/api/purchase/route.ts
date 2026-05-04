@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
 import { generateSingleUseInviteLink, sendTelegramAccessLink } from '@/lib/telegram'
 import { verifyTonTransaction, verifyJettonTransaction } from '@/lib/tonVerification'
 import { buildChannelUrl } from '@/lib/channels'
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     }
 
     // --- Fetch Space ---
-    const { data, error } = await supabase
+    const { data, error } = await (supabaseAdmin || supabase)
       .from('spaces')
       .select('channel_link, name, subscribers, is_closed')
       .eq('id', spaceId)
@@ -158,7 +158,8 @@ export async function POST(request: Request) {
     }
 
     // --- Record subscription with persistence ---
-    await supabase.from('space_subscriptions').insert({
+    const db = supabaseAdmin || supabase
+    await db.from('space_subscriptions').insert({
       space_id: spaceId,
       telegram_user_id: telegramUserId ?? null,
       wallet_address: walletAddress ?? null,
@@ -170,7 +171,7 @@ export async function POST(request: Request) {
     })
 
     // --- Record auditable transaction ---
-    await supabase.from('transactions').insert({
+    await db.from('transactions').insert({
       space_id: spaceId,
       telegram_user_id: telegramUserId ?? null,
       wallet_address: walletAddress ?? null,
@@ -181,7 +182,7 @@ export async function POST(request: Request) {
     })
 
     // Update subscribers count
-    await supabase
+    await db
       .from('spaces')
       .update({ subscribers: (space.subscribers || 0) + 1 })
       .eq('id', spaceId)
