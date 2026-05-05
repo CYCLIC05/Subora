@@ -429,3 +429,49 @@ export const getUserTransactions = async (walletAddress: string): Promise<Transa
     return []
   }
 }
+
+export type AdminData = {
+  searchTrends: { query: string; count: number; last_searched: string }[]
+  recentTransactions: (Transaction & { space_name: string })[]
+  globalStats: {
+    totalRevenue: number
+    totalMembers: number
+    totalSpaces: number
+  }
+}
+
+export const getAdminData = async (): Promise<AdminData> => {
+  if (!isSupabaseReady) return { searchTrends: [], recentTransactions: [], globalStats: { totalRevenue: 0, totalMembers: 0, totalSpaces: 0 } }
+
+  try {
+    const [searchRes, txRes, spacesRes] = await Promise.all([
+      db!.from('search_queries').select('*').order('count', { ascending: false }).limit(20),
+      db!.from('transactions').select('*, space:spaces(name)').order('created_at', { ascending: false }).limit(50),
+      db!.from('spaces').select('id, subscribers')
+    ])
+
+    const tonPrice = await getTonPriceInUSD()
+    let totalUSD = 0
+    txRes.data?.forEach(tx => {
+       if (tx.currency === 'Stars') totalUSD += (Number(tx.amount) * STAR_TO_USD)
+       else if (tx.currency === 'TON') totalUSD += (Number(tx.amount) * tonPrice)
+       else if (tx.currency === 'USDT') totalUSD += Number(tx.amount)
+    })
+
+    return {
+      searchTrends: searchRes.data || [],
+      recentTransactions: txRes.data?.map((tx: any) => ({
+        ...tx,
+        space_name: tx.space?.name || 'Deleted Space'
+      })) || [],
+      globalStats: {
+        totalRevenue: totalUSD,
+        totalMembers: spacesRes.data?.reduce((sum, s) => sum + (s.subscribers || 0), 0) || 0,
+        totalSpaces: spacesRes.data?.length || 0
+      }
+    }
+  } catch (error) {
+    console.error('Admin data fetch failed', error)
+    return { searchTrends: [], recentTransactions: [], globalStats: { totalRevenue: 0, totalMembers: 0, totalSpaces: 0 } }
+  }
+}

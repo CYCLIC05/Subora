@@ -138,6 +138,19 @@ export function DashboardClient({
             >
               Withdraw
             </button>
+            <button
+              onClick={async () => {
+                const WebApp = (await import('@twa-dev/sdk')).default
+                const username = WebApp.initDataUnsafe?.user?.username || String(WebApp.initDataUnsafe?.user?.id)
+                const shareText = encodeURIComponent("Launch your own premium community on Subora 🚀")
+                const shareUrl = `https://t.me/share/url?url=https://t.me/SuboraBot?start=ref_${username}&text=${shareText}`
+                WebApp.openTelegramLink(shareUrl)
+                handleHaptic()
+              }}
+              className="inline-flex items-center gap-2 rounded-2xl bg-white border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+            >
+              Share App
+            </button>
             <Link
               href="/create"
               onClick={handleHaptic}
@@ -171,39 +184,78 @@ export function DashboardClient({
           {/* Referral Program Card */}
           <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[32px] p-8 text-white shadow-2xl shadow-indigo-500/20 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:scale-110 transition-transform duration-700" />
-            <div className="relative z-10 space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="relative z-10 space-y-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-1">
-                  <h3 className="text-xl font-heading font-black tracking-tight">Refer & Earn TON</h3>
-                  <p className="text-indigo-100 text-xs font-medium max-w-[240px]">
-                    Invite creators to Subora and earn a percentage of every subscription they generate.
+                  <h3 className="text-2xl font-heading font-black tracking-tight">Refer & Earn</h3>
+                  <p className="text-indigo-100 text-sm font-medium max-w-[280px]">
+                    Share Subora with creators. You earn 7% of every subscription they generate, paid instantly to your wallet.
                   </p>
                 </div>
-                <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 text-center min-w-[100px]">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">Your Referrals</p>
-                  <p className="text-2xl font-black">{allMembers.filter(m => m.referral_source === (window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id))).length}</p>
+                <div className="flex gap-4">
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center min-w-[110px] border border-white/10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">Total Referrals</p>
+                    <p className="text-2xl font-black">{allMembers.filter(m => m.referral_source === (window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id))).length}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center min-w-[110px] border border-white/10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">Est. Earnings</p>
+                    <p className="text-2xl font-black text-emerald-300">
+                      {(allMembers.filter(m => m.referral_source === (window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id))).reduce((sum, m) => sum + (m.amountPaid * 0.07), 0)).toFixed(1)} <span className="text-xs">TON</span>
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-4 py-3 flex items-center justify-between overflow-hidden">
-                  <span className="text-xs font-mono font-medium truncate opacity-80">
-                    t.me/SuboraBot?start=ref_{(typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.username) || (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) || 'user'}
-                  </span>
+              <div className="space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 ml-1">Your Unique Invite Link</p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-4 flex items-center justify-between overflow-hidden">
+                    <span className="text-xs font-mono font-medium truncate opacity-90">
+                      t.me/SuboraBot?start=ref_{(typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.username) || (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) || 'user'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id)
+                      const link = `https://t.me/SuboraBot?start=ref_${username}`
+                      navigator.clipboard.writeText(link)
+                      toast.success('Referral link copied!')
+                      handleHaptic()
+                    }}
+                    className="bg-white text-indigo-600 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95 shadow-xl shadow-black/10"
+                  >
+                    Copy Link
+                  </button>
                 </div>
-                <button
-                  onClick={async () => {
-                    const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id)
-                    const link = `https://t.me/SuboraBot?start=ref_${username}`
-                    navigator.clipboard.writeText(link)
-                    toast.success('Referral link copied!')
-                    handleHaptic()
-                  }}
-                  className="bg-white text-indigo-600 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95 shadow-lg shadow-black/10"
-                >
-                  Copy Link
-                </button>
               </div>
+
+              {/* Recent Referrals List */}
+              {allMembers.filter(m => m.referral_source === (window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id))).length > 0 && (
+                <div className="pt-4 border-t border-white/10 space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200">Recent Referrals</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {allMembers
+                      .filter(m => m.referral_source === (window.Telegram?.WebApp?.initDataUnsafe?.user?.username || String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id)))
+                      .slice(0, 4)
+                      .map((ref, idx) => (
+                        <div key={idx} className="bg-white/5 rounded-xl p-3 flex items-center justify-between border border-white/5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-[10px] font-black">
+                              {ref.spaceName?.charAt(0) || 'S'}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-bold truncate">{ref.spaceName}</p>
+                              <p className="text-[9px] text-indigo-200 opacity-70">Joined {new Date(ref.joinDate).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-[10px] font-black text-emerald-300">+{ (ref.amountPaid * 0.07).toFixed(2) } TON</p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
